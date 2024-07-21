@@ -1,0 +1,21 @@
+---
+title: "About"
+image: profile.jpg
+about:
+  template: jolla
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/telecamera
+    - icon: github
+      text: Github
+      href: https://github.com/AlekseiPrishchepo
+    - icon: facebook
+      text: Facebook
+      href: https://www.facebook.com/aleksei.pr
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/alexparty
+---
+
+Constantly learning
