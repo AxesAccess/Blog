@@ -1,0 +1,242 @@
+---
+title: "Exploring Geospatial Insights with R and rnaturalearth"
+author: "Aleksei"
+date: "2024-07-25"
+categories: [r, geo]
+image: "image.png"
+---
+
+```{r warning = FALSE, message = FALSE, echo = FALSE}
+library(dplyr)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(sf)
+library(lwgeom)
+library(ggplot2)
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+The article showcases the utilization of the `rnaturalearth` package for
+handling geographical data. This package provides valuable tools and
+functions for working with spatial information, making it a powerful
+resource for data analysts and researchers interested in geographic
+analyses.
+
+Today, I stumbled upon an article discussing the approval ratings of
+Russia among people from various nations around the world. As I examined
+the list, which was sorted from worst to best, a hypothesis formed in my
+mind: **Could the distance between this particular country and others
+correlate with its citizens’ approval of its international affairs?** To
+explore this, I promptly collected data and calculated the geographical
+distances between the boundaries of Russia and those of the countries in
+the list. The null hypothesis posits that distance has no impact on
+approval rates, while the alternative hypothesis suggests that distance
+does indeed influence approval levels.
+
+```{r}
+
+theme_set(theme_minimal())
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+df <- read.csv("ViewsOfRussia2024.csv")
+
+by <- join_by(admin == country)
+world <- left_join(world, df, by)
+
+world <- world[world$admin != "Antarctica", ]
+
+ggplot(data = world) + 
+  geom_sf(aes(fill = approval)) + 
+  scale_fill_viridis_c(option = "plasma") + 
+  # theme_void() +
+  theme(legend.position = "bottom", 
+        legend.key.height = unit(5, "pt"), 
+        legend.key.width = unit(40, "pt"), 
+        legend.title.position = "bottom") + 
+  labs(fill = "% who have a favorable view of Russia")
+
+```
+
+```{r}
+
+countries <- ne_countries(returnclass = "sf")
+russia <- filter(countries, grepl("Russia", admin))
+
+invisible(sf_use_s2(FALSE))
+
+df <- df |> rowwise() |>
+  mutate(distB = st_distance(russia, countries[countries$admin == country, ])[1])
+
+df$distB <- as.numeric(sub("([0-9\\.]+)", "\\1", df$distB)) / 1000000
+
+model <- lm(approval ~ distB, data = df)
+summary(model)
+
+```
+
+The model explains less than 10% of variability. P-value for distance is
+`r format(coef(summary(model))["distB","Pr(>|t|)"], digits=2)`, so the
+null hypothesis cannot be rejected at the level of 0.05. Scatter plot
+also shows no obvious trend.
+
+```{r}
+
+qplot(df$distB, df$approval) + 
+  geom_point() + 
+  stat_smooth(method = "lm", se = F, color = "red", formula = y ~ x)
+
+```
+
+It emerged that the geographical distance between boundaries was
+statistically insignificant. However, I propose an alternative
+hypothesis in this scenario. Russia, being an exceptionally vast
+country, shares proximity with Asian nations in its eastern part.
+Interestingly, these eastern countries exhibit a more favorable attitude
+toward Russia compared to their European counterparts. One plausible
+explanation for this discrepancy is the absence of significant Russian
+territorial interests in Asia. Since Moscow, the capital, lies in the
+western part of Russia, **let’s measure the distance between capitals
+and explore this further using regression analysis**.
+
+```{r echo=TRUE}
+
+cities <- ne_download(type = "populated_places", returnclass = "sf")
+capitals <- cities[cities$FEATURECLA == "Admin-0 capital", ]
+
+```
+
+```{r}
+
+capitals <- capitals |> distinct(ADM0NAME, .keep_all = TRUE)
+moscow <- cities[cities$NAME == "Moscow", ]
+
+df <- read.csv("ViewsOfRussia2024.csv")
+
+by <- join_by(country == ADM0NAME)
+df <- left_join(df, capitals, by) |> select(country, approval, NAME)
+
+df <- df |> rowwise() |> 
+  mutate(distC = st_distance(moscow, capitals[capitals$NAME == NAME, ])[1])
+df$distC <- as.numeric(sub("([0-9\\.]+)", "\\1", df$distC)) / 1000000
+
+model <- lm(approval ~ distC, data = df)
+summary(model)
+
+```
+
+Unfortunately, using the distance between capitals didn’t yield
+meaningful results either.
+
+```{r}
+
+qplot(df$distC, df$approval) + 
+  geom_point() + 
+  stat_smooth(method = "lm", se = F, color = "red", formula = y ~ x)
+
+```
+
+In my search for additional regressors, I included GDP per capita,
+
+```{r}
+df <- read.csv("ViewsOfRussia2024.csv")
+
+by <- join_by(country == admin)
+df <- left_join(df, countries, by) |> select(country, approval, gdp_md, pop_est, economy)
+
+df <- df |> mutate(gdp_pc = 1000 * gdp_md / pop_est)
+
+model <- lm(approval ~ gdp_pc, data = df)
+summary(model)
+
+```
+
+and it yielded promising results. The coefficient associated with GDP
+showed a remarkably low p-value of 1.52e-08, providing strong evidence
+against the null hypothesis. The coefficient of determination
+(R-squared) was also quite favorable at 0.6377, indicating that the
+model captures a substantial portion of the variation in approval rates.
+The coefficient with `gdp_pc` indicates that for every additional
+thousand USD of GDP per capita, there is a corresponding 0.7 percentage
+point decrease in the approval rate.
+
+```{r}
+
+qplot(df$gdp_pc, df$approval) + 
+  geom_point() + 
+  stat_smooth(method = "lm", formula = y ~ x) + 
+  labs(x = "GDP per capita, K", y = "% who have a favorable view of Russia")
+
+```
+
+In an effort to enhance predictive power, one can explore the
+possibility of non-linear dependencies. Let’s consider using the
+logarithm of GDP as a predictor.
+
+```{r}
+
+model <- lm(approval ~ log(gdp_pc), data = df)
+summary(model)
+
+```
+
+The resulting model yields an impressive R² value of 0.7073, indicating
+that it explains the vast amount of the variation. Additionally, the
+p-value of 4.77e-10 provides the strongest evidence against the null
+hypothesis.
+
+```{r}
+
+qplot(log(df$gdp_pc), df$approval) + 
+  geom_point() + 
+  stat_smooth(method = "lm", formula = y ~ x) + 
+  labs(x = "Logarithm of GDP per capita", y = "% who have a favorable view of Russia")
+
+```
+
+However, this improved model is more complex and less straightforward to
+explain. Allow me to attempt an interpretation: If a country’s GDP per
+capita is 1% lower than another country’s, it tends to have 0.12% more
+people who approve of Russia.
+
+Now that we’ve obtained the regression model, we can use it to make
+predictions for the remaining countries and visualize the results on a
+map. By assigning colors based on predicted approval rates, we’ll create
+an informative and visually appealing representation.
+
+```{r}
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+world <- world[world$admin != "Antarctica", ]
+
+world <- world |> mutate(gdp_pc = 1000 * gdp_md / pop_est)
+
+invisible(na.omit(world, cols = "gdp_pc"))
+
+pred <- predict(model, world)
+
+world <- cbind(world, pred)
+
+by <- join_by(admin == country)
+world <- left_join(world, df, by)
+
+world <- mutate(world, approval = coalesce(approval, pred))
+
+world[world$admin == "Russia", ]$approval <- NA
+
+ggplot(data = world) + 
+  geom_sf(aes(fill = approval)) + 
+  scale_fill_viridis_c(option = "plasma") + 
+  theme(legend.position = "bottom", 
+        legend.key.height = unit(5, "pt"), 
+        legend.key.width = unit(40, "pt"), 
+        legend.title.position = "bottom") + 
+  labs(fill = "")
+
+
+```
