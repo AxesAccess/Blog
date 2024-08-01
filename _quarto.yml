@@ -10,10 +10,10 @@ website:
         href: https://github.com/AlekseiPrishchepo
       - icon: linkedin
         href: https://www.linkedin.com/in/telecamera/
+  google-analytics: "G-H2HYLD7LV5"
 format:
   html:
     theme: litera
     css: styles.css
-
 editor: visual
 
