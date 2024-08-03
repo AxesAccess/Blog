@@ -1,0 +1,130 @@
+---
+title: "Kano Method for Prioritization of Features"
+author: "Aleksei"
+date: "2024-08-05"
+categories: [marketing, product]
+drafd: true
+image: "image.png"
+---
+
+# Kano Method for Prioritization of Features
+
+The Kano model is a theory for product development and customer
+satisfaction developed in the 1980s by Professor Noriaki Kano. The model
+classifies customer preferences into five categories: Must-be Quality,
+One-dimensional Quality, Attractive Quality, Indifferent Quality, and
+Reverse Quality. The Kano model is used to prioritize features and
+functionalities in product development based on customer needs and
+expectations.
+
+## Categories of the Kano Model
+
+### Must-be Quality
+
+Must-be Quality features are basic requirements that customers expect.
+If these features are not present in a product, customers will be
+dissatisfied. However, the presence of these features does not
+necessarily lead to customer satisfaction. Must-be Quality features are
+considered essential for the product.
+
+> Examples: a car must have wheels, a smartphone must have a battery, a
+> website must have a search function.
+
+### One-dimensional Quality
+
+One-dimensional Quality features are directly proportional to customer
+satisfaction. The more these features are present in a product, the more
+satisfied customers will be. These features are usually explicitly
+stated by customers and are easy to measure and quantify.
+
+> Examples: a car with leather seats, a smartphone with a
+> high-resolution camera, a website with fast loading times.
+
+### Attractive Quality
+
+Attractive Quality features are unexpected features that delight
+customers. These features are not explicitly requested by customers but
+can create a positive emotional response when present. Attractive
+Quality features can differentiate a product from its competitors and
+create a competitive advantage.
+
+> Examples: a car with a built-in navigation system, a smartphone with
+> facial recognition technology, a website with personalized
+> recommendations.
+
+### Indifferent Quality
+
+Indifferent Quality features are neither good nor bad from the
+customer's perspective. Customers are indifferent to these features, and
+their presence or absence does not significantly impact customer
+satisfaction. These features are often considered "nice to have" but not
+essential.
+
+> Examples: a car with cup holders, a smartphone with a stylus, a
+> website with social media integration.
+
+### Reverse Quality
+
+Reverse Quality features are features that, when present, can lead to
+customer dissatisfaction. These features may be perceived as unnecessary
+or even annoying by customers. It is essential to identify and eliminate
+Reverse Quality features to prevent negative customer experiences.
+
+> Examples: a car with uncomfortable seats, a smartphone with a short
+> battery life, a website with intrusive pop-up ads.
+
+## Prioritizing Features with the Kano Model
+
+With the Kano model, prioritization of features and functionalities
+becomes clear and straightforward as that:
+
+**a)** keep eye on the Must-be Quality features, as they are essential,
+**b)** incorporate One-dimensional Quality features to increase customer
+satisfaction, **c)** consider Attractive Quality features to create a
+competitive advantage; **d)** eliminate Reverse Quality features
+completely, and **e)** save resources by setting Indifferent Quality
+features as low priority.
+
+## Implementation
+
+Implementing the Kano model involves a sequence of steps, beginning with the development of a questionnaire. For each feature, two types of questions are posed: functional and dysfunctional. Each question offers five possible responses, from "I like it" to "I dislike it." Subsequently, these responses are classified into the five Kano categories.
+
+```{python iterp}
+#| echo: false
+#| label: tbl-cap-margin
+#| cap-location: top
+#| tbl-cap: "Interpretation of answers to the Kano questionnaire."
+#| tbl-cap-location: top
+#| 
+import pandas as pd
+
+interp = pd.read_csv("data/kano-interp.csv")
+
+interp.groupby(["Functional", "Dysfunctional"]).agg({"Category": "first"}).unstack()
+```
+
+
+$$ \text{Satisfaction} = \dfrac{(A + O) }{ ( A + O + M + I ) } \times 100 $$
+
+$$ \text{Dissatisfaction} =  - \dfrac{(O + M) }{ ( A + O + M + I ) } \times 100 $$
+
+## Application of the Kano Model
+
+The Kano model can be applied in product development to prioritize
+features and functionalities based on customer needs and expectations.
+By categorizing features into the five Kano categories, product managers
+can identify which features are essential, which are nice to have, and
+which can create a competitive advantage.
+
+The Kano model can also help product managers understand customer
+preferences and make informed decisions about resource allocation and
+product development. By focusing on Must-be Quality and One-dimensional
+Quality features, product managers can ensure that the product meets
+basic customer requirements and maximizes customer satisfaction.
+
+In conclusion, the Kano model is a valuable tool for prioritizing
+features and functionalities in product development. By understanding
+customer preferences and categorizing features into the five Kano
+categories, product managers can create products that meet customer
+needs and expectations, leading to higher customer satisfaction and
+competitive advantage.
