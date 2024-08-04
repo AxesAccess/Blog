@@ -87,13 +87,24 @@ features as low priority.
 
 ## Implementation
 
-Implementing the Kano model involves a sequence of steps, beginning with the development of a questionnaire. For each feature, two types of questions are posed: functional and dysfunctional. Each question offers five possible responses, from "I like it" to "I dislike it." Subsequently, these responses are classified into the five Kano categories.
+Implementing the Kano model involves a sequence of steps, beginning with
+the development of a questionnaire. For each feature, two types of
+questions are posed: functional and dysfunctional.
+
+-   The functional question assesses respondents' feelings when a
+    feature is present.
+-   The dysfunctional question gauges their reactions in the absence of
+    that feature.
+
+Each question offers five possible responses, from "I like it" to "I
+dislike it." Subsequently, these responses are classified into the five
+Kano categories.
 
 ```{python iterp}
 #| echo: false
 #| label: tbl-cap-margin
 #| cap-location: top
-#| tbl-cap: "Interpretation of answers to the Kano questionnaire."
+#| tbl-cap: "Classification of answers to the Kano questionnaire."
 #| tbl-cap-location: top
 #| 
 import pandas as pd
@@ -103,10 +114,104 @@ interp = pd.read_csv("data/kano-interp.csv")
 interp.groupby(["Functional", "Dysfunctional"]).agg({"Category": "first"}).unstack()
 ```
 
+After the classification of responses, the next step is to calculate the
+satisfaction and dissatisfaction scores for each feature. The
+satisfaction influence score is calculated as the percentage of
+Attractive and One-dimensional responses relative to the total number of
+responses.
 
-$$ \text{Satisfaction} = \dfrac{(A + O) }{ ( A + O + M + I ) } \times 100 $$
+$$ \text{Satisfaction Influence} = \dfrac{A + O}{ A + O + M + I } \times 100 \% $$
+The dissatisfaction influence score is calculated as the percentage of
+One-dimensional and Must-be responses relative to the total number of
+responses.
 
-$$ \text{Dissatisfaction} =  - \dfrac{(O + M) }{ ( A + O + M + I ) } \times 100 $$
+$$ \text{Dissatisfaction Influence} =  - \dfrac{O + M}{A + O + M + I} \times 100 \% $$
+The features are then plotted on a Kano diagram, with the
+dissatisfaction score on the x-axis and the satisfaction score on the
+y-axis. The features are categorized based on their position in the
+diagram: Attractive Quality features in the upper left quadrant,
+One-dimensional Quality features in the upper right quadrant, Must-be
+Quality features in the lower right quadrant, and Indifferent features
+in the lower left quadrant.
+
+```{python}
+import os
+import pandas as pd
+
+
+directory = "data"
+files = [f for f in os.listdir(directory) if f.endswith("-clean.csv")]
+
+df = pd.DataFrame()
+
+for file in files:
+  df = pd.concat([df, pd.read_csv(f"{directory}/{file}")])
+  
+df.tail()
+
+```
+
+```{python}
+#| echo: false
+
+features = pd.read_csv(f"data/features.csv")
+
+```
+
+```{python}
+#| echo: false
+
+# load answers dictionary
+
+answers = pd.read_csv("data/answers.csv")
+
+answers = answers.melt()
+answers.columns = ["Score", "Answer"]
+
+answers["Score"] = answers["Score"].apply(lambda x: "ABCDE".find(x) + 1)
+```
+
+```{python}
+#| echo: 
+#| warning: false
+
+# check if all variants of answers are present in dictionary
+
+df1 = df[["F1_functional"]].dropna().drop_duplicates()
+df1.columns = ["Answer"]
+
+# df1.merge(answers, how="left", indicator=True).groupby("_merge").size()
+```
+
+```{python}
+#| echo: false
+
+import re
+
+value_vars = [col for col in df.columns if re.findall(r"F\d+_", col)]
+index_vars = [col for col in df.columns if col not in value_vars]
+
+df_final = df.melt(id_vars=index_vars, value_vars=value_vars, var_name="Question", value_name="Answer")
+df_final.head()
+```
+
+```{python}
+#| echo: false
+
+df_final = df_final.merge(answers[["Answer", "Score"]], how="left")
+
+df_final["Answer"] = df_final["Score"].apply(lambda x: "ABCDE".find(str(x)))
+df_final["Type"] = df_final["Question"].apply(lambda x: re.sub(r"F\d+_(.+)", "\\1", x))
+df_final["ID"] = df_final["Question"].apply(lambda x: re.sub(r"(F\d+_).+", "\\1", x))
+
+```
+
+```{python}
+#| echo: false
+
+
+
+```
 
 ## Application of the Kano Model
 
