@@ -101,12 +101,12 @@ dislike it." Subsequently, these responses are classified into the five
 Kano categories.
 
 ```{python iterp}
-#| echo: false
-#| label: tbl-cap-margin
-#| cap-location: top
-#| tbl-cap: "Classification of answers to the Kano questionnaire."
-#| tbl-cap-location: top
-#| 
+# | echo: false
+# | label: tbl-cap-margin
+# | cap-location: top
+# | tbl-cap: "Classification of answers to the Kano questionnaire."
+# | tbl-cap-location: top
+# |
 import pandas as pd
 
 interp = pd.read_csv("data/kano-interp.csv")
@@ -134,7 +134,9 @@ One-dimensional Quality features in the upper right quadrant, Must-be
 Quality features in the lower right quadrant, and Indifferent features
 in the lower left quadrant.
 
-```{python}
+```{python unnamed-chunk-1}
+# | echo: false
+
 import os
 import pandas as pd
 
@@ -145,35 +147,24 @@ files = [f for f in os.listdir(directory) if f.endswith("-clean.csv")]
 df = pd.DataFrame()
 
 for file in files:
-  df = pd.concat([df, pd.read_csv(f"{directory}/{file}")])
-  
-df.tail()
+    df = pd.concat([df, pd.read_csv(f"{directory}/{file}")])
 
+df.tail()
 ```
 
-```{python}
-#| echo: false
+```{python unnamed-chunk-2}
+# | echo: false
 
+# load features dictionary
 features = pd.read_csv(f"data/features.csv")
 
-```
-
-```{python}
-#| echo: false
-
 # load answers dictionary
-
 answers = pd.read_csv("data/answers.csv")
-
-answers = answers.melt()
-answers.columns = ["Score", "Answer"]
-
-answers["Score"] = answers["Score"].apply(lambda x: "ABCDE".find(x) + 1)
 ```
 
-```{python}
-#| echo: 
-#| warning: false
+```{python unnamed-chunk-3}
+# | echo: false
+# | warning: false
 
 # check if all variants of answers are present in dictionary
 
@@ -183,34 +174,122 @@ df1.columns = ["Answer"]
 # df1.merge(answers, how="left", indicator=True).groupby("_merge").size()
 ```
 
-```{python}
-#| echo: false
-
+```{python unnamed-chunk-4}
+# | echo: false
 import re
+
 
 value_vars = [col for col in df.columns if re.findall(r"F\d+_", col)]
 index_vars = [col for col in df.columns if col not in value_vars]
 
-df_final = df.melt(id_vars=index_vars, value_vars=value_vars, var_name="Question", value_name="Answer")
-df_final.head()
+df_long = df.melt(
+    id_vars=index_vars, value_vars=value_vars, var_name="Question", value_name="Answer"
+)
+
+df_long = df_long.dropna(subset=["Answer"])
+
+# add code to answers
+df_long = df_long.merge(answers[["Answer", "Code"]], how="left")
+
+# extract type and id from question
+df_long["Type"] = df_long["Question"].apply(lambda x: re.sub(r"F\d+_(.+)", "\\1", x))
+df_long["Type"] = df_long["Type"].str.capitalize()
+
+df_long["ID"] = df_long["Question"].apply(lambda x: re.sub(r"(F\d+_).+", "\\1", x))
+
+# add columns for functional and dysfunctional codes
+mask = df_long["Type"] == "Functional"
+df_long.loc[mask, "FuncCode"] = df_long.loc[mask, "Code"]
+
+mask = df_long["Type"] == "Dysfunctional"
+df_long.loc[mask, "DysfCode"] = df_long.loc[mask, "Code"]
 ```
 
-```{python}
-#| echo: false
+```{python unnamed-chunk-5}
+# | echo: false
 
-df_final = df_final.merge(answers[["Answer", "Score"]], how="left")
+# group by columns and aggregate functional and dysfunctional codes
+columns = ["ID", "Income_us", "Gender", "Age", "Employment", "Education"]
+df_final = (
+    df_long.fillna(0)
+    .groupby(columns)
+    .agg({"FuncCode": "sum", "DysfCode": "sum"})
+    .reset_index()
+)
 
-df_final["Answer"] = df_final["Score"].apply(lambda x: "ABCDE".find(str(x)))
-df_final["Type"] = df_final["Question"].apply(lambda x: re.sub(r"F\d+_(.+)", "\\1", x))
-df_final["ID"] = df_final["Question"].apply(lambda x: re.sub(r"(F\d+_).+", "\\1", x))
+# merge with features dictionary
 
+df_final = df_final.merge(interp, on=["FuncCode", "DysfCode"], how="left")
 ```
 
-```{python}
-#| echo: false
+```{python unnamed-chunk-6}
+# | echo: false
+
+# calculate satisfaction and dissatisfaction scores
+
+df_final["Satisfaction"] = (df_final["Category"] == "Attractive") | (
+    df_final["Category"] == "One-dimensional"
+)
+df_final["Dissatisfaction"] = (df_final["Category"] == "One-dimensional") | (
+    df_final["Category"] == "Must-be"
+)
+
+df_final["Satisfaction"] = df_final["Satisfaction"].astype(int)
+df_final["Dissatisfaction"] = df_final["Dissatisfaction"].astype(int)
+
+df_results = (
+    df_final.groupby("ID")
+    .agg({"Satisfaction": "sum", "Dissatisfaction": "sum"})
+    .reset_index()
+)
+
+df_results["SatisfactionInfluence"] = (
+    df_results["Satisfaction"]
+    / (df_results["Satisfaction"] + df_results["Dissatisfaction"])
+    * 100
+)
+
+df_results["DissatisfactionInfluence"] = (
+    -df_results["Dissatisfaction"]
+    / (df_results["Satisfaction"] + df_results["Dissatisfaction"])
+    * 100
+)
+```
+
+```{python unnamed-chunk-7}
+# | echo: false
+
+# plot Kano diagram
+
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
+plt.figure(figsize=(6, 6))
 
+sns.scatterplot(
+    data=df_results,
+    x="DissatisfactionInfluence",
+    y="SatisfactionInfluence",
+    hue="ID",
+    s=100,
+)
+
+plt.ylim(-100, 100)
+plt.xlim(-100, 100)
+
+plt.axhline(0, color="black", linestyle="--")
+plt.axvline(0, color="black", linestyle="--")
+
+plt.xlabel("Dissatisfaction Influence (%)")
+plt.ylabel("Satisfaction Influence (%)")
+
+plt.title("Kano Diagram")
+
+plt.legend(title="Feature ID", bbox_to_anchor=(1.05, 1), loc="upper left")
+
+plt.show()
+plt.close()
 ```
 
 ## Application of the Kano Model
@@ -233,3 +312,4 @@ customer preferences and categorizing features into the five Kano
 categories, product managers can create products that meet customer
 needs and expectations, leading to higher customer satisfaction and
 competitive advantage.
+

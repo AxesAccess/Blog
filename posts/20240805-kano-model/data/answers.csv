@@ -1,5 +1,20 @@
-A,B,C,D,E
-I like it that way,I must be that way,I am neutral,I can live with it that way,I dislike it that way
-I enjoy it that way,It is a basic necessity or I expect it that way,I am neutral,"I dislike it, but I can live with it that way","I dislike it, and I can’t accept it"
-This would be very helpful to me,This is a basic requirement for me,This would not affect me,This would be a minor inconvenience,This would be a major problem for me
-I like it,I expect it,I’m neutral,I can tolerate it,I dislike it
+Answer,Code
+I like it that way,1
+I enjoy it that way,1
+This would be very helpful to me,1
+I like it,1
+I must be that way,2
+It is a basic necessity or I expect it that way,2
+This is a basic requirement for me,2
+I expect it,2
+I am neutral,3
+This would not affect me,3
+I’m neutral,3
+I can live with it that way,4
+"I dislike it, but I can live with it that way",4
+This would be a minor inconvenience,4
+I can tolerate it,4
+I dislike it that way,5
+"I dislike it, and I can’t accept it",5
+This would be a major problem for me,5
+I dislike it,5

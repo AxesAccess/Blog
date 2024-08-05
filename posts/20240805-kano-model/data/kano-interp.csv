@@ -1,26 +1,26 @@
 Functional,Dysfunctional,Category,FuncCode,DysfCode
-1) I like it,1) I like it,Questionable,A,A
-2) I expect it,1) I like it,Reverse,B,A
-3) I am neutral,1) I like it,Reverse,C,A
-4) I can tolerate it,1) I like it,Reverse,D,A
-5) I dislike it,1) I like it,Reverse,E,A
-1) I like it,2) I expect it,Attractive,A,B
-2) I expect it,2) I expect it,Indifferent,B,B
-3) I am neutral,2) I expect it,Indifferent,C,B
-4) I can tolerate it,2) I expect it,Indifferent,D,B
-5) I dislike it,2) I expect it,Reverse,E,B
-1) I like it,3) I am neutral,Attractive,A,C
-2) I expect it,3) I am neutral,Indifferent,B,C
-3) I am neutral,3) I am neutral,Indifferent,C,C
-4) I can tolerate it,3) I am neutral,Indifferent,D,C
-5) I dislike it,3) I am neutral,Reverse,E,C
-1) I like it,4) I can tolerate it,Attractive,A,D
-2) I expect it,4) I can tolerate it,Indifferent,B,D
-3) I am neutral,4) I can tolerate it,Indifferent,C,D
-4) I can tolerate it,4) I can tolerate it,Indifferent,D,D
-5) I dislike it,4) I can tolerate it,Reverse,E,D
-1) I like it,5) I dislike it,One-dimensional,A,E
-2) I expect it,5) I dislike it,Must-be,B,E
-3) I am neutral,5) I dislike it,Must-be,C,E
-4) I can tolerate it,5) I dislike it,Must-be,D,E
-5) I dislike it,5) I dislike it,Questionable,E,E
+1) I like it,1) I like it,Questionable,1,1
+2) I expect it,1) I like it,Reverse,2,1
+3) I am neutral,1) I like it,Reverse,3,1
+4) I can tolerate it,1) I like it,Reverse,4,1
+5) I dislike it,1) I like it,Reverse,5,1
+1) I like it,2) I expect it,Attractive,1,2
+2) I expect it,2) I expect it,Indifferent,2,2
+3) I am neutral,2) I expect it,Indifferent,3,2
+4) I can tolerate it,2) I expect it,Indifferent,4,2
+5) I dislike it,2) I expect it,Reverse,5,2
+1) I like it,3) I am neutral,Attractive,1,3
+2) I expect it,3) I am neutral,Indifferent,2,3
+3) I am neutral,3) I am neutral,Indifferent,3,3
+4) I can tolerate it,3) I am neutral,Indifferent,4,3
+5) I dislike it,3) I am neutral,Reverse,5,3
+1) I like it,4) I can tolerate it,Attractive,1,4
+2) I expect it,4) I can tolerate it,Indifferent,2,4
+3) I am neutral,4) I can tolerate it,Indifferent,3,4
+4) I can tolerate it,4) I can tolerate it,Indifferent,4,4
+5) I dislike it,4) I can tolerate it,Reverse,5,4
+1) I like it,5) I dislike it,One-dimensional,1,5
+2) I expect it,5) I dislike it,Must-be,2,5
+3) I am neutral,5) I dislike it,Must-be,3,5
+4) I can tolerate it,5) I dislike it,Must-be,4,5
+5) I dislike it,5) I dislike it,Questionable,5,5
