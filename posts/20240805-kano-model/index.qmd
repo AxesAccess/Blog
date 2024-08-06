@@ -3,11 +3,8 @@ title: "Kano Method for Prioritization of Features"
 author: "Aleksei"
 date: "2024-08-05"
 categories: [marketing, product]
-drafd: true
 image: "image.png"
 ---
-
-# Kano Method for Prioritization of Features
 
 The Kano model is a theory for product development and customer
 satisfaction developed in the 1980s by Professor Noriaki Kano. The model
@@ -17,12 +14,19 @@ Reverse Quality. The Kano model is used to prioritize features and
 functionalities in product development based on customer needs and
 expectations.
 
+![](minh-gCL_rWClhpU-unsplash.jpg)
+
+::: {style="font-size: small;"}
+Photo by
+[Minh](https://unsplash.com/@minhh11hh?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)
+on
+[Unsplash](https://unsplash.com/photos/a-long-exposure-of-a-star-trail-in-the-night-sky-gCL_rWClhpU?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)
+:::
+
 ## Categories of the Kano Model
 
-### Must-be Quality
-
-Must-be Quality features are basic requirements that customers expect.
-If these features are not present in a product, customers will be
+**Must-be** features are basic requirements that customers expect. If
+these features are not present in a product, customers will be
 dissatisfied. However, the presence of these features does not
 necessarily lead to customer satisfaction. Must-be Quality features are
 considered essential for the product.
@@ -30,9 +34,7 @@ considered essential for the product.
 > Examples: a car must have wheels, a smartphone must have a battery, a
 > website must have a search function.
 
-### One-dimensional Quality
-
-One-dimensional Quality features are directly proportional to customer
+**One-dimensional** features are directly proportional to customer
 satisfaction. The more these features are present in a product, the more
 satisfied customers will be. These features are usually explicitly
 stated by customers and are easy to measure and quantify.
@@ -40,32 +42,25 @@ stated by customers and are easy to measure and quantify.
 > Examples: a car with leather seats, a smartphone with a
 > high-resolution camera, a website with fast loading times.
 
-### Attractive Quality
-
-Attractive Quality features are unexpected features that delight
-customers. These features are not explicitly requested by customers but
-can create a positive emotional response when present. Attractive
-Quality features can differentiate a product from its competitors and
-create a competitive advantage.
+**Attractive** features are unexpected features that delight customers.
+These features are not explicitly requested by customers but can create
+a positive emotional response when present. Attractive Quality features
+can differentiate a product from its competitors and create a
+competitive advantage.
 
 > Examples: a car with a built-in navigation system, a smartphone with
 > facial recognition technology, a website with personalized
 > recommendations.
 
-### Indifferent Quality
-
-Indifferent Quality features are neither good nor bad from the
-customer's perspective. Customers are indifferent to these features, and
-their presence or absence does not significantly impact customer
-satisfaction. These features are often considered "nice to have" but not
-essential.
+**Indifferent** features are neither good nor bad from the customer's
+perspective. Customers are indifferent to these features, and their
+presence or absence does not significantly impact customer satisfaction.
+These features are often considered "nice to have" but not essential.
 
 > Examples: a car with cup holders, a smartphone with a stylus, a
 > website with social media integration.
 
-### Reverse Quality
-
-Reverse Quality features are features that, when present, can lead to
+**Reverse** features are features that, when present, can lead to
 customer dissatisfaction. These features may be perceived as unnecessary
 or even annoying by customers. It is essential to identify and eliminate
 Reverse Quality features to prevent negative customer experiences.
@@ -75,26 +70,32 @@ Reverse Quality features to prevent negative customer experiences.
 
 ## Prioritizing Features with the Kano Model
 
+::: {#fig-kano-example}
+![](image.png){width="50%"}
+
+Example of a Kano diagram.
+:::
+
 With the Kano model, prioritization of features and functionalities
 becomes clear and straightforward as that:
 
-**a)** keep eye on the Must-be Quality features, as they are essential,
-**b)** incorporate One-dimensional Quality features to increase customer
-satisfaction, **c)** consider Attractive Quality features to create a
-competitive advantage; **d)** eliminate Reverse Quality features
-completely, and **e)** save resources by setting Indifferent Quality
-features as low priority.
+**a)** keep eye on the *Must-be Quality* features, as they are
+essential, **b)** incorporate *One-dimensional Quality* features to
+increase customer satisfaction, **c)** consider *Attractive Quality*
+features to create a competitive advantage; **d)** eliminate *Reverse
+Quality* features, and **e)** save resources by setting *Indifferent
+Quality* features as low priority.
 
-## Implementation
+## Implementation of the Kano Analysis
 
 Implementing the Kano model involves a sequence of steps, beginning with
 the development of a questionnaire. For each feature, two types of
 questions are posed: functional and dysfunctional.
 
--   The functional question assesses respondents' feelings when a
+-   The **functional question** assesses respondents' feelings when a
     feature is present.
--   The dysfunctional question gauges their reactions in the absence of
-    that feature.
+-   The **dysfunctional question** gauges their reactions in the absence
+    of that feature.
 
 Each question offers five possible responses, from "I like it" to "I
 dislike it." Subsequently, these responses are classified into the five
@@ -120,21 +121,35 @@ satisfaction influence score is calculated as the percentage of
 Attractive and One-dimensional responses relative to the total number of
 responses.
 
-$$ \text{Satisfaction Influence} = \dfrac{A + O}{ A + O + M + I } \times 100 \% $$
+$$ \text{Satisfaction Influence} = \dfrac{A + O}{ A + O + M + I } \times 100 \% $$ {#eq-satisfaction-influence}
 The dissatisfaction influence score is calculated as the percentage of
 One-dimensional and Must-be responses relative to the total number of
 responses.
 
-$$ \text{Dissatisfaction Influence} =  - \dfrac{O + M}{A + O + M + I} \times 100 \% $$
+$$ \text{Dissatisfaction Influence} =  - \dfrac{O + M}{A + O + M + I} \times 100 \% $$ {#eq-dissatisfaction-influence}
+
 The features are then plotted on a Kano diagram, with the
 dissatisfaction score on the x-axis and the satisfaction score on the
 y-axis. The features are categorized based on their position in the
 diagram: Attractive Quality features in the upper left quadrant,
 One-dimensional Quality features in the upper right quadrant, Must-be
 Quality features in the lower right quadrant, and Indifferent features
-in the lower left quadrant.
+in the lower left quadrant, as depicted in the @fig-kano-example.
 
-```{python unnamed-chunk-1}
+## Example implementation of the Kano Analysis
+
+### Conducting a Kano Survey
+
+For illustrative purposes, let's consider existing dataset with responses to a
+Kano questionnaire from [Doing Research Online: The Kano
+Model](https://github.com/REPPL/Doing-research-online-the-kano-model)
+project by [Alex Reppel](https://github.com/REPPL) published on GitHub
+under the GPL-3.0 License. The dataset consists of five csv files
+containing responses to functional and dysfunctional questions for
+various features, along with demographic information about the
+respondents.
+
+```{python load-data}
 # | echo: false
 
 import os
@@ -149,10 +164,148 @@ df = pd.DataFrame()
 for file in files:
     df = pd.concat([df, pd.read_csv(f"{directory}/{file}")])
 
-df.tail()
+df = df.reset_index(drop=True)
+
+dataframe_length = len(df)
+dataframe_shape = df.shape
 ```
 
-```{python unnamed-chunk-2}
+### Exploratory Data Analysis
+
+Let's explore data. The dataframe of shape `{python} dataframe_shape`
+includes an `ID` column, multiple columns with demographic data such as
+`Income_us`, `Gender`, `Age`, `Employment`, and `Education`, as well as
+responses to functional and dysfunctional questions (`F1_functional`,
+`F1_dysfunctional`, etc), and columns indicating the importance of
+certain features to the customer (`F1_importance`, `F2_importance`,
+etc).
+
+```{python fig-hist-age}
+# | echo: false
+# | warning: false
+# | label: fig-hist-age
+# | fig-cap: Histogram of respondents' age
+
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_style("ticks")
+
+axes = df.plot.hist(
+    column=["Age"],
+    by="Gender",
+    bins=20,
+    color="skyblue",
+    edgecolor="black",
+    sharex=True,
+    sharey=True,
+)
+
+plt.xlabel("Age")
+
+# hide legend
+for ax in axes:
+    ax.legend().set_visible(False)
+
+plt.tight_layout()
+
+plt.show()
+plt.close()
+```
+
+The customers' age distribution is relatively balanced, with a slight
+skew towards younger respondents.
+
+```{python fig-income-hist}
+# | echo: false
+# | warning: false
+# | label: fig-income-empl-hist
+# | layout-ncol: 2
+# | fig-cap:
+# |   - "Income distribution"
+# |   - "Employment distribution"
+
+# Income distribution
+
+df_income = df.groupby(["Income_us"]).size().reset_index(name="Count")
+
+sort_income = [
+    "prefer_not_to_answer",
+    "less_than_15",
+    "15000_to_24999",
+    "25000_to_34999",
+    "35000_to_49999",
+    "50000_to_74999",
+    "75000_to_99999",
+    "100000_to_149999",
+    "150000_to_249999",
+    "250000_or_more",
+]
+
+df_income["Sort"] = df_income["Income_us"].apply(lambda x: sort_income.index(x))
+df_income = df_income.sort_values("Sort").drop("Sort", axis=1)
+
+df_income.plot.bar(
+    x="Income_us",
+    y="Count",
+    color="skyblue",
+    edgecolor="black",
+    legend=False,
+    figsize=(4, 4),
+)
+
+plt.xlabel("")
+plt.ylabel("")
+plt.title("Income distribution")
+
+plt.show()
+plt.close()
+
+# Employment distribution
+
+df_employment = df.groupby(["Employment"]).size().reset_index(name="Count")
+
+sort_employment = [
+    "temporarily-unemployed",
+    "student_part_time",
+    "student_full_time",
+    "employed_part_time",
+    "employed_full_time",
+    "self_employed",
+    "other",
+    "retired",
+    "homemaker",
+    "disability",
+]
+
+df_employment["Sort"] = df_employment["Employment"].apply(
+    lambda x: sort_employment.index(x)
+)
+df_employment = df_employment.sort_values("Sort").drop("Sort", axis=1)
+
+df_employment.plot.bar(
+    x="Employment",
+    y="Count",
+    color="skyblue",
+    edgecolor="black",
+    legend=False,
+    figsize=(4, 4),
+)
+
+plt.xlabel("")
+plt.ylabel("")
+plt.title("Employment distribution")
+
+plt.show()
+plt.close()
+```
+
+The income distribution is expectedly skewed to the left. The employment
+distribution shows that the majority of respondents are employed
+full-time.
+
+```{python load-dictionaries}
 # | echo: false
 
 # load features dictionary
@@ -162,7 +315,17 @@ features = pd.read_csv(f"data/features.csv")
 answers = pd.read_csv("data/answers.csv")
 ```
 
-```{python unnamed-chunk-3}
+While customer responses might vary based on demographic data, Kano
+analysis does not consider the demographic characteristics of the
+respondents.
+
+### Aggregating Responses
+
+Next, we will aggregate the responses to functional and dysfunctional
+questions for each feature. The table below shows an example of aggregated
+answers for a feature with ID = F1.
+
+```{python check-answers}
 # | echo: false
 # | warning: false
 
@@ -174,7 +337,7 @@ df1.columns = ["Answer"]
 # df1.merge(answers, how="left", indicator=True).groupby("_merge").size()
 ```
 
-```{python unnamed-chunk-4}
+```{python create-long-df}
 # | echo: false
 import re
 
@@ -183,7 +346,10 @@ value_vars = [col for col in df.columns if re.findall(r"F\d+_", col)]
 index_vars = [col for col in df.columns if col not in value_vars]
 
 df_long = df.melt(
-    id_vars=index_vars, value_vars=value_vars, var_name="Question", value_name="Answer"
+    id_vars=index_vars,
+    value_vars=value_vars,
+    var_name="Question",
+    value_name="Answer",
 )
 
 df_long = df_long.dropna(subset=["Answer"])
@@ -205,11 +371,12 @@ mask = df_long["Type"] == "Dysfunctional"
 df_long.loc[mask, "DysfCode"] = df_long.loc[mask, "Code"]
 ```
 
-```{python unnamed-chunk-5}
+```{python groupby-agg}
 # | echo: false
 
 # group by columns and aggregate functional and dysfunctional codes
 columns = ["ID", "Income_us", "Gender", "Age", "Employment", "Education"]
+
 df_final = (
     df_long.fillna(0)
     .groupby(columns)
@@ -218,46 +385,97 @@ df_final = (
 )
 
 # merge with features dictionary
-
 df_final = df_final.merge(interp, on=["FuncCode", "DysfCode"], how="left")
 ```
 
-```{python unnamed-chunk-6}
+```{python tbl-agg-answers}
 # | echo: false
+# | tbl-colwidths: [5, 20, 15, 15, 15, 15, 15]
+# | label: tbl-agg-answers
+# | tbl-cap: Example of aggregated answers for a feature.
 
-# calculate satisfaction and dissatisfaction scores
+pd.options.display.float_format = "{:0.0f}%".format
 
-df_final["Satisfaction"] = (df_final["Category"] == "Attractive") | (
-    df_final["Category"] == "One-dimensional"
+d = dict(selector="th", props=[("text-align", "center")])
+
+df_final.style.set_properties(
+    **{"width": "10em", "text-align": "center"}
+).set_table_styles([d])
+
+df_final.query("ID == 'F1_'").groupby(
+    ["ID", "Functional", "Dysfunctional"]
+).size().unstack().fillna(0)
+```
+
+
+### Calculating Satisfaction and Dissatisfaction Scores
+
+After aggregating the responses, we calculate the satisfaction and
+dissatisfaction scores for each feature using @eq-satisfaction-influence
+and @eq-dissatisfaction-influence. The table below shows the qualities:
+Attractive (**A**), Indifferent (**I**), Must-be (**M**),
+One-dimensional (**O**), Questionable (**Q**), Reverse (**R**), as well
+as satisfaction (**S**) and dissatisfaction (**D**) scores for each
+feature.
+
+```{python calc-scores}
+# | echo: false
+# | label: tbl-scores
+# | tbl-cap: Qualities and satisfaction and dissatisfaction scores for each feature.
+# | tbl-align: center
+
+
+df_agg = df_final.groupby(["ID", "Category"]).size().unstack().fillna(0)
+
+# trim name to one letter
+df_agg.columns = [col[0] for col in df_agg.columns]
+
+df_agg["Total"] = df_agg.sum(axis=1)
+
+df_agg = df_agg.apply(lambda x: x / x["Total"] * 100, axis=1)
+
+df_agg["S"] = (
+    (df_agg["A"] + df_agg["O"])
+    / (df_agg["A"] + df_agg["O"] + df_agg["M"] + df_agg["I"])
+    * 100
 )
-df_final["Dissatisfaction"] = (df_final["Category"] == "One-dimensional") | (
-    df_final["Category"] == "Must-be"
-)
-
-df_final["Satisfaction"] = df_final["Satisfaction"].astype(int)
-df_final["Dissatisfaction"] = df_final["Dissatisfaction"].astype(int)
-
-df_results = (
-    df_final.groupby("ID")
-    .agg({"Satisfaction": "sum", "Dissatisfaction": "sum"})
-    .reset_index()
-)
-
-df_results["SatisfactionInfluence"] = (
-    df_results["Satisfaction"]
-    / (df_results["Satisfaction"] + df_results["Dissatisfaction"])
+df_agg["D"] = (
+    -(df_agg["O"] + df_agg["M"])
+    / (df_agg["A"] + df_agg["O"] + df_agg["M"] + df_agg["I"])
     * 100
 )
 
-df_results["DissatisfactionInfluence"] = (
-    -df_results["Dissatisfaction"]
-    / (df_results["Satisfaction"] + df_results["Dissatisfaction"])
-    * 100
+df_agg = df_agg.merge(features[["ID", "Question"]], on="ID")
+
+df_agg = df_agg[["ID", "Question", "A", "I", "M", "O", "Q", "R", "S", "D"]]
+
+df_agg["ID"] = df_agg["ID"].str.replace("_", "")
+
+df_agg["Sort"] = df_agg["ID"].str.extract(r"(\d+)").astype(int)
+df_agg = df_agg.sort_values("Sort").drop("Sort", axis=1).reset_index(drop=True)
+
+df_agg.style.highlight_max(
+    color="lightgreen",
+    subset=df_agg.columns[2:-2],
+    axis=1,
+).format(
+    lambda x: "{:0.0f}".format(x) if type(x) == float else x,
 )
 ```
 
-```{python unnamed-chunk-7}
+
+### Plotting the Kano Diagram
+
+The last step is to plot the features on a Kano diagram. The quadrant in
+which the feature is located indicates a Kano category. The further the
+from the center, the higher the influence on satisfaction or
+dissatisfaction.
+
+```{python plot-diagram}
 # | echo: false
+# | fig-align: center
+# | label: fig-kano-diagram
+# | fig-cap: Kano diagram
 
 # plot Kano diagram
 
@@ -268,27 +486,85 @@ import seaborn as sns
 plt.figure(figsize=(6, 6))
 
 sns.scatterplot(
-    data=df_results,
-    x="DissatisfactionInfluence",
-    y="SatisfactionInfluence",
+    data=df_agg,
+    x="D",
+    y="S",
     hue="ID",
-    s=100,
+    style="ID",
+    s=200,
 )
 
-plt.ylim(-100, 100)
-plt.xlim(-100, 100)
+plt.ylim(0, 100)
+plt.xlim(-100, 0)
 
-plt.axhline(0, color="black", linestyle="--")
-plt.axvline(0, color="black", linestyle="--")
+plt.axhline(50, color="black", linestyle="--")
+plt.axvline(-50, color="black", linestyle="--")
 
 plt.xlabel("Dissatisfaction Influence (%)")
 plt.ylabel("Satisfaction Influence (%)")
 
-plt.title("Kano Diagram")
+plt.text(-25, 95, "Attractive", fontsize=10, ha="center", va="center")
+plt.text(-75, 95, "One-dimensional", fontsize=10, ha="center", va="center")
+plt.text(-75, 5, "Must-be", fontsize=10, ha="center", va="center")
+plt.text(-25, 5, "Indifferent", fontsize=10, ha="center", va="center")
 
-plt.legend(title="Feature ID", bbox_to_anchor=(1.05, 1), loc="upper left")
+plt.gca().invert_xaxis()
+
+plt.legend(
+    title="Feature ID", bbox_to_anchor=(1.05, 0.5), loc="center left", frameon=False
+)
 
 plt.show()
+plt.close()
+```
+
+```{python create-image-png}
+# | echo: false
+
+# create preview image
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+df_agg["Label"] = df_agg["ID"].str.extract(r"(\d+)")
+
+sns.set_style("ticks")
+
+plt.figure(figsize=(3, 3))
+
+sns.scatterplot(
+    data=df_agg,
+    x="D",
+    y="S",
+    hue="Label",
+    style="Label",
+    s=100,
+)
+
+plt.ylim(0, 100)
+plt.xlim(-100, 0)
+
+plt.axhline(50, color="black", linestyle="--", linewidth=0.75)
+plt.axvline(-50, color="black", linestyle="--", linewidth=0.75)
+
+
+plt.text(-25, 95, "Attractive", fontsize=9, ha="center", va="center")
+plt.text(-75, 95, "One-dimens.", fontsize=9, ha="center", va="center")
+plt.text(-75, 5, "Must-be", fontsize=9, ha="center", va="center")
+plt.text(-25, 5, "Indifferent", fontsize=9, ha="center", va="center")
+
+plt.xlabel("")
+plt.ylabel("")
+
+plt.gca().invert_xaxis()
+
+plt.legend(
+    title="Feature", bbox_to_anchor=(1.05, 0.5), loc="center left", frameon=False
+)
+
+
+plt.savefig("image.png", dpi=300, bbox_inches="tight")
 plt.close()
 ```
 
@@ -312,4 +588,3 @@ customer preferences and categorizing features into the five Kano
 categories, product managers can create products that meet customer
 needs and expectations, leading to higher customer satisfaction and
 competitive advantage.
-
