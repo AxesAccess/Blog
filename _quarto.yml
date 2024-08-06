@@ -11,7 +11,6 @@ website:
       - icon: linkedin
         href: https://www.linkedin.com/in/telecamera/
   google-analytics: "G-H2HYLD7LV5"
-  cookie-consent: true
 format:
   html:
     theme: litera
