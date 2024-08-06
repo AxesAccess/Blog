@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.555">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aleksei">
+<meta name="dcterms.date" content="2024-08-05">
+
+<title>Blog - Kano Method for Prioritization of Features</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-H2HYLD7LV5"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/AlekseiPrishchepo"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/telecamera/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Kano Method for Prioritization of Features</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">marketing</div>
+                <div class="quarto-category">product</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aleksei </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 5, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<p>The Kano model is a theory for product development and customer satisfaction developed in the 1980s by Professor Noriaki Kano. The model classifies customer preferences into five categories: Must-be Quality, One-dimensional Quality, Attractive Quality, Indifferent Quality, and Reverse Quality. The Kano model is used to prioritize features and functionalities in product development based on customer needs and expectations.</p>
+<p><img src="minh-gCL_rWClhpU-unsplash.jpg" class="img-fluid"></p>
+<div style="font-size: small;">
+<p>Photo by <a href="https://unsplash.com/@minhh11hh?utm_content=creditCopyText&amp;utm_medium=referral&amp;utm_source=unsplash">Minh</a> on <a href="https://unsplash.com/photos/a-long-exposure-of-a-star-trail-in-the-night-sky-gCL_rWClhpU?utm_content=creditCopyText&amp;utm_medium=referral&amp;utm_source=unsplash">Unsplash</a></p>
+</div>
+<section id="categories-of-the-kano-model" class="level2">
+<h2 class="anchored" data-anchor-id="categories-of-the-kano-model">Categories of the Kano Model</h2>
+<p><strong>Must-be</strong> features are basic requirements that customers expect. If these features are not present in a product, customers will be dissatisfied. However, the presence of these features does not necessarily lead to customer satisfaction. Must-be Quality features are considered essential for the product.</p>
+<blockquote class="blockquote">
+<p>Examples: a car must have wheels, a smartphone must have a battery, a website must have a search function.</p>
+</blockquote>
+<p><strong>One-dimensional</strong> features are directly proportional to customer satisfaction. The more these features are present in a product, the more satisfied customers will be. These features are usually explicitly stated by customers and are easy to measure and quantify.</p>
+<blockquote class="blockquote">
+<p>Examples: a car with leather seats, a smartphone with a high-resolution camera, a website with fast loading times.</p>
+</blockquote>
+<p><strong>Attractive</strong> features are unexpected features that delight customers. These features are not explicitly requested by customers but can create a positive emotional response when present. Attractive Quality features can differentiate a product from its competitors and create a competitive advantage.</p>
+<blockquote class="blockquote">
+<p>Examples: a car with a built-in navigation system, a smartphone with facial recognition technology, a website with personalized recommendations.</p>
+</blockquote>
+<p><strong>Indifferent</strong> features are neither good nor bad from the customer’s perspective. Customers are indifferent to these features, and their presence or absence does not significantly impact customer satisfaction. These features are often considered “nice to have” but not essential.</p>
+<blockquote class="blockquote">
+<p>Examples: a car with cup holders, a smartphone with a stylus, a website with social media integration.</p>
+</blockquote>
+<p><strong>Reverse</strong> features are features that, when present, can lead to customer dissatisfaction. These features may be perceived as unnecessary or even annoying by customers. It is essential to identify and eliminate Reverse Quality features to prevent negative customer experiences.</p>
+<blockquote class="blockquote">
+<p>Examples: a car with uncomfortable seats, a smartphone with a short battery life, a website with intrusive pop-up ads.</p>
+</blockquote>
+</section>
+<section id="prioritizing-features-with-the-kano-model" class="level2">
+<h2 class="anchored" data-anchor-id="prioritizing-features-with-the-kano-model">Prioritizing Features with the Kano Model</h2>
+<div id="fig-kano-example" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kano-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="image.png" class="img-fluid figure-img" style="width:50.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kano-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Example of a Kano diagram.
+</figcaption>
+</figure>
+</div>
+<p>With the Kano model, prioritization of features and functionalities becomes clear and straightforward as that:</p>
+<p><strong>a)</strong> keep eye on the <em>Must-be Quality</em> features, as they are essential, <strong>b)</strong> incorporate <em>One-dimensional Quality</em> features to increase customer satisfaction, <strong>c)</strong> consider <em>Attractive Quality</em> features to create a competitive advantage; <strong>d)</strong> eliminate <em>Reverse Quality</em> features, and <strong>e)</strong> save resources by setting <em>Indifferent Quality</em> features as low priority.</p>
+</section>
+<section id="implementation-of-the-kano-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-of-the-kano-analysis">Implementation of the Kano Analysis</h2>
+<p>Implementing the Kano model involves a sequence of steps, beginning with the development of a questionnaire. For each feature, two types of questions are posed: functional and dysfunctional.</p>
+<ul>
+<li>The <strong>functional question</strong> assesses respondents’ feelings when a feature is present.</li>
+<li>The <strong>dysfunctional question</strong> gauges their reactions in the absence of that feature.</li>
+</ul>
+<p>Each question offers five possible responses, from “I like it” to “I dislike it.” Subsequently, these responses are classified into the five Kano categories.</p>
+<div class="cell" data-execution_count="1" data-cap-location="undefined" data-tbl-cap-location="top">
+<div id="tbl-cap-margin" class="cell quarto-float anchored" data-cap-location="undefined" data-tbl-cap-location="top" data-execution_count="1">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cap-margin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Classification of answers to the Kano questionnaire.
+</figcaption>
+<div aria-describedby="tbl-cap-margin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="61">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th colspan="5" data-quarto-table-cell-role="th" data-halign="left">Category</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">Dysfunctional</th>
+<th data-quarto-table-cell-role="th">1) I like it</th>
+<th data-quarto-table-cell-role="th">2) I expect it</th>
+<th data-quarto-table-cell-role="th">3) I am neutral</th>
+<th data-quarto-table-cell-role="th">4) I can tolerate it</th>
+<th data-quarto-table-cell-role="th">5) I dislike it</th>
+</tr>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Functional</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1) I like it</td>
+<td>Questionable</td>
+<td>Attractive</td>
+<td>Attractive</td>
+<td>Attractive</td>
+<td>One-dimensional</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2) I expect it</td>
+<td>Reverse</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Must-be</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3) I am neutral</td>
+<td>Reverse</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Must-be</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4) I can tolerate it</td>
+<td>Reverse</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Must-be</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5) I dislike it</td>
+<td>Reverse</td>
+<td>Reverse</td>
+<td>Reverse</td>
+<td>Reverse</td>
+<td>Questionable</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>After the classification of responses, the next step is to calculate the satisfaction and dissatisfaction scores for each feature. The satisfaction influence score is calculated as the percentage of Attractive and One-dimensional responses relative to the total number of responses.</p>
+<p><span id="eq-satisfaction-influence"><span class="math display">\[ \text{Satisfaction Influence} = \dfrac{A + O}{ A + O + M + I } \times 100 \%  \tag{1}\]</span></span> The dissatisfaction influence score is calculated as the percentage of One-dimensional and Must-be responses relative to the total number of responses.</p>
+<p><span id="eq-dissatisfaction-influence"><span class="math display">\[ \text{Dissatisfaction Influence} =  - \dfrac{O + M}{A + O + M + I} \times 100 \%  \tag{2}\]</span></span></p>
+<p>The features are then plotted on a Kano diagram, with the dissatisfaction score on the x-axis and the satisfaction score on the y-axis. The features are categorized based on their position in the diagram: Attractive Quality features in the upper left quadrant, One-dimensional Quality features in the upper right quadrant, Must-be Quality features in the lower right quadrant, and Indifferent features in the lower left quadrant, as depicted in the <a href="#fig-kano-example" class="quarto-xref">Figure&nbsp;1</a>.</p>
+</section>
+<section id="example-implementation-of-the-kano-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="example-implementation-of-the-kano-analysis">Example implementation of the Kano Analysis</h2>
+<section id="conducting-a-kano-survey" class="level3">
+<h3 class="anchored" data-anchor-id="conducting-a-kano-survey">Conducting a Kano Survey</h3>
+<p>For illustrative purposes, let’s consider existing dataset with responses to a Kano questionnaire from <a href="https://github.com/REPPL/Doing-research-online-the-kano-model">Doing Research Online: The Kano Model</a> project by <a href="https://github.com/REPPL">Alex Reppel</a> published on GitHub under the GPL-3.0 License. The dataset consists of five csv files containing responses to functional and dysfunctional questions for various features, along with demographic information about the respondents.</p>
+</section>
+<section id="exploratory-data-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h3>
+<p>Let’s explore data. The dataframe of shape (721, 39) includes an <code>ID</code> column, multiple columns with demographic data such as <code>Income_us</code>, <code>Gender</code>, <code>Age</code>, <code>Employment</code>, and <code>Education</code>, as well as responses to functional and dysfunctional questions (<code>F1_functional</code>, <code>F1_dysfunctional</code>, etc), and columns indicating the importance of certain features to the customer (<code>F1_importance</code>, <code>F2_importance</code>, etc).</p>
+<div id="cell-fig-hist-age" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div id="fig-hist-age" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hist-age-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-hist-age-output-1.png" width="661" height="468" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hist-age-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Histogram of respondents’ age
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The customers’ age distribution is relatively balanced, with a slight skew towards younger respondents.</p>
+<div>
+
+</div>
+<div id="cell-fig-income-empl-hist" class="cell quarto-layout-panel" data-execution_count="4" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-income-empl-hist" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-income-empl-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-income-empl-hist-output-1.png" width="352" height="488" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-income-empl-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Income distribution
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-income-empl-hist" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-income-empl-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-income-empl-hist-output-2.png" width="352" height="509" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-income-empl-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Employment distribution
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p>The income distribution is expectedly skewed to the left. The employment distribution shows that the majority of respondents are employed full-time.</p>
+<p>While customer responses might vary based on demographic data, Kano analysis does not consider the demographic characteristics of the respondents.</p>
+</section>
+<section id="aggregating-responses" class="level3">
+<h3 class="anchored" data-anchor-id="aggregating-responses">Aggregating Responses</h3>
+<p>Next, we will aggregate the responses to functional and dysfunctional questions for each feature. The table below shows an example of aggregated answers for a feature with ID = F1.</p>
+<div class="cell" data-tbl-colwidths="[5,20,15,15,15,15,15]" data-execution_count="9">
+<div id="tbl-agg-answers" class="cell quarto-float anchored" data-execution_count="9">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-agg-answers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Example of aggregated answers for a feature.
+</figcaption>
+<div aria-describedby="tbl-agg-answers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="69">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1" data-tbl-colwidths="[5,20,15,15,15,15,15]">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Dysfunctional</th>
+<th data-quarto-table-cell-role="th">1) I like it</th>
+<th data-quarto-table-cell-role="th">2) I expect it</th>
+<th data-quarto-table-cell-role="th">3) I am neutral</th>
+<th data-quarto-table-cell-role="th">4) I can tolerate it</th>
+<th data-quarto-table-cell-role="th">5) I dislike it</th>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">ID</th>
+<th data-quarto-table-cell-role="th">Functional</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td rowspan="5" data-quarto-table-cell-role="th" data-valign="top">F1_</td>
+<td data-quarto-table-cell-role="th">1) I like it</td>
+<td>12</td>
+<td>10</td>
+<td>21</td>
+<td>25</td>
+<td>9</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2) I expect it</td>
+<td>6</td>
+<td>6</td>
+<td>14</td>
+<td>10</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3) I am neutral</td>
+<td>15</td>
+<td>25</td>
+<td>72</td>
+<td>29</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4) I can tolerate it</td>
+<td>5</td>
+<td>13</td>
+<td>12</td>
+<td>10</td>
+<td>5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5) I dislike it</td>
+<td>14</td>
+<td>8</td>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="calculating-satisfaction-and-dissatisfaction-scores" class="level3">
+<h3 class="anchored" data-anchor-id="calculating-satisfaction-and-dissatisfaction-scores">Calculating Satisfaction and Dissatisfaction Scores</h3>
+<p>After aggregating the responses, we calculate the satisfaction and dissatisfaction scores for each feature using <a href="#eq-satisfaction-influence" class="quarto-xref">Equation&nbsp;1</a> and <a href="#eq-dissatisfaction-influence" class="quarto-xref">Equation&nbsp;2</a>. The table below shows the qualities: Attractive (<strong>A</strong>), Indifferent (<strong>I</strong>), Must-be (<strong>M</strong>), One-dimensional (<strong>O</strong>), Questionable (<strong>Q</strong>), Reverse (<strong>R</strong>), as well as satisfaction (<strong>S</strong>) and dissatisfaction (<strong>D</strong>) scores for each feature.</p>
+<div class="cell" data-tbl-align="center" data-execution_count="10">
+<div id="tbl-scores" class="cell quarto-float anchored" data-execution_count="10" data-tbl-align="center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Qualities and satisfaction and dissatisfaction scores for each feature.
+</figcaption>
+<div aria-describedby="tbl-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="70">
+<style type="text/css">
+#T_bc908_row0_col3, #T_bc908_row1_col5, #T_bc908_row2_col5, #T_bc908_row3_col5, #T_bc908_row4_col3, #T_bc908_row5_col3, #T_bc908_row6_col5, #T_bc908_row7_col5, #T_bc908_row8_col2, #T_bc908_row9_col5, #T_bc908_row10_col3 {
+  background-color: lightgreen;
+}
+</style>
+
+<table id="T_bc908" class="do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
+<th id="T_bc908_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">ID</th>
+<th id="T_bc908_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Question</th>
+<th id="T_bc908_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">A</th>
+<th id="T_bc908_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">I</th>
+<th id="T_bc908_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">M</th>
+<th id="T_bc908_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">O</th>
+<th id="T_bc908_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">Q</th>
+<th id="T_bc908_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">R</th>
+<th id="T_bc908_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">S</th>
+<th id="T_bc908_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">D</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td id="T_bc908_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0</td>
+<td id="T_bc908_row0_col0" class="data row0 col0">F1</td>
+<td id="T_bc908_row0_col1" class="data row0 col1">If your funds are stored in a way that does not have to be linked to your identity, how do you feel?</td>
+<td id="T_bc908_row0_col2" class="data row0 col2">17</td>
+<td id="T_bc908_row0_col3" class="data row0 col3">57</td>
+<td id="T_bc908_row0_col4" class="data row0 col4">3</td>
+<td id="T_bc908_row0_col5" class="data row0 col5">3</td>
+<td id="T_bc908_row0_col6" class="data row0 col6">4</td>
+<td id="T_bc908_row0_col7" class="data row0 col7">16</td>
+<td id="T_bc908_row0_col8" class="data row0 col8">24</td>
+<td id="T_bc908_row0_col9" class="data row0 col9">-7</td>
+</tr>
+<tr class="even">
+<td id="T_bc908_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">1</td>
+<td id="T_bc908_row1_col0" class="data row1 col0">F2</td>
+<td id="T_bc908_row1_col1" class="data row1 col1">If it is easy to store funds, how do you feel?</td>
+<td id="T_bc908_row1_col2" class="data row1 col2">22</td>
+<td id="T_bc908_row1_col3" class="data row1 col3">27</td>
+<td id="T_bc908_row1_col4" class="data row1 col4">14</td>
+<td id="T_bc908_row1_col5" class="data row1 col5">30</td>
+<td id="T_bc908_row1_col6" class="data row1 col6">3</td>
+<td id="T_bc908_row1_col7" class="data row1 col7">4</td>
+<td id="T_bc908_row1_col8" class="data row1 col8">56</td>
+<td id="T_bc908_row1_col9" class="data row1 col9">-48</td>
+</tr>
+<tr class="odd">
+<td id="T_bc908_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">2</td>
+<td id="T_bc908_row2_col0" class="data row2 col0">F3</td>
+<td id="T_bc908_row2_col1" class="data row2 col1">If you can access your funds wherever and whenever you want, how do you feel?</td>
+<td id="T_bc908_row2_col2" class="data row2 col2">15</td>
+<td id="T_bc908_row2_col3" class="data row2 col3">18</td>
+<td id="T_bc908_row2_col4" class="data row2 col4">14</td>
+<td id="T_bc908_row2_col5" class="data row2 col5">47</td>
+<td id="T_bc908_row2_col6" class="data row2 col6">3</td>
+<td id="T_bc908_row2_col7" class="data row2 col7">3</td>
+<td id="T_bc908_row2_col8" class="data row2 col8">66</td>
+<td id="T_bc908_row2_col9" class="data row2 col9">-65</td>
+</tr>
+<tr class="even">
+<td id="T_bc908_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">3</td>
+<td id="T_bc908_row3_col0" class="data row3 col0">F4</td>
+<td id="T_bc908_row3_col1" class="data row3 col1">If it is guaranteed that no one else can access your funds without your permission, how do you feel?</td>
+<td id="T_bc908_row3_col2" class="data row3 col2">5</td>
+<td id="T_bc908_row3_col3" class="data row3 col3">12</td>
+<td id="T_bc908_row3_col4" class="data row3 col4">22</td>
+<td id="T_bc908_row3_col5" class="data row3 col5">53</td>
+<td id="T_bc908_row3_col6" class="data row3 col6">4</td>
+<td id="T_bc908_row3_col7" class="data row3 col7">4</td>
+<td id="T_bc908_row3_col8" class="data row3 col8">63</td>
+<td id="T_bc908_row3_col9" class="data row3 col9">-82</td>
+</tr>
+<tr class="odd">
+<td id="T_bc908_level0_row4" class="row_heading level0 row4" data-quarto-table-cell-role="th">4</td>
+<td id="T_bc908_row4_col0" class="data row4 col0">F5</td>
+<td id="T_bc908_row4_col1" class="data row4 col1">If relevant information is always easy to find, how do you feel?</td>
+<td id="T_bc908_row4_col2" class="data row4 col2">22</td>
+<td id="T_bc908_row4_col3" class="data row4 col3">34</td>
+<td id="T_bc908_row4_col4" class="data row4 col4">12</td>
+<td id="T_bc908_row4_col5" class="data row4 col5">21</td>
+<td id="T_bc908_row4_col6" class="data row4 col6">5</td>
+<td id="T_bc908_row4_col7" class="data row4 col7">6</td>
+<td id="T_bc908_row4_col8" class="data row4 col8">49</td>
+<td id="T_bc908_row4_col9" class="data row4 col9">-37</td>
+</tr>
+<tr class="even">
+<td id="T_bc908_level0_row5" class="row_heading level0 row5" data-quarto-table-cell-role="th">5</td>
+<td id="T_bc908_row5_col0" class="data row5 col0">F6</td>
+<td id="T_bc908_row5_col1" class="data row5 col1">If you can transfer funds without having to link that transaction to your name, how do you feel?</td>
+<td id="T_bc908_row5_col2" class="data row5 col2">26</td>
+<td id="T_bc908_row5_col3" class="data row5 col3">50</td>
+<td id="T_bc908_row5_col4" class="data row5 col4">2</td>
+<td id="T_bc908_row5_col5" class="data row5 col5">5</td>
+<td id="T_bc908_row5_col6" class="data row5 col6">4</td>
+<td id="T_bc908_row5_col7" class="data row5 col7">14</td>
+<td id="T_bc908_row5_col8" class="data row5 col8">38</td>
+<td id="T_bc908_row5_col9" class="data row5 col9">-8</td>
+</tr>
+<tr class="odd">
+<td id="T_bc908_level0_row6" class="row_heading level0 row6" data-quarto-table-cell-role="th">6</td>
+<td id="T_bc908_row6_col0" class="data row6 col0">F7</td>
+<td id="T_bc908_row6_col1" class="data row6 col1">If it is easy to transfer funds, how do you feel?</td>
+<td id="T_bc908_row6_col2" class="data row6 col2">20</td>
+<td id="T_bc908_row6_col3" class="data row6 col3">24</td>
+<td id="T_bc908_row6_col4" class="data row6 col4">17</td>
+<td id="T_bc908_row6_col5" class="data row6 col5">34</td>
+<td id="T_bc908_row6_col6" class="data row6 col6">4</td>
+<td id="T_bc908_row6_col7" class="data row6 col7">2</td>
+<td id="T_bc908_row6_col8" class="data row6 col8">57</td>
+<td id="T_bc908_row6_col9" class="data row6 col9">-54</td>
+</tr>
+<tr class="even">
+<td id="T_bc908_level0_row7" class="row_heading level0 row7" data-quarto-table-cell-role="th">7</td>
+<td id="T_bc908_row7_col0" class="data row7 col0">F8</td>
+<td id="T_bc908_row7_col1" class="data row7 col1">If you can transfer your funds wherever and whenever you want, how do you feel?</td>
+<td id="T_bc908_row7_col2" class="data row7 col2">21</td>
+<td id="T_bc908_row7_col3" class="data row7 col3">20</td>
+<td id="T_bc908_row7_col4" class="data row7 col4">18</td>
+<td id="T_bc908_row7_col5" class="data row7 col5">35</td>
+<td id="T_bc908_row7_col6" class="data row7 col6">4</td>
+<td id="T_bc908_row7_col7" class="data row7 col7">2</td>
+<td id="T_bc908_row7_col8" class="data row7 col8">60</td>
+<td id="T_bc908_row7_col9" class="data row7 col9">-56</td>
+</tr>
+<tr class="odd">
+<td id="T_bc908_level0_row8" class="row_heading level0 row8" data-quarto-table-cell-role="th">8</td>
+<td id="T_bc908_row8_col0" class="data row8 col0">F9</td>
+<td id="T_bc908_row8_col1" class="data row8 col1">If funds are transferred almost instantaneous, how do you feel?</td>
+<td id="T_bc908_row8_col2" class="data row8 col2">40</td>
+<td id="T_bc908_row8_col3" class="data row8 col3">23</td>
+<td id="T_bc908_row8_col4" class="data row8 col4">7</td>
+<td id="T_bc908_row8_col5" class="data row8 col5">22</td>
+<td id="T_bc908_row8_col6" class="data row8 col6">4</td>
+<td id="T_bc908_row8_col7" class="data row8 col7">3</td>
+<td id="T_bc908_row8_col8" class="data row8 col8">67</td>
+<td id="T_bc908_row8_col9" class="data row8 col9">-31</td>
+</tr>
+<tr class="even">
+<td id="T_bc908_level0_row9" class="row_heading level0 row9" data-quarto-table-cell-role="th">9</td>
+<td id="T_bc908_row9_col0" class="data row9 col0">F10</td>
+<td id="T_bc908_row9_col1" class="data row9 col1">If it is guaranteed that no one else can manipulate transfers you have initiated, how do you feel?</td>
+<td id="T_bc908_row9_col2" class="data row9 col2">5</td>
+<td id="T_bc908_row9_col3" class="data row9 col3">15</td>
+<td id="T_bc908_row9_col4" class="data row9 col4">25</td>
+<td id="T_bc908_row9_col5" class="data row9 col5">49</td>
+<td id="T_bc908_row9_col6" class="data row9 col6">4</td>
+<td id="T_bc908_row9_col7" class="data row9 col7">2</td>
+<td id="T_bc908_row9_col8" class="data row9 col8">58</td>
+<td id="T_bc908_row9_col9" class="data row9 col9">-79</td>
+</tr>
+<tr class="odd">
+<td id="T_bc908_level0_row10" class="row_heading level0 row10" data-quarto-table-cell-role="th">10</td>
+<td id="T_bc908_row10_col0" class="data row10 col0">F11</td>
+<td id="T_bc908_row10_col1" class="data row10 col1">If relevant information on how to make transfers is always easy to find, how do you feel?</td>
+<td id="T_bc908_row10_col2" class="data row10 col2">24</td>
+<td id="T_bc908_row10_col3" class="data row10 col3">30</td>
+<td id="T_bc908_row10_col4" class="data row10 col4">10</td>
+<td id="T_bc908_row10_col5" class="data row10 col5">26</td>
+<td id="T_bc908_row10_col6" class="data row10 col6">6</td>
+<td id="T_bc908_row10_col7" class="data row10 col7">4</td>
+<td id="T_bc908_row10_col8" class="data row10 col8">56</td>
+<td id="T_bc908_row10_col9" class="data row10 col9">-40</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="plotting-the-kano-diagram" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-the-kano-diagram">Plotting the Kano Diagram</h3>
+<p>The last step is to plot the features on a Kano diagram. The quadrant in which the feature is located indicates a Kano category. The further the from the center, the higher the influence on satisfaction or dissatisfaction.</p>
+<div id="cell-fig-kano-diagram" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display">
+<div id="fig-kano-diagram" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kano-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-kano-diagram-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="627" height="508">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kano-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Kano diagram
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="application-of-the-kano-model" class="level2">
+<h2 class="anchored" data-anchor-id="application-of-the-kano-model">Application of the Kano Model</h2>
+<p>The Kano model can be applied in product development to prioritize features and functionalities based on customer needs and expectations. By categorizing features into the five Kano categories, product managers can identify which features are essential, which are nice to have, and which can create a competitive advantage.</p>
+<p>The Kano model can also help product managers understand customer preferences and make informed decisions about resource allocation and product development. By focusing on Must-be Quality and One-dimensional Quality features, product managers can ensure that the product meets basic customer requirements and maximizes customer satisfaction.</p>
+<p>In conclusion, the Kano model is a valuable tool for prioritizing features and functionalities in product development. By understanding customer preferences and categorizing features into the five Kano categories, product managers can create products that meet customer needs and expectations, leading to higher customer satisfaction and competitive advantage.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/AlekseiPrishchepo\.github\.io\/Blog\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
