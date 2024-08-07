@@ -14,14 +14,7 @@ Reverse Quality. The Kano model is used to prioritize features and
 functionalities in product development based on customer needs and
 expectations.
 
-![](minh-gCL_rWClhpU-unsplash.jpg)
-
-::: {style="font-size: small;"}
-Photo by
-[Minh](https://unsplash.com/@minhh11hh?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)
-on
-[Unsplash](https://unsplash.com/photos/a-long-exposure-of-a-star-trail-in-the-night-sky-gCL_rWClhpU?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)
-:::
+![](features.jpg)
 
 ## Categories of the Kano Model
 
