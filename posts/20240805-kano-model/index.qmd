@@ -2,7 +2,7 @@
 title: "Kano Method for Prioritization of Features"
 author: "Aleksei"
 date: "2024-08-05"
-categories: [marketing, product]
+categories: [marketing, product, python]
 image: "image.png"
 ---
 
@@ -133,8 +133,8 @@ in the lower left quadrant, as depicted in the @fig-kano-example.
 
 ### Conducting a Kano Survey
 
-For illustrative purposes, let's consider existing dataset with responses to a
-Kano questionnaire from [Doing Research Online: The Kano
+For illustrative purposes, let's consider existing dataset with
+responses to a Kano questionnaire from [Doing Research Online: The Kano
 Model](https://github.com/REPPL/Doing-research-online-the-kano-model)
 project by [Alex Reppel](https://github.com/REPPL) published on GitHub
 under the GPL-3.0 License. The dataset consists of five csv files
@@ -315,8 +315,8 @@ respondents.
 ### Aggregating Responses
 
 Next, we will aggregate the responses to functional and dysfunctional
-questions for each feature. The table below shows an example of aggregated
-answers for a feature with ID = F1.
+questions for each feature. The table below shows an example of
+aggregated answers for a feature with ID = F1.
 
 ```{python check-answers}
 # | echo: false
@@ -400,7 +400,6 @@ df_final.query("ID == 'F1_'").groupby(
 ).size().unstack().fillna(0)
 ```
 
-
 ### Calculating Satisfaction and Dissatisfaction Scores
 
 After aggregating the responses, we calculate the satisfaction and
@@ -455,7 +454,6 @@ df_agg.style.highlight_max(
     lambda x: "{:0.0f}".format(x) if type(x) == float else x,
 )
 ```
-
 
 ### Plotting the Kano Diagram
 
