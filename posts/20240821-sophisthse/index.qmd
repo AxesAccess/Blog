@@ -177,7 +177,7 @@ finmar["RTS_M"].rolling(12, center=True).mean().plot(label="12-months MA")
 plt.legend()
 ```
 
-## Furhter Investigation
+## Further Investigation
 
 Looking at the tables, one can assume that the suffixes `_M`, `_Q` and
 `_Y` in the names mean that the data was sampled monthly, quarterly and
@@ -314,7 +314,7 @@ ax.plot(
     linestyle="--",
 )
 
-ax.legend(["RTS index", "24-months MA"], loc="upper left");
+# ax.legend(["RTS index", "24-months MA"], loc="upper left");
 
 plt.close()
 
