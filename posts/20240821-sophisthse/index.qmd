@@ -1,0 +1,328 @@
+---
+title: "Python Library for Russian Macroeconomics Data"
+author: "Aleksei"
+date: "2024-08-22"
+categories: [timeseries, macroeconomics, python]
+image: "image.png"
+---
+
+```{python}
+#| echo: false
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.set_style("ticks")
+# plt.rcParams["figure.figsize"] = (9.5, 4.5)
+```
+
+The article introduces a Python library called `sophisthse` that
+provides access to Russian macroeconomic statistics time series
+published by the National Research University Higher School of Economics
+(HSE). The library aims to simplify the process of working with Russian
+macroeconomic data and facilitate the analysis of economic trends in the
+country. The article demonstrates how to use the library to list
+available time series, download data, and visualize the time series
+data.
+
+![](banner.png)
+
+## Acknowledgments
+
+The library is a port of the `sophisthse` R package developed by [Boris
+Demeshev](https://github.com/bdemeshev). The original package provides
+similar functionality for working with Russian macroeconomic data in R.
+The Python version of the library is designed to offer the same features
+to Python users interested in analyzing Russian economic indicators.
+
+## Source Data
+
+The [sophist.hse.ru](http://sophist.hse.ru/hse/nindex.shtml) website
+contains wide range of Russian macroeconomic statistics time series,
+including data on GDP, inflation, unemployment, industrial production,
+retail sales, and more. The data is originally sourced from the Federal
+State Statistics Service of the Russian Federation (Rosstat) and other
+official sources.
+
+## Features
+
+The `sophisthse` library provides the following features:
+
+-   Listing available tables with time series data
+-   Downloading and caching time series data
+
+## Installation
+
+You can install the library using `pip`:
+
+``` bash
+pip install sophisthse
+```
+
+## Usage
+
+Here is an example of how to use the library to download and plot the
+time series data.
+
+### List Available Time Series
+
+Time series are published on the
+[sophist.hse.ru](http://sophist.hse.ru/hse/nindex.shtml) website.
+Initializing `sophisthse` class will download the list of available
+tables. You can list the available tables using the `list_tables`
+method:
+
+```{python unnamed-chunk-1}
+from sophisthse import sophisthse
+
+sph = sophisthse()
+tables = sph.list_tables()
+tables
+```
+
+The column named `date` contains timestamp of the latest update. The
+dates in this column hint that some tables may be out of date. Let's
+take a look at the date of the latest update of the tables.
+
+```{python unnamed-chunk-2}
+# | fig-align: center
+tables["year"] = tables["date"].dt.year
+tables.groupby("year").size().plot(kind="bar")
+```
+
+The `{python} sum(tables.year == 2024)` out of `{python} len(tables)`
+are being updated through 2024. Let's take a look at the most recently
+updated tables.
+
+```{python unnamed-chunk-3}
+tables["date"] = tables["date"].dt.date
+(
+    tables.groupby("date")
+    .agg({"name": lambda x: ", ".join(x)})
+    .reset_index()
+    .sort_values("date", ascending=False)
+    .head()
+)
+```
+
+### Download and Plot Time Series
+
+According to the
+[sophist.hse.ru](http://sophist.hse.ru/hse/nindex.shtml) website table
+`AGR_M_I` provides the index of real agricultural production in column
+`AGR_M_DIRI`, and seasonally adjusted one in the `AGR_M_DIRI_SA`. Let's
+download it and take a look at the data.
+
+```{python unnamed-chunk-4}
+agr_m_i = sph.get_table("AGR_M_I")
+agr_m_i.tail()
+```
+
+::: callout-note
+After calling `get_table`, the data is cached locally. The next time
+`get_table` is called, the data will be loaded from the cache. However,
+if the table is updated on the server, which is checked when the
+`sophisthse` class is initialized, the new data will be loaded from the
+website.
+:::
+
+The method returns a pandas DataFrame, so we can plot the data using the
+`plot` method.
+
+```{python unnamed-chunk-5}
+# | fig-align: center
+agr_m_i.plot()
+```
+
+### Additional Example
+
+According to the
+[sophist.hse.ru](http://sophist.hse.ru/hse/nindex.shtml) website table
+`FINMAR_M` contains data on the financial market.
+
+```{python unnamed-chunk-6}
+finmar = sph.get_table("FINMAR_M")
+finmar.tail()
+```
+
+The first columns are:
+
+-   `RDEXRO_M` - Official exchange rate of the ruble against the US
+    dollar.
+-   `RDEXRM_M` - Exchange rate of the US dollar on the Moscow Exchange.
+-   `RTS_M` - Average [RTS
+    index](https://en.wikipedia.org/wiki/RTS_Index).
+
+The last four columns show NaNs for the most recent periods. Let's take
+a look at the missing values.
+
+```{python unnamed-chunk-7}
+# | fig-align: center
+
+sns.heatmap(~finmar.isnull(), cbar=False, cmap="Blues")
+```
+
+The heatmap shows that the data in the `IB_M`, `GKO_M`, `DEP_M`, and
+`CR_M` columns is not available for the recent years, while the
+`RDEXRO_M`, `RDEXRM_M`, and `RTS_M` columns have complete data.
+
+Let's plot the `RTS_M` column. Due to the economic fluctuations, the RTS
+index has a lot of volatility. We will add the moving average to the
+plot.
+
+```{python unnamed-chunk-8}
+# | fig-align: center
+
+finmar["RTS_M"].plot(label="RTS index")
+finmar["RTS_M"].rolling(12, center=True).mean().plot(label="12-months MA")
+plt.legend()
+```
+
+## Furhter Investigation
+
+Looking at the tables, one can assume that the suffixes `_M`, `_Q` and
+`_Y` in the names mean that the data was sampled monthly, quarterly and
+annually, respectively. Let's check this assumption.
+
+```{python unnamed-chunk-9}
+# | fig-align: center
+
+
+def guess_period(name: str):
+    if "_M" in name:
+        return "month"
+    if "_Q" in name:
+        return "quarter"
+    if "_Y" in name:
+        return "year"
+    return "unknown"
+
+
+tables["period"] = tables["name"].apply(guess_period)
+
+tables.groupby("period").size().plot(kind="bar")
+```
+
+The bar plot shows that the assumption is partially correct. There are
+tables with unknown sampling frequency. This information can be drawn
+from the actual series after downloading data. It's not necessary for
+demonstrative purposes, so we will skip this step.
+
+Let's calculate the correlation matrix for the monthly data.
+
+```{python unnamed-chunk-10}
+# | fig-align: center
+
+from time import sleep
+from random import randint
+import pandas as pd
+
+
+monthly_tables = tables.query("period == 'month' & year >= 2023")
+
+df = pd.DataFrame(index=pd.period_range(start="2014-01-01", end="2025-01-01", freq="M"))
+for table in monthly_tables["name"]:
+    df_add = sph.get_table(table)
+    # We don't want to overload the server
+    # sleep(randint(1, 3))
+    df = df.merge(df_add, left_index=True, right_index=True)
+
+# We do not want to deal with NaNs, at least at this time :)
+df = df.dropna(how="any", axis=1)
+
+# Keep only columns with "_M" suffix to skip derived columns
+columns = [col for col in df.columns if col.endswith("_M")]
+
+corr = df[columns].corr()
+
+sns.heatmap(
+    corr,
+    vmin=-1.0,
+    vmax=1.0,
+    xticklabels=corr.columns.values,  # type: ignore
+    yticklabels=corr.columns.values,  # type: ignore
+    cmap="coolwarm",
+)
+```
+
+The last column (or row) is the `WAG_C_M`. This is a monthly series of
+the average nominal wage. It correlates with many economics indicators,
+and it worth noting that `CBEX_M` (Consolidated Budget Expenditures)
+explains almost 84% of `WAG_C_M` variability. Let's take a look at these
+two series.
+
+```{python unnamed-chunk-11}
+# | fig-align: center
+
+df_norm = df[columns].apply(lambda x: (x - x.mean()) / x.std())
+df_norm[["WAG_C_M", "CBEX_M"]].plot()
+```
+
+The plot shows that the `WAG_C_M` series follows the `CBEX_M` series
+with great accuracy. This is an interesting observation that can be used
+in further analysis.
+
+## Conclusion
+
+The `sophisthse` library provides a convenient way to access and work
+with Russian macroeconomic time series data. The library simplifies the
+process of downloading and caching data, making it easier to analyze
+economic trends in Russia. The library is a valuable resource for
+researchers, analysts, and anyone interested in studying the Russian
+economy.
+
+```{python unnamed-chunk-12}
+# | echo: false
+
+sns.set_style("ticks")
+
+plt.figure(figsize=(4, 3))
+
+finmar["RTS_M"].plot(label="RTS index")
+finmar["RTS_M"].rolling(12, center=True).mean().plot()
+
+plt.xlabel("")
+plt.ylabel("")
+plt.legend(["RTS index", "12-months MA"], loc="upper left")
+
+plt.savefig("image.png", dpi=300)
+plt.close()
+```
+
+```{python}
+# | echo: false
+
+from PIL import Image, ImageOps
+
+finmar_ts = finmar.copy(deep=True)
+finmar_ts.index = finmar_ts.index.to_timestamp()
+
+sns.set_style("darkgrid")
+
+fig, ax = plt.subplots(figsize=(10, 4))
+
+ax.plot(finmar_ts["RTS_M"],
+    marker=".",
+    markersize=4,
+    linestyle="-",
+    linewidth=0.5,
+)
+
+ax.plot(
+    finmar_ts["RTS_M"].rolling(24, center=True).mean(),
+    marker="",  # no marker
+    markersize=2,
+    linestyle="--",
+)
+
+ax.legend(["RTS index", "24-months MA"], loc="upper left");
+
+plt.close()
+
+fig.savefig("banner.png", dpi=150, bbox_inches="tight")
+
+plt.close()
+
+with Image.open("banner.png") as img:
+    with open("banner-1920x1080.png", "wb") as f:
+        ImageOps.pad(img, (1920, 1080), color=(255, 255, 255)).save(f)
+```
