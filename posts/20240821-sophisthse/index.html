@@ -231,13 +231,13 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 <section id="list-available-time-series" class="level3">
 <h3 class="anchored" data-anchor-id="list-available-time-series">List Available Time Series</h3>
 <p>Time series are published on the <a href="http://sophist.hse.ru/hse/nindex.shtml">sophist.hse.ru</a> website. Initializing <code>sophisthse</code> class will download the list of available tables. You can list the available tables using the <code>list_tables</code> method:</p>
-<div id="35cdec64" class="cell" data-execution_count="2">
+<div id="128ddfa2" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sophisthse <span class="im">import</span> sophisthse</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>sph <span class="op">=</span> sophisthse()</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>tables <span class="op">=</span> sph.list_tables()</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>tables</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="100">
+<div class="cell-output cell-output-display" data-execution_count="16">
 <div>
 
 
@@ -313,7 +313,7 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 </div>
 </div>
 <p>The column named <code>date</code> contains timestamp of the latest update. The dates in this column hint that some tables may be out of date. Let’s take a look at the date of the latest update of the tables.</p>
-<div id="d2c6189f" class="cell" data-execution_count="3">
+<div id="f0589363" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tables[<span class="st">"year"</span>] <span class="op">=</span> tables[<span class="st">"date"</span>].dt.year</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>tables.groupby(<span class="st">"year"</span>).size().plot(kind<span class="op">=</span><span class="st">"bar"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -325,7 +325,7 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 </div>
 </div>
 <p>The 116 out of 289 are being updated through 2024. Let’s take a look at the most recently updated tables.</p>
-<div id="523a7d13" class="cell" data-execution_count="4">
+<div id="67ee61c6" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tables[<span class="st">"date"</span>] <span class="op">=</span> tables[<span class="st">"date"</span>].dt.date</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    tables.groupby(<span class="st">"date"</span>)</span>
@@ -334,7 +334,7 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    .sort_values(<span class="st">"date"</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    .head()</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="102">
+<div class="cell-output cell-output-display" data-execution_count="18">
 <div>
 
 
@@ -382,10 +382,10 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 <section id="download-and-plot-time-series" class="level3">
 <h3 class="anchored" data-anchor-id="download-and-plot-time-series">Download and Plot Time Series</h3>
 <p>According to the <a href="http://sophist.hse.ru/hse/nindex.shtml">sophist.hse.ru</a> website table <code>AGR_M_I</code> provides the index of real agricultural production in column <code>AGR_M_DIRI</code>, and seasonally adjusted one in the <code>AGR_M_DIRI_SA</code>. Let’s download it and take a look at the data.</p>
-<div id="91637ac0" class="cell" data-execution_count="5">
+<div id="e4063bc9" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>agr_m_i <span class="op">=</span> sph.get_table(<span class="st">"AGR_M_I"</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>agr_m_i.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="103">
+<div class="cell-output cell-output-display" data-execution_count="19">
 <div>
 
 
@@ -448,7 +448,7 @@ Note
 </div>
 </div>
 <p>The method returns a pandas DataFrame, so we can plot the data using the <code>plot</code> method.</p>
-<div id="8f7c194e" class="cell" data-execution_count="6">
+<div id="a1b24d9f" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>agr_m_i.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -462,10 +462,10 @@ Note
 <section id="additional-example" class="level3">
 <h3 class="anchored" data-anchor-id="additional-example">Additional Example</h3>
 <p>According to the <a href="http://sophist.hse.ru/hse/nindex.shtml">sophist.hse.ru</a> website table <code>FINMAR_M</code> contains data on the financial market.</p>
-<div id="4bb2b987" class="cell" data-execution_count="7">
+<div id="51ffa3ad" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>finmar <span class="op">=</span> sph.get_table(<span class="st">"FINMAR_M"</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>finmar.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="105">
+<div class="cell-output cell-output-display" data-execution_count="21">
 <div>
 
 
@@ -556,7 +556,7 @@ Note
 <li><code>RTS_M</code> - Average <a href="https://en.wikipedia.org/wiki/RTS_Index">RTS index</a>.</li>
 </ul>
 <p>The last four columns show NaNs for the most recent periods. Let’s take a look at the missing values.</p>
-<div id="d3a6ca7c" class="cell" data-execution_count="8">
+<div id="65d5b75f" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sns.heatmap(<span class="op">~</span>finmar.isnull(), cbar<span class="op">=</span><span class="va">False</span>, cmap<span class="op">=</span><span class="st">"Blues"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -568,7 +568,7 @@ Note
 </div>
 <p>The heatmap shows that the data in the <code>IB_M</code>, <code>GKO_M</code>, <code>DEP_M</code>, and <code>CR_M</code> columns is not available for the recent years, while the <code>RDEXRO_M</code>, <code>RDEXRM_M</code>, and <code>RTS_M</code> columns have complete data.</p>
 <p>Let’s plot the <code>RTS_M</code> column. Due to the economic fluctuations, the RTS index has a lot of volatility. We will add the moving average to the plot.</p>
-<div id="a76b6705" class="cell" data-execution_count="9">
+<div id="0d3f3f2f" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>finmar[<span class="st">"RTS_M"</span>].plot(label<span class="op">=</span><span class="st">"RTS index"</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>finmar[<span class="st">"RTS_M"</span>].rolling(<span class="dv">12</span>, center<span class="op">=</span><span class="va">True</span>).mean().plot(label<span class="op">=</span><span class="st">"12-months MA"</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>plt.legend()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -582,10 +582,10 @@ Note
 </div>
 </section>
 </section>
-<section id="furhter-investigation" class="level2">
-<h2 class="anchored" data-anchor-id="furhter-investigation">Furhter Investigation</h2>
+<section id="further-investigation" class="level2">
+<h2 class="anchored" data-anchor-id="further-investigation">Further Investigation</h2>
 <p>Looking at the tables, one can assume that the suffixes <code>_M</code>, <code>_Q</code> and <code>_Y</code> in the names mean that the data was sampled monthly, quarterly and annually, respectively. Let’s check this assumption.</p>
-<div id="7ef28e3d" class="cell" data-execution_count="10">
+<div id="df7c7284" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> guess_period(name: <span class="bu">str</span>):</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"_M"</span> <span class="kw">in</span> name:</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"month"</span></span>
@@ -609,7 +609,7 @@ Note
 </div>
 <p>The bar plot shows that the assumption is partially correct. There are tables with unknown sampling frequency. This information can be drawn from the actual series after downloading data. It’s not necessary for demonstrative purposes, so we will skip this step.</p>
 <p>Let’s calculate the correlation matrix for the monthly data.</p>
-<div id="fca202b0" class="cell" data-execution_count="11">
+<div id="64b1af90" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> time <span class="im">import</span> sleep</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> random <span class="im">import</span> randint</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -649,7 +649,7 @@ Note
 </div>
 </div>
 <p>The last column (or row) is the <code>WAG_C_M</code>. This is a monthly series of the average nominal wage. It correlates with many economics indicators, and it worth noting that <code>CBEX_M</code> (Consolidated Budget Expenditures) explains almost 84% of <code>WAG_C_M</code> variability. Let’s take a look at these two series.</p>
-<div id="957e7154" class="cell" data-execution_count="12">
+<div id="e67a6209" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df_norm <span class="op">=</span> df[columns].<span class="bu">apply</span>(<span class="kw">lambda</span> x: (x <span class="op">-</span> x.mean()) <span class="op">/</span> x.std())</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>df_norm[[<span class="st">"WAG_C_M"</span>, <span class="st">"CBEX_M"</span>]].plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
