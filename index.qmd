@@ -1,5 +1,5 @@
 ---
-title: "Business Development, Sales, and Management"
+title: "Navigating Data Landscapes"
 listing:
   contents:
     - "posts/*/index.qmd"
