@@ -9,7 +9,7 @@ about:
       href: https://www.linkedin.com/in/telecamera
     - icon: github
       text: Github
-      href: https://github.com/AlekseiPrishchepo
+      href: https://github.com/AxesAccess
     - icon: facebook
       text: Facebook
       href: https://www.facebook.com/aleksei.pr
