@@ -87,7 +87,9 @@ map of Europe and plot the cities where the respondents are located. The
 map will also show the number of respondents in each city and their
 median salary in USD.
 
-```{r}
+```{r fig-geography}
+#| fig-cap: "Geography of respondents"
+
 library(giscoR)
 library(maps)
 library(dplyr)
@@ -148,15 +150,18 @@ p <- by_city |>
   ylim(35, 65) +
   xlim(-15, 40)
 
-p1 <- p + theme(legend.position = "none", plot.margin=grid::unit(c(50,50,50,50), "pt"))
+p1 <- p + theme(
+  legend.position = "none",
+  plot.margin = grid::unit(c(50, 50, 50, 50), "pt")
+)
 
 ggsave("image.png", plot = p1, width = 8, height = 8)
 
 p + geom_text_repel(
-    data = by_city |> arrange(resp_count) |> tail(20),
-    aes(x = long, y = lat, label = name),
-    size = 4
-  ) +
+  data = by_city |> arrange(resp_count) |> tail(20),
+  aes(x = long, y = lat, label = name),
+  size = 4
+) +
   theme(
     legend.position = "right",
     legend.key.height = unit(20, "pt"),
@@ -173,7 +178,8 @@ salary distribution, it is not the best idea to compare salaries across
 cities directly, as the salary may vary depending on other factors like
 job title or seniority.
 
-```{r top-cities, fig.width=8, fig.height=4}
+```{r fig-top-cities, fig.width=8, fig.height=4}
+#| fig-cap: "Top and bottom cities by median salary"
 library(scales)
 
 cities_ranked <- data |>
@@ -234,7 +240,9 @@ In the following plot, the size of the point represents the number of
 respondents, and the color represents the median salary. The text on the
 plot shows the median salary for each country and job category.
 
-```{r salaries-balloon-plot, fig.width=8, fig.height=12}
+```{r fig-salaries-balloon-plot, fig.width=8, fig.height=12}
+#| fig-cap: "Median salary by country and job title"
+
 data1 <- data |> inner_join(cities, by = c("City" = "name"))
 
 data1 <- data1 |> left_join(read.csv("data/job-categories.csv"), by = "Job.Title")
@@ -339,7 +347,7 @@ country_coef <- country_coef |> mutate(rownumber = 1:nrow(country_coef))
 
 xlim <- c(
   min(country_coef$effect - country_coef$error),
-  max(country_coef$effect + 1.1 *country_coef$error)
+  max(country_coef$effect + 1.1 * country_coef$error)
 )
 xscale <- c(0, 50000, 100000, 150000)
 ```
@@ -353,7 +361,9 @@ it is generally better practice to consider the overall differences in
 salaries across countries.
 
 ::: {#coefficients-plot layout-ncol="2"}
-```{r coefficients-plot-left, fig.width=4, fig.height=5}
+```{r fig-coefficients-plot-left, fig.width=4, fig.height=5}
+#| fig-cap: "Effect of country on salary"
+
 country_coef[1:17, ] |>
   ggplot(aes(x = effect, y = reorder(value, effect), colour = significant)) +
   geom_point() +
@@ -367,7 +377,11 @@ country_coef[1:17, ] |>
     fill = "white",
     size = 2.5
   ) +
-  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed",
+    colour = "grey55"
+  ) +
   theme_minimal() +
   coord_cartesian(xlim = xlim) +
   scale_x_discrete(limits = xscale, labels = scales::comma) +
@@ -389,7 +403,11 @@ country_coef[18:34, ] |>
     fill = "white",
     size = 2.5
   ) +
-  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed",
+    colour = "grey55"
+  ) +
   theme_minimal() +
   coord_cartesian(xlim = xlim) +
   scale_x_discrete(limits = xscale, labels = scales::comma) +
@@ -402,7 +420,9 @@ Next two plots show the effect of job category and seniority on the
 salary. The interpretation is similar to the previous plot.
 
 ::: {#coefficients-plot-jobs-seniority layout-ncol="2"}
-```{r coefficients-plot-jobs, fig.width=4, fig.height=3}
+```{r fig-coefficients-plot-jobs, fig.width=4, fig.height=3}
+#| fig-cap: "Effect of job title on salary"
+
 model_coef |>
   filter(variable == "Job Category") |>
   ggplot(aes(x = effect, y = reorder(value, effect), colour = significant)) +
@@ -424,7 +444,9 @@ model_coef |>
   labs(x = "", y = "")
 ```
 
-```{r coefficients-plot-seniority, fig.width=4, fig.height=3}
+```{r fig-coefficients-plot-seniority, fig.width=4, fig.height=3}
+#| fig-cap: "Effect of seniority on salary"
+
 model_coef |>
   filter(variable == "Seniority") |>
   mutate(value = str_replace(value, "Senior Staff / ", "")) |>
@@ -440,7 +462,10 @@ model_coef |>
     fill = "white",
     size = 2.5
   ) +
-  geom_vline(xintercept = 0, linetype = "dashed") +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed"
+  ) +
   theme_minimal() +
   theme(legend.position = "none") +
   scale_x_discrete(limits = c(-50000, 50000)) +
@@ -456,7 +481,9 @@ salary. Taxes and social security contributions can significantly reduce
 take-home pay. Let’s calculate the net salary for each respondent and
 visualize the distribution of net salaries by country.
 
-```{r pre-tax-vs-after-tax, fig.width=8, fig.height=8}
+```{r fig-net-salary, fig.width=8, fig.height=8}
+#| fig-cap: "Net salary by country"
+
 library(tidyr)
 
 net_by_country <- select(data, Country, City, Pre.Tax.TC, After.Tax.TC) |>
@@ -549,7 +576,8 @@ model_coef <- model_coef |> mutate(value = sub("Lifestyle", "", value))
 country_coef <- model_coef |>
   filter(variable == "Country") |>
   arrange(desc(effect))
-country_coef <- country_coef |> mutate(rownumber = 1:nrow(country_coef))
+country_coef <- country_coef |>
+  mutate(rownumber = 1:nrow(country_coef))
 
 xlim <- c(
   min(country_coef$effect - country_coef$error),
@@ -568,7 +596,9 @@ Let's look at the coefficients for the country variable. Basically, the
 effect represents cost of living for a single person.
 
 ::: {#col-coefficients-plot layout-ncol="2"}
-```{r col-coefficients-plot-left, fig.width=4, fig.height=5}
+```{r fig-cost-plot-left, fig.width=4, fig.height=5}
+#| fig-cap: "Effect of country on cost of living"
+
 country_coef[1:17, ] |>
   ggplot(aes(x = effect, y = reorder(value, effect), colour = significant)) +
   geom_point() +
@@ -582,7 +612,11 @@ country_coef[1:17, ] |>
     fill = "white",
     size = 2.5
   ) +
-  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed",
+    colour = "grey55"
+  ) +
   theme_minimal() +
   coord_cartesian(xlim = xlim) +
   scale_x_discrete(limits = xscale, labels = scales::comma) +
@@ -590,7 +624,7 @@ country_coef[1:17, ] |>
   labs(x = "", y = "")
 ```
 
-```{r col-coefficients-plot-right, fig.width=4, fig.height=5}
+```{r cost-plot-right, fig.width=4, fig.height=5}
 country_coef[18:34, ] |>
   ggplot(aes(x = effect, y = reorder(value, effect), colour = significant)) +
   geom_point() +
@@ -604,7 +638,11 @@ country_coef[18:34, ] |>
     fill = "white",
     size = 2.5
   ) +
-  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed",
+    colour = "grey55"
+  ) +
   theme_minimal() +
   coord_cartesian(xlim = xlim) +
   scale_x_discrete(limits = xscale, labels = scales::comma) +
@@ -618,13 +656,14 @@ living. As expected, total cost of living for the two people is higher
 than for a single person, but the cost per person is lower for a larger
 household.
 
-```{r col-coefficients-plot-household, fig.width=4, fig.height=2.5, center=TRUE}
+```{r fig-cost-plot-household, fig.width=4, fig.height=2.5}
+#| fig-cap: "Effect of household size on cost of living"
 
 xscale <- c(0, 10000, 20000, 30000, 40000, 50000)
- xlim = c(-10000, 60000)
+xlim <- c(-10000, 60000)
 
-model_coef |> 
- filter(variable == "Household Size") |>
+model_coef |>
+  filter(variable == "Household Size") |>
   ggplot(aes(x = effect, y = reorder(value, desc(value)), colour = significant)) +
   geom_point() +
   geom_errorbarh(aes(xmin = effect - error, xmax = effect + error),
@@ -637,7 +676,11 @@ model_coef |>
     fill = "white",
     size = 2.5
   ) +
-  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed",
+    colour = "grey55"
+  ) +
   theme_minimal() +
   coord_cartesian(xlim = xlim) +
   scale_x_discrete(limits = xscale, labels = scales::comma) +
@@ -654,7 +697,6 @@ to understand the factors affecting savings. We will use `Country`,
 `Share.of.Household.Expenses` as predictors.
 
 ```{r}
-
 data1 <- data |> inner_join(cities, by = c("City" = "name"))
 # let's exclude unrealistic values
 data1 <- data1 |> filter(Share.of.Household.Expenses > 10)
@@ -700,7 +742,6 @@ xlim <- c(
   max(country_coef$effect + 1.2 * country_coef$error)
 )
 xscale <- c(0, 25000, 50000, 75000)
-
 ```
 
 This model performs on a mediocre level, with an adjusted R-squared
@@ -709,7 +750,9 @@ The coefficients for the country variable represent the expected yearly
 savings for a single person.
 
 ::: {#savings-coefficients-plot layout-ncol="2"}
-```{r savings-coefficients-plot-left, fig.width=4, fig.height=5}
+```{r fig-savings-plot-left, fig.width=4, fig.height=5}
+#| fig-cap: "Effect of country on yearly savings"
+
 country_coef[1:17, ] |>
   ggplot(aes(x = effect, y = reorder(value, effect), colour = significant)) +
   geom_point() +
@@ -731,7 +774,7 @@ country_coef[1:17, ] |>
   labs(x = "", y = "")
 ```
 
-```{r savings-coefficients-plot-right, fig.width=4, fig.height=5}
+```{r savings-plot-right, fig.width=4, fig.height=5}
 country_coef[18:34, ] |>
   ggplot(aes(x = effect, y = reorder(value, effect), colour = significant)) +
   geom_point() +
@@ -745,7 +788,11 @@ country_coef[18:34, ] |>
     fill = "white",
     size = 2.5
   ) +
-  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey55") +
+  geom_vline(
+    xintercept = 0,
+    linetype = "dashed",
+    colour = "grey55"
+  ) +
   theme_minimal() +
   coord_cartesian(xlim = xlim) +
   scale_x_discrete(limits = xscale, labels = scales::comma) +
@@ -779,7 +826,3 @@ not apply to every individual case.
 
 -   The **highest yearly savings** in the sample are found in Georgia
     and Romania, followed by the UK, Switzerland, and Denmark.
-
--   While **cost of living** and **salary** can be predicted with precision
-    based on factors like country, job title, and seniority, yearly
-    **savings** are largely the result of individual choices.
