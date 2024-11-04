@@ -1,5 +1,5 @@
 ---
-title: "Navigating Data Landscapes"
+title: "Systems, Data, and a Dash of Curiosity"
 listing:
   contents:
     - "posts/*/index.qmd"
