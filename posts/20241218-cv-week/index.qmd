@@ -1,0 +1,38 @@
+---
+title: "CV Week 2024"
+author: "Aleksei"
+date: "2024-12-18"
+categories: [ml]
+image: "image.png"
+---
+
+## Introduction
+
+In November 2024, the Yandex School of Data Analysis (YSDA) and Yandex
+conducted an open online intensive course on computer vision, focusing
+on generative diffusion models that underpin many visual services.
+
+## Format and Structure
+
+**Dates**: November 25–29, 2024.
+
+**Format**: All lectures and seminars were pre-recorded and broadcast on
+YouTube. During the broadcasts, participants could ask questions in the
+comments and interact with instructors and fellow participants via a
+dedicated Telegram channel.
+
+**Participation and Certification**: The broadcasts were open to all
+without selection. However, to receive a certificate, participants
+needed to complete Qualifying assignments on the Yandex Contest
+platform and submit a final project.
+
+## Lectures and Seminars
+
+
+
+## Qualifying Assignment
+
+
+## Final Project
+
+
