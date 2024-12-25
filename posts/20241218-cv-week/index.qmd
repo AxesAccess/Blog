@@ -23,16 +23,134 @@ dedicated Telegram channel.
 
 **Participation and Certification**: The broadcasts were open to all
 without selection. However, to receive a certificate, participants
-needed to complete Qualifying assignments on the Yandex Contest
-platform and submit a final project.
+needed to complete Qualifying assignments on the Yandex Contest platform
+and submit a final project.
 
 ## Lectures and Seminars
 
+The intensive course's schedule consisted of lectures and seminars. Five
+days from Monday to Friday, in the evenings, there were a lecture for
+approximately an hour and then a seminar where the instructor provided
+with the implementation of the different aspects of image generation
+approaches.
 
+**November 25**
+
+-   Lecture 1: Introduction to Diffusion Models (Lecturer: Dmitry
+    Baranchuk, Researcher, Yandex Research).
+
+-   Seminar 1: Basic Implementation of Diffusion Models (Instructor:
+    Sergey Kastrulin, Researcher, Yandex Research).
+
+**November 26**
+
+-   Lecture 2: Formulating Diffusion Models through Stochastic and
+    Ordinary Differential Equations (Lecturer: Mikhail Romanov,
+    Developer, Computer Vision Service).
+
+-   Seminar 2: Implementing an Efficient Sampler (Instructor: Mikhail
+    Romanov).
+
+**November 27**
+
+-   Lecture 3: Architectures of Diffusion Models, Training and Sampling
+    Methods, and Text-to-Image Generation (Lecturer: Denis Kuznedelev,
+    Researcher, Yandex Research).
+
+-   Seminar 3: Generating Images from Text Descriptions (Instructor:
+    Denis Kuznedelev).
+
+**November 28**
+
+-   Lecture 4: Distillation of Diffusion Models Using ODE-Based Methods
+    (Lecturer: Nikita Starodubtsev, Researcher, Yandex Research ML
+    Residency).
+
+-   Lecture 5: Distillation of Diffusion Models Without ODEs (Lecturer:
+    Dmitry Baranchuk).
+
+-   Seminar 4: Implementing Consistent Models for Text-to-Image
+    Generation (Instructor: Nikita Starodubtsev).
+
+**November 29**
+
+-   Lecture 6: Fine-Tuning Diffusion Models Using Reinforcement Learning
+    Methods (Lecturer: Alexander Shishenya, Developer, Computer Vision
+    Service).
+
+-   Lecture 7: YandexART — Industrial Diffusion Model (Lecturer: Sergey
+    Kastrulin).
 
 ## Qualifying Assignment
 
+The qualifying assignment needed to access the final project. There were
+three programming tasks.
+
+The first task was to reshape a list or tensor by swapping its first two
+dimensions. No pytorch or numpy methods were allowed. For instance,
+
+$\begin{bmatrix}1 & 2 & 3\\4 & 5 & 6\end{bmatrix}$
+
+must be transformed into
+
+$\begin{bmatrix}1 & 4 \\ 2 & 5 \\ 3 & 6\end{bmatrix}$.
+
+In the second task we needed to implement encoder and decoder of the
+variational autoencoder (VAE) architecture.
+
+![Variational autoencoder architecture](vae.png)
+
+Third task was to fix errors in the VAE loss function. To ensure that
+the funcion implementation is correct, we trained VAE and then inferred
+on the MNIST digits dataset.
+
+For the first two tasks participants earned up to 2 points each, the
+last task could bring up to 4 points.
+
+![Reconstructed digits using VAE](qualifying-mnist.png)
 
 ## Final Project
 
+In the final project, participants had to distill a multi-step diffusion
+model into a more efficient, few-step student model, significantly
+enhancing generation speed.
 
+The project focused on implementing the Consistency Distillation
+framework, a method that accelerates diffusion models by enforcing
+self-consistency along learned trajectories.
+
+Participants would apply this technique to distill the Stable Diffusion
+1.5 model, a latent text-to-image diffusion model capable of generating
+photo-realistic images from textual descriptions.
+
+The project comprised eight tasks, each building upon the previous,
+guiding participants toward developing a proficient model capable of
+generating images in just four steps.
+
+There were 4 automatically graded assignments and one teacher graded
+assignment.
+
+### 1. Implementation of DDIM Solver Step
+
+In the diffusion models, there is a diffusion process that transforms
+pictures into noise using distribution
+$q(\mathbf{x}_t | \mathbf{x}_0)= {N}(\mathbf{x}_t | \alpha_t \mathbf{x}_0, \sigma^2_t I)$.
+So, $x$ at the point $t$ will be
+$\mathbf{x}_t = \alpha_t \mathbf{x}_0 + \sigma_t \epsilon$, where
+$\epsilon{\sim} {N}(0, I)$.
+
+The diffusion model solves inverse problem: transforming noise into
+picture. The diffusion process can be described by the ordinary
+differential equation (ODE):
+$dx = \left[ f(\mathbf{x}, t) - \frac{1}{2} \nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}) \right] dt$,
+where $f(\mathbf{x}, t)$ is known from the given noise process, and
+$\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)$ (*score function*) is
+estimated using a neural network:
+$s_\theta(\mathbf{x}_t, t) \approx \nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)$.
+Thus, having an estimate for
+$\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x})$, we can solve this ODE
+starting from random noise and get a picture.
+
+...
+
+### 2.
