@@ -83,31 +83,57 @@ approaches.
 
 ## Qualifying Assignment
 
-The qualifying assignment needed to access the final project. There were
-three programming tasks.
+The Qualifying Assignment was a prerequisite for accessing the final
+project and comprised three programming tasks designed to assess
+participants' proficiency in fundamental machine learning concepts and
+PyTorch implementation.
 
-The first task was to reshape a list or tensor by swapping its first two
-dimensions. No pytorch or numpy methods were allowed. For instance,
+### 1. Reshape a Tensor
 
-$\begin{bmatrix}1 & 2 & 3\\4 & 5 & 6\end{bmatrix}$
+The first task required reshaping a list or tensor by swapping its first
+two dimensions without utilizing PyTorch or NumPy methods. For example:
 
-must be transformed into
+$\begin{bmatrix}1 & 2 & 3\\4 & 5 & 6\end{bmatrix}$ should be transformed
+into $\begin{bmatrix}1 & 4 \\ 2 & 5 \\ 3 & 6\end{bmatrix}$.
 
-$\begin{bmatrix}1 & 4 \\ 2 & 5 \\ 3 & 6\end{bmatrix}$.
+This task tested participants' understanding of tensor manipulation at a
+fundamental level, emphasizing the importance of grasping underlying
+data structures without relying on high-level library functions.
 
-In the second task we needed to implement encoder and decoder of the
-variational autoencoder (VAE) architecture.
+### 2. Encoder and Decoder Architecture
+
+The second task involved implementing the encoder and decoder components
+of a Variational Autoencoder (VAE) architecture. VAEs are generative
+models that learn to represent data in a latent space, enabling the
+generation of new, similar data points. This task assessed participants'
+ability to construct neural network architectures.
 
 ![Variational autoencoder architecture](vae.png)
 
-Third task was to fix errors in the VAE loss function. To ensure that
-the funcion implementation is correct, we trained VAE and then inferred
-on the MNIST digits dataset.
+### 3. VAE Loss Function
 
-For the first two tasks participants earned up to 2 points each, the
-last task could bring up to 4 points.
+The third task required identifying and correcting errors in the VAE
+loss function implementation. To validate the correctness of the
+function, participants trained the VAE and performed inference on the
+MNIST digits dataset. The VAE loss function typically comprises two
+components:
+
+-   Reconstruction Loss: Measures how well the decoder reconstructs the
+    input data.
+
+-   Kullback-Leibler (KL) Divergence: Regularizes the learned latent
+    space to align with a predefined distribution, often a standard
+    normal distribution.
+
+Accurate implementation of this loss function is crucial for the VAE to
+learn meaningful latent representations and generate coherent outputs.
 
 ![Reconstructed digits using VAE](qualifying-mnist.png)
+
+Each of the first two tasks was worth up to 2 points, while the third
+task could earn up to 4 points. A minimum of 6 points was required to
+pass, ensuring that participants had a solid grasp of the necessary
+concepts to proceed to the final project.
 
 ## Final Project
 
@@ -119,29 +145,121 @@ The project focused on implementing the Consistency Distillation
 framework, a method that accelerates diffusion models by enforcing
 self-consistency along learned trajectories.
 
-Participants would apply this technique to distill the Stable Diffusion
-1.5 model, a latent text-to-image diffusion model capable of generating
-photo-realistic images from textual descriptions.
+Participants would apply this technique to distill the [Stable Diffusion
+1.5](https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5)
+(SD 1.5) model, a latent text-to-image diffusion model capable of
+generating photo-realistic images from textual descriptions.
 
 The project comprised eight tasks, each building upon the previous,
 guiding participants toward developing a proficient model capable of
 generating images in just four steps.
 
+### Teacher Model
+
+The initial model for our experiments is Stable Diffusion 1.5, a
+pre-trained latent text-to-image diffusion model. This serves as the
+"teacher" model in our distillation process.
+
+For the prompt: "A sad puppy with large eyes", running the model with 50
+steps and a guidance_scale of 7.5 produces the following high-quality
+images:
+
+![](sd-50-steps.png)
+
+However, when the number of steps is reduced to 4, the output becomes
+blurry and lacks detail:
+
+![](sd-4-steps.png)
+
+This demonstrates the trade-off between the number of sampling steps and
+image quality in diffusion models. Our goal is to bridge this gap by
+using techniques like Consistency Distillation to achieve similar
+quality with fewer steps.
+
+### Consistency Training
+
+The model will be trained on a subset of the COCO Dataset comprising
+5,000 images. To reduce memory consumption, we will train LoRA (Low-Rank
+Adaptation) adapters for the U-Net convolutional neural network instead
+of fine-tuning the entire model.
+
+This approach significantly decreases the number of trainable parameters
+and activation memory, enhancing efficiency during training.
+
+Additionally, implementing techniques such as gradient checkpointing can
+further reduce memory usage, albeit with a potential increase in
+training time.
+
+By employing these strategies, we aim to achieve effective model
+performance while operating within the memory constraints of our
+training environment.
+
+The result with `guidance_scale = 2` looks sharper, but the quality is
+still far from desired.
+
+![](cm.png)
+
+### Consistency Distillation
+
+In the Consistency Distillation phase, we enhance the model's quality by
+incorporating a teacher model within the U-Net architecture, utilizing
+LoRA adapters trained in the previous step. This integration refines the
+student's learning process, leading to significantly improved image
+generation results.
+
+Consistency Distillation is a technique that accelerates diffusion
+models by enforcing self-consistency along learned trajectories. By
+aligning the student model's outputs with those of the teacher model,
+the student learns to produce high-quality images in fewer steps.
+Implementing this method with LoRA adapters allows for efficient
+training, as LoRA reduces the number of trainable parameters, thereby
+decreasing memory consumption and computational load.
+
+![](cd.png)
+
+### Multi-boundary Consistency Distillation
+
+In the Multi-boundary Consistency Distillation phase, we draw
+inspiration from recent advancements in generative modeling,
+particularly the work by researchers from Google DeepMind. In their
+paper "Multistep Consistency Models" (arXiv:2403.06807v3), they propose
+a method that interpolates between consistency models and diffusion
+models, allowing for a trade-off between sampling speed and quality.
+
+By employing 2 to 8 sampling steps, this approach achieves performance
+comparable to traditional diffusion models but with significantly
+reduced computational resources. This reduction in sampling steps leads
+to decreased memory usage and computational load, making the models more
+efficient without compromising output quality.
+
+Implementing this technique involves training the model to maintain
+consistency across multiple steps, effectively enabling it to generate
+high-quality samples in fewer iterations. This advancement is
+particularly beneficial for applications requiring rapid generation or
+operating under resource constraints.
+
+![](mbcd.png)
+
+### Assignments
+
 There were 4 automatically graded assignments and one teacher graded
 assignment.
 
-### 1. Implementation of DDIM Solver Step
+#### 1. Implementation of DDIM Solver Step
 
-In the diffusion models, there is a diffusion process that transforms
-pictures into noise using distribution
-$q(\mathbf{x}_t | \mathbf{x}_0)= {N}(\mathbf{x}_t | \alpha_t \mathbf{x}_0, \sigma^2_t I)$.
-So, $x$ at the point $t$ will be
+In diffusion models, the forward diffusion process gradually transforms
+images into noise, following the distribution:
+
+$$ q(\mathbf{x}_t | \mathbf{x}_0)= {N}(\mathbf{x}_t | \alpha_t \mathbf{x}_0, \sigma^2_t I)$$
+
+At time step $t$, the noisy image $\mathbf{x}_t$ can be represented as:
 $\mathbf{x}_t = \alpha_t \mathbf{x}_0 + \sigma_t \epsilon$, where
 $\epsilon{\sim} {N}(0, I)$.
 
-The diffusion model solves inverse problem: transforming noise into
-picture. The diffusion process can be described by the ordinary
-differential equation (ODE):
+The goal of the diffusion model is to solve the inverse problem,
+reconstructing an image from noise. This reverse process is formulated
+as an ordinary differential equation (ODE):
+
 $dx = \left[ f(\mathbf{x}, t) - \frac{1}{2} \nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}) \right] dt$,
 where $f(\mathbf{x}, t)$ is known from the given noise process, and
 $\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)$ (*score function*) is
@@ -149,8 +267,128 @@ estimated using a neural network:
 $s_\theta(\mathbf{x}_t, t) \approx \nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)$.
 Thus, having an estimate for
 $\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x})$, we can solve this ODE
-starting from random noise and get a picture.
+starting from random noise and generate a picture.
 
-...
+For this assignment, participants implemented the step from
+$\mathbf{x}_t$ to $\mathbf{x}_s$ using the Denoising Diffusion Implicit
+Models (DDIM) framework:
 
-### 2.
+$$\mathbf{x}_s = DDIM(\epsilon_\theta, \mathbf{x}_t, t, s) = \alpha_s \cdot \left(\frac{\mathbf{x}_t - \sigma_t \epsilon_\theta}{\alpha_t} \right) + \sigma_s \epsilon_\theta$$
+
+Most of the function was pre-written by the instructors, but
+participants were required to correctly set $\alpha_t$ and $\sigma_t$
+using the DDIMScheduler. This task tested participants' understanding of
+the underlying mathematical concepts and their ability to implement them
+in code.
+
+### 2. Implementation of Noise Process
+
+The second task involved implementing the function
+`q_sample(x, t, scheduler, noise)` to simulate the forward diffusion
+process. The function follows the mathematical formulation:
+
+$q(\mathbf{x}_t | \mathbf{x}_0)= {N}(\mathbf{x}_t | \alpha_t \mathbf{x}_0, \sigma^2_t I)$
+where the noisy image $x_t$ at time $t$ is calculated as:
+
+$\mathbf{x}_t = \alpha_t \mathbf{x}_0 + \sigma_t \epsilon$, where
+$\epsilon{\sim} {N}(0, I)$.
+
+Participants were required to:
+
+1.  Use the **scheduler** to retrieve $\alpha_t$ and $\sigma_t$ values
+    for the given timestep $t$.
+
+2.  Generate random noise $\epsilon \sim \mathcal{N}(0, I)$ and apply it
+    to the formula above to simulate the noisy image $\mathbf{x}_t$.
+
+3.  Handle edge cases for boundary points, ensuring the process remains
+    valid when $t=0$.
+
+This assignment focused on implementing the forward diffusion process
+accurately while accounting for the nuances of boundary conditions,
+which added complexity to the task.
+
+### 3. Consistency Training
+
+Consistency distillation leverages the teacher model to obtain the
+second point on the ODE trajectory, which can also be computed using the
+DDIM formula. The task required participants to derive the function for
+this computation based on the definitions of the noise process and the
+score function.
+
+$\epsilon_\theta(x_t, t) = - \sigma_t s_\theta(x_t, t)$
+
+$s_\theta(x_t, t) \approx \nabla_{x_t} \log q(x_t) = \mathop{\mathbb{E}}_{\mathbf{x}\sim p_{data}}\left [ \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t | \mathbf{x}) \vert \mathbf{x}_t \right ] \approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t \vert \mathbf{x})$
+
+### 4. Multi-boundary Timesteps
+
+The objective of this task was to implement the
+get_multi_boundary_timesteps function, which generates boundary points
+for multi-step consistency training. These boundary points define the
+timesteps used in sampling and play a critical role in the effectiveness
+of the distillation process.
+
+The task itself was somewhat ambiguous, leaving room for interpretation.
+Participants were expected to:
+
+-   Understand how multi-boundary timesteps are utilized in multi-step
+    consistency models. Implement the function to output the appropriate
+    boundary points.
+-   Ensure that the timesteps are well-distributed and align with the
+    requirements of the consistency distillation framework.
+
+### 5. Generated Images
+
+Once all the graded and non-graded tasks were completed, the next step
+was to train the Multi-boundary Consistency Model. This involved
+applying the techniques and frameworks developed in earlier tasks to
+produce high-quality generated images.
+
+After training, participants were required to upload the trained model
+along with generated results for assessment. This provided an
+opportunity to showcase the practical implementation of multi-step
+consistency techniques.
+
+The trained model was evaluated based on its ability to generate images
+that were consistent and high-quality, even with a reduced number of
+sampling steps.
+
+#### Sampling prompts
+
+1.  A sad puppy with large eyes.
+2.  Astronaut in a jungle, cold color palette, muted colors, detailed,
+    8k.
+3.  A photo of beautiful mountain with realistic sunset and blue lake,
+    highly detailed, masterpiece.
+4.  A girl with pale blue hair and a cami tank top.
+5.  A lighthouse in a giant wave, origami style.
+6.  Belle epoque, christmas, red house in the forest, photo realistic,
+    8k.
+7.  A small cactus with a happy face in the Sahara desert.
+8.  Green commercial building with refrigerator and refrigeration units
+    outside.
+
+::: {layout="[[1,1], [1]]"}
+![Consistency Distillation](CV_week_cd.png){.lightbox}
+
+![Multi-boundary Consistency Distillation](CV_week_mbcd.png){.lightbox}
+:::
+
+## Conclusion
+
+Participating in YSDA's intensive training programs has been both
+challenging and rewarding. My first experience was during GPT Week in
+2023, which did not require a qualifying assignment. The final project
+involved training a model to summarize articles, with flexibility
+regarding the architecture and implementation details.
+
+In contrast, CV Week 2024 presented a more rigorous experience. Both the
+qualifying assignment and the final project demanded significant effort,
+especially given my limited background in computer vision. This
+intensive pushed me to expand my knowledge and skills, making the
+experience both demanding and educational.
+
+For those interested in exploring similar topics, YSDA offers a range of
+online courses, including an Introduction to Machine Learning. These
+resources can provide a solid foundation for tackling advanced subjects
+in data analysis and machine learning.
