@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.555">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Aleksei">
 <meta name="dcterms.date" content="2024-08-05">
 
-<title>Blog - Kano Method for Prioritization of Features</title>
+<title>Kano Method for Prioritization of Features – Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -81,7 +81,7 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -126,7 +126,7 @@ window.Quarto = {
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -147,7 +147,7 @@ window.Quarto = {
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
-          <div class="quarto-navbar-tools">
+            <div class="quarto-navbar-tools">
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -224,7 +224,7 @@ window.Quarto = {
 </section>
 <section id="prioritizing-features-with-the-kano-model" class="level2">
 <h2 class="anchored" data-anchor-id="prioritizing-features-with-the-kano-model">Prioritizing Features with the Kano Model</h2>
-<div id="fig-kano-example" class="quarto-figure quarto-figure-center quarto-float anchored">
+<div id="fig-kano-example" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-kano-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="image.png" class="img-fluid figure-img" style="width:50.0%">
@@ -246,7 +246,7 @@ Figure&nbsp;1: Example of a Kano diagram.
 </ul>
 <p>Each question offers five possible responses, from “I like it” to “I dislike it.” Subsequently, these responses are classified into the five Kano categories.</p>
 <div class="cell" data-execution_count="1" data-cap-location="undefined" data-tbl-cap-location="top">
-<div id="tbl-cap-margin" class="cell quarto-float anchored" data-tbl-cap-location="top" data-execution_count="1" data-cap-location="undefined">
+<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="top" data-execution_count="1" data-cap-location="undefined">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cap-margin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1: Classification of answers to the Kano questionnaire.
@@ -345,7 +345,7 @@ Table&nbsp;1: Classification of answers to the Kano questionnaire.
 <p>Let’s explore data. The dataframe of shape (721, 39) includes an <code>ID</code> column, multiple columns with demographic data such as <code>Income_us</code>, <code>Gender</code>, <code>Age</code>, <code>Employment</code>, and <code>Education</code>, as well as responses to functional and dysfunctional questions (<code>F1_functional</code>, <code>F1_dysfunctional</code>, etc), and columns indicating the importance of certain features to the customer (<code>F1_importance</code>, <code>F2_importance</code>, etc).</p>
 <div id="cell-fig-hist-age" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
-<div id="fig-hist-age" class="quarto-figure quarto-figure-center quarto-float anchored">
+<div id="fig-hist-age" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-hist-age-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="index_files/figure-html/fig-hist-age-output-1.png" width="661" height="468" class="figure-img">
@@ -361,10 +361,10 @@ Figure&nbsp;2: Histogram of respondents’ age
 <div>
 
 </div>
-<div id="cell-fig-income-empl-hist" class="cell quarto-layout-panel" data-execution_count="4" data-layout-ncol="2">
+<div id="cell-fig-income-empl-hist" class="cell quarto-layout-panel" data-layout-ncol="2" data-execution_count="4">
 <div class="quarto-layout-row">
 <div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-income-empl-hist" class="quarto-figure quarto-figure-center quarto-float anchored">
+<div id="fig-income-empl-hist" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-income-empl-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="index_files/figure-html/fig-income-empl-hist-output-1.png" width="352" height="488" class="figure-img">
@@ -376,7 +376,7 @@ Figure&nbsp;3: Income distribution
 </div>
 </div>
 <div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-income-empl-hist" class="quarto-figure quarto-figure-center quarto-float anchored">
+<div id="fig-income-empl-hist" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-income-empl-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="index_files/figure-html/fig-income-empl-hist-output-2.png" width="352" height="509" class="figure-img">
@@ -396,7 +396,7 @@ Figure&nbsp;4: Employment distribution
 <h3 class="anchored" data-anchor-id="aggregating-responses">Aggregating Responses</h3>
 <p>Next, we will aggregate the responses to functional and dysfunctional questions for each feature. The table below shows an example of aggregated answers for a feature with ID = F1.</p>
 <div class="cell" data-tbl-colwidths="[5,20,15,15,15,15,15]" data-execution_count="9">
-<div id="tbl-agg-answers" class="cell quarto-float anchored" data-execution_count="9">
+<div id="tbl-agg-answers" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-colwidths="[5,20,15,15,15,15,15]" data-execution_count="9">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-agg-answers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2: Example of aggregated answers for a feature.
@@ -406,7 +406,7 @@ Table&nbsp;2: Example of aggregated answers for a feature.
 <div>
 
 
-<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1" data-tbl-colwidths="[5,20,15,15,15,15,15]">
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -483,7 +483,7 @@ Table&nbsp;2: Example of aggregated answers for a feature.
 <h3 class="anchored" data-anchor-id="calculating-satisfaction-and-dissatisfaction-scores">Calculating Satisfaction and Dissatisfaction Scores</h3>
 <p>After aggregating the responses, we calculate the satisfaction and dissatisfaction scores for each feature using <a href="#eq-satisfaction-influence" class="quarto-xref">Equation&nbsp;1</a> and <a href="#eq-dissatisfaction-influence" class="quarto-xref">Equation&nbsp;2</a>. The table below shows the qualities: Attractive (<strong>A</strong>), Indifferent (<strong>I</strong>), Must-be (<strong>M</strong>), One-dimensional (<strong>O</strong>), Questionable (<strong>Q</strong>), Reverse (<strong>R</strong>), as well as satisfaction (<strong>S</strong>) and dissatisfaction (<strong>D</strong>) scores for each feature.</p>
 <div class="cell" data-tbl-align="center" data-execution_count="10">
-<div id="tbl-scores" class="cell quarto-float anchored" data-tbl-align="center" data-execution_count="10">
+<div id="tbl-scores" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="10" data-tbl-align="center">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;3: Qualities and satisfaction and dissatisfaction scores for each feature.
@@ -669,7 +669,7 @@ Table&nbsp;3: Qualities and satisfaction and dissatisfaction scores for each fea
 <p>The last step is to plot the features on a Kano diagram. The quadrant in which the feature is located indicates a Kano category. The further the from the center, the higher the influence on satisfaction or dissatisfaction.</p>
 <div id="cell-fig-kano-diagram" class="cell" data-execution_count="11">
 <div class="cell-output cell-output-display">
-<div id="fig-kano-diagram" class="quarto-figure quarto-figure-center quarto-float anchored" data-fig-align="center">
+<div id="fig-kano-diagram" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-kano-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="index_files/figure-html/fig-kano-diagram-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="627" height="508">
@@ -728,18 +728,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -771,7 +760,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp("https:\/\/AlekseiPrishchepo\.github\.io\/Blog\/");
@@ -779,7 +790,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {
