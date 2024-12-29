@@ -158,7 +158,8 @@ window.Quarto = {
     <div class="quarto-title column-body">
       <h1 class="title">CV Week 2024</h1>
                                 <div class="quarto-categories">
-                <div class="quarto-category">ml</div>
+                <div class="quarto-category">CompVis</div>
+                <div class="quarto-category">ML</div>
               </div>
                   </div>
   </div>
@@ -304,13 +305,13 @@ window.Quarto = {
 </section>
 <section id="multi-boundary-consistency-distillation" class="level3">
 <h3 class="anchored" data-anchor-id="multi-boundary-consistency-distillation">Multi-boundary Consistency Distillation</h3>
-<p>In the Multi-boundary Consistency Distillation phase, we draw inspiration from recent advancements in generative modeling, particularly the work by researchers from Google DeepMind. In their paper “Multistep Consistency Models” (arXiv:2403.06807v3), they propose a method that interpolates between consistency models and diffusion models, allowing for a trade-off between sampling speed and quality.</p>
+<p>In the Multi-boundary Consistency Distillation phase, we draw inspiration from recent advancements in generative modeling, particularly the work by researchers from Google DeepMind. In their paper “Multistep Consistency Models” (<a href="https://arxiv.org/pdf/2403.06807">arXiv:2403.06807v3</a>), they propose a method that interpolates between consistency models and diffusion models, allowing for a trade-off between sampling speed and quality.</p>
 <p>By employing 2 to 8 sampling steps, this approach achieves performance comparable to traditional diffusion models but with significantly reduced computational resources. This reduction in sampling steps leads to decreased memory usage and computational load, making the models more efficient without compromising output quality.</p>
 <p>Implementing this technique involves training the model to maintain consistency across multiple steps, effectively enabling it to generate high-quality samples in fewer iterations. This advancement is particularly beneficial for applications requiring rapid generation or operating under resource constraints.</p>
 <p><img src="mbcd.png" class="img-fluid"></p>
 </section>
-<section id="assignments" class="level3">
-<h3 class="anchored" data-anchor-id="assignments">Assignments</h3>
+<section id="graded-assignments" class="level3">
+<h3 class="anchored" data-anchor-id="graded-assignments">Graded Assignments</h3>
 <p>There were 4 automatically graded assignments and one teacher graded assignment.</p>
 <section id="implementation-of-ddim-solver-step" class="level4">
 <h4 class="anchored" data-anchor-id="implementation-of-ddim-solver-step">1. Implementation of DDIM Solver Step</h4>
@@ -318,14 +319,14 @@ window.Quarto = {
 <p><span class="math display">\[ q(\mathbf{x}_t | \mathbf{x}_0)= {N}(\mathbf{x}_t | \alpha_t \mathbf{x}_0, \sigma^2_t I)\]</span></p>
 <p>At time step <span class="math inline">\(t\)</span>, the noisy image <span class="math inline">\(\mathbf{x}_t\)</span> can be represented as: <span class="math inline">\(\mathbf{x}_t = \alpha_t \mathbf{x}_0 + \sigma_t \epsilon\)</span>, where <span class="math inline">\(\epsilon{\sim} {N}(0, I)\)</span>.</p>
 <p>The goal of the diffusion model is to solve the inverse problem, reconstructing an image from noise. This reverse process is formulated as an ordinary differential equation (ODE):</p>
-<p><span class="math inline">\(dx = \left[ f(\mathbf{x}, t) - \frac{1}{2} \nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}) \right] dt\)</span>, where <span class="math inline">\(f(\mathbf{x}, t)\)</span> is known from the given noise process, and <span class="math inline">\(\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)\)</span> (<em>score function</em>) is estimated using a neural network: <span class="math inline">\(s_\theta(\mathbf{x}_t, t) \approx \nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)\)</span>. Thus, having an estimate for <span class="math inline">\(\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x})\)</span>, we can solve this ODE starting from random noise and generate a picture.</p>
+<p><span class="math inline">\(dx = \left[ f(\mathbf{x}, t) - \frac{1}{2} \nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}) \right] dt\)</span>, where <span class="math inline">\(f(\mathbf{x}, t)\)</span> is known from the given noise process, and <span class="math inline">\(\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)\)</span> (<em>score function</em>) is estimated using a neural network: <span class="math inline">\(s_\theta(\mathbf{x}_t, t) \approx \nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)\)</span>.</p>
+<p>Thus, having an estimate for <span class="math inline">\(\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x})\)</span>, we can solve this ODE starting from random noise and generate a picture.</p>
 <p>For this assignment, participants implemented the step from <span class="math inline">\(\mathbf{x}_t\)</span> to <span class="math inline">\(\mathbf{x}_s\)</span> using the Denoising Diffusion Implicit Models (DDIM) framework:</p>
 <p><span class="math display">\[\mathbf{x}_s = DDIM(\epsilon_\theta, \mathbf{x}_t, t, s) = \alpha_s \cdot \left(\frac{\mathbf{x}_t - \sigma_t \epsilon_\theta}{\alpha_t} \right) + \sigma_s \epsilon_\theta\]</span></p>
 <p>Most of the function was pre-written by the instructors, but participants were required to correctly set <span class="math inline">\(\alpha_t\)</span> and <span class="math inline">\(\sigma_t\)</span> using the DDIMScheduler. This task tested participants’ understanding of the underlying mathematical concepts and their ability to implement them in code.</p>
 </section>
-</section>
-<section id="implementation-of-noise-process" class="level3">
-<h3 class="anchored" data-anchor-id="implementation-of-noise-process">2. Implementation of Noise Process</h3>
+<section id="implementation-of-noise-process" class="level4">
+<h4 class="anchored" data-anchor-id="implementation-of-noise-process">2. Implementation of Noise Process</h4>
 <p>The second task involved implementing the function <code>q_sample(x, t, scheduler, noise)</code> to simulate the forward diffusion process. The function follows the mathematical formulation:</p>
 <p><span class="math inline">\(q(\mathbf{x}_t | \mathbf{x}_0)= {N}(\mathbf{x}_t | \alpha_t \mathbf{x}_0, \sigma^2_t I)\)</span> where the noisy image <span class="math inline">\(x_t\)</span> at time <span class="math inline">\(t\)</span> is calculated as:</p>
 <p><span class="math inline">\(\mathbf{x}_t = \alpha_t \mathbf{x}_0 + \sigma_t \epsilon\)</span>, where <span class="math inline">\(\epsilon{\sim} {N}(0, I)\)</span>.</p>
@@ -337,14 +338,14 @@ window.Quarto = {
 </ol>
 <p>This assignment focused on implementing the forward diffusion process accurately while accounting for the nuances of boundary conditions, which added complexity to the task.</p>
 </section>
-<section id="consistency-training-1" class="level3">
-<h3 class="anchored" data-anchor-id="consistency-training-1">3. Consistency Training</h3>
+<section id="consistency-training-1" class="level4">
+<h4 class="anchored" data-anchor-id="consistency-training-1">3. Consistency Training</h4>
 <p>Consistency distillation leverages the teacher model to obtain the second point on the ODE trajectory, which can also be computed using the DDIM formula. The task required participants to derive the function for this computation based on the definitions of the noise process and the score function.</p>
 <p><span class="math inline">\(\epsilon_\theta(x_t, t) = - \sigma_t s_\theta(x_t, t)\)</span></p>
 <p><span class="math inline">\(s_\theta(x_t, t) \approx \nabla_{x_t} \log q(x_t) = \mathop{\mathbb{E}}_{\mathbf{x}\sim p_{data}}\left [ \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t | \mathbf{x}) \vert \mathbf{x}_t \right ] \approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t \vert \mathbf{x})\)</span></p>
 </section>
-<section id="multi-boundary-timesteps" class="level3">
-<h3 class="anchored" data-anchor-id="multi-boundary-timesteps">4. Multi-boundary Timesteps</h3>
+<section id="multi-boundary-timesteps" class="level4">
+<h4 class="anchored" data-anchor-id="multi-boundary-timesteps">4. Multi-boundary Timesteps</h4>
 <p>The objective of this task was to implement the get_multi_boundary_timesteps function, which generates boundary points for multi-step consistency training. These boundary points define the timesteps used in sampling and play a critical role in the effectiveness of the distillation process.</p>
 <p>The task itself was somewhat ambiguous, leaving room for interpretation. Participants were expected to:</p>
 <ul>
@@ -352,23 +353,11 @@ window.Quarto = {
 <li>Ensure that the timesteps are well-distributed and align with the requirements of the consistency distillation framework.</li>
 </ul>
 </section>
-<section id="generated-images" class="level3">
-<h3 class="anchored" data-anchor-id="generated-images">5. Generated Images</h3>
+<section id="generated-images" class="level4">
+<h4 class="anchored" data-anchor-id="generated-images">5. Generated Images</h4>
 <p>Once all the graded and non-graded tasks were completed, the next step was to train the Multi-boundary Consistency Model. This involved applying the techniques and frameworks developed in earlier tasks to produce high-quality generated images.</p>
 <p>After training, participants were required to upload the trained model along with generated results for assessment. This provided an opportunity to showcase the practical implementation of multi-step consistency techniques.</p>
 <p>The trained model was evaluated based on its ability to generate images that were consistent and high-quality, even with a reduced number of sampling steps.</p>
-<section id="sampling-prompts" class="level4">
-<h4 class="anchored" data-anchor-id="sampling-prompts">Sampling prompts</h4>
-<ol type="1">
-<li>A sad puppy with large eyes.</li>
-<li>Astronaut in a jungle, cold color palette, muted colors, detailed, 8k.</li>
-<li>A photo of beautiful mountain with realistic sunset and blue lake, highly detailed, masterpiece.</li>
-<li>A girl with pale blue hair and a cami tank top.</li>
-<li>A lighthouse in a giant wave, origami style.</li>
-<li>Belle epoque, christmas, red house in the forest, photo realistic, 8k.</li>
-<li>A small cactus with a happy face in the Sahara desert.</li>
-<li>Green commercial building with refrigerator and refrigeration units outside.</li>
-</ol>
 <div>
 
 </div>
@@ -392,14 +381,27 @@ window.Quarto = {
 </div>
 </div>
 </div>
+<section id="sampling-prompts" class="level5">
+<h5 class="anchored" data-anchor-id="sampling-prompts">Sampling Prompts</h5>
+<ol type="1">
+<li>A sad puppy with large eyes.</li>
+<li>Astronaut in a jungle, cold color palette, muted colors, detailed, 8k.</li>
+<li>A photo of beautiful mountain with realistic sunset and blue lake, highly detailed, masterpiece.</li>
+<li>A girl with pale blue hair and a cami tank top.</li>
+<li>A lighthouse in a giant wave, origami style.</li>
+<li>Belle epoque, christmas, red house in the forest, photo realistic, 8k.</li>
+<li>A small cactus with a happy face in the Sahara desert.</li>
+<li>Green commercial building with refrigerator and refrigeration units outside.</li>
+</ol>
+</section>
 </section>
 </section>
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>Participating in YSDA’s intensive training programs has been both challenging and rewarding. My first experience was during GPT Week in 2023, which did not require a qualifying assignment. The final project involved training a model to summarize articles, with flexibility regarding the architecture and implementation details.</p>
+<p>Participating in YSDA’s intensive training programs has been both challenging and rewarding. My first experience was during <a href="https://shad.yandex.ru/gptweek">GPT Week</a> in 2023, which did not require a qualifying assignment. The final project involved training a model to summarize articles, with flexibility regarding the architecture and implementation details.</p>
 <p>In contrast, CV Week 2024 presented a more rigorous experience. Both the qualifying assignment and the final project demanded significant effort, especially given my limited background in computer vision. This intensive pushed me to expand my knowledge and skills, making the experience both demanding and educational.</p>
-<p>For those interested in exploring similar topics, YSDA offers a range of online courses, including an Introduction to Machine Learning. These resources can provide a solid foundation for tackling advanced subjects in data analysis and machine learning.</p>
+<p>For those interested in exploring similar topics, YSDA offers a range of online courses. These resources can provide a solid foundation for tackling advanced subjects in data analysis and machine learning.</p>
 
 
 </section>
@@ -826,7 +828,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom","loop":false});
+<script>var lightboxQuarto = GLightbox({"openEffect":"zoom","selector":".lightbox","loop":false,"descPosition":"bottom","closeEffect":"zoom"});
 (function() {
   let previousOnload = window.onload;
   window.onload = () => {
