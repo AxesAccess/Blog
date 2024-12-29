@@ -2,7 +2,7 @@
 title: "Exploring Geospatial Insights with R and rnaturalearth"
 author: "Aleksei"
 date: "2024-07-25"
-categories: [r, geo]
+categories: [R, Geo]
 image: "image.png"
 ---
 

@@ -2,7 +2,7 @@
 title: "Kano Method for Prioritization of Features"
 author: "Aleksei"
 date: "2024-08-05"
-categories: [marketing, product, python]
+categories: [Marketing, Product, Python]
 image: "image.png"
 ---
 

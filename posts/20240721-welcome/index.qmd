@@ -2,7 +2,7 @@
 title: "Welcome To My Blog"
 author: "Aleksei"
 date: "2024-07-21"
-categories: [news]
+categories: [News]
 ---
 
 This is the first post in a Quarto blog. Welcome and take care!

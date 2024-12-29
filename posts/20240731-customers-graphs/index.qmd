@@ -2,7 +2,7 @@
 title: "Merging Customers Records Using Graphs in Python"
 author: "Aleksei"
 date: "2024-07-31"
-categories: [python, graphs]
+categories: [Python, Graphs]
 image: "image.png"
 ---
 

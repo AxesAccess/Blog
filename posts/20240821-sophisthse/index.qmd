@@ -2,7 +2,7 @@
 title: "Python Library for Russian Macroeconomics Data"
 author: "Aleksei"
 date: "2024-08-22"
-categories: [timeseries, macroeconomics, python]
+categories: [Timeseries, Macroeconomics, Python]
 image: "image.png"
 ---
 

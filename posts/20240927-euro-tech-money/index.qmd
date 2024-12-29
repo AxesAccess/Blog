@@ -2,7 +2,7 @@
 title: "European Tech Salaries"
 author: "Aleksei"
 date: "2024-09-27"
-categories: [money, r]
+categories: [Money, R]
 image: "image.png"
 code-fold: true
 code-summary: "Show the code"

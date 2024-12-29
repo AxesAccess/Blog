@@ -2,10 +2,8 @@
 title: "Using Airflow FileSensor for Triggering ETL Process"
 author: "Aleksei"
 date: "2024-11-05"
-categories: [etl, Airflow]
+categories: [ETL, Airflow]
 image: "image.png"
-code-fold: true
-code-summary: "Show the code"
 ---
 
 ## Abstract
@@ -156,4 +154,6 @@ program the source system to create a new file to signal the
 availability of new data.
 
 I hope this article has been helpful in understanding how to use the
-Airflow FileSensor for triggering ETL processes.
+Airflow FileSensor for triggering ETL processes. If you have any further
+questions or comments, please feel free to leave them int the comments
+section.
