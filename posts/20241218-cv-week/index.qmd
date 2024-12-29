@@ -2,7 +2,7 @@
 title: "CV Week 2024"
 author: "Aleksei"
 date: "2024-12-18"
-categories: [ml]
+categories: [CompVis, ML]
 image: "image.png"
 ---
 
@@ -33,6 +33,9 @@ days from Monday to Friday, in the evenings, there were a lecture for
 approximately an hour and then a seminar where the instructor provided
 with the implementation of the different aspects of image generation
 approaches.
+
+[YouTube
+Playlist](https://www.youtube.com/live/E6fzcThxGK0?si=2NuhmHIAKBqXuKW3)
 
 **November 25**
 
@@ -222,8 +225,9 @@ decreasing memory consumption and computational load.
 In the Multi-boundary Consistency Distillation phase, we draw
 inspiration from recent advancements in generative modeling,
 particularly the work by researchers from Google DeepMind. In their
-paper "Multistep Consistency Models" (arXiv:2403.06807v3), they propose
-a method that interpolates between consistency models and diffusion
+paper "Multistep Consistency Models"
+([arXiv:2403.06807v3](https://arxiv.org/pdf/2403.06807)), they propose a
+method that interpolates between consistency models and diffusion
 models, allowing for a trade-off between sampling speed and quality.
 
 By employing 2 to 8 sampling steps, this approach achieves performance
@@ -240,7 +244,7 @@ operating under resource constraints.
 
 ![](mbcd.png)
 
-### Assignments
+### Graded Assignments
 
 There were 4 automatically graded assignments and one teacher graded
 assignment.
@@ -265,6 +269,7 @@ where $f(\mathbf{x}, t)$ is known from the given noise process, and
 $\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)$ (*score function*) is
 estimated using a neural network:
 $s_\theta(\mathbf{x}_t, t) \approx \nabla_{\mathbf{x}_t} \log p_t(\mathbf{x}_t)$.
+
 Thus, having an estimate for
 $\nabla_{\mathbf{x}_t} \log p_t(\mathbf{x})$, we can solve this ODE
 starting from random noise and generate a picture.
@@ -281,7 +286,7 @@ using the DDIMScheduler. This task tested participants' understanding of
 the underlying mathematical concepts and their ability to implement them
 in code.
 
-### 2. Implementation of Noise Process
+#### 2. Implementation of Noise Process
 
 The second task involved implementing the function
 `q_sample(x, t, scheduler, noise)` to simulate the forward diffusion
@@ -308,7 +313,7 @@ This assignment focused on implementing the forward diffusion process
 accurately while accounting for the nuances of boundary conditions,
 which added complexity to the task.
 
-### 3. Consistency Training
+#### 3. Consistency Training
 
 Consistency distillation leverages the teacher model to obtain the
 second point on the ODE trajectory, which can also be computed using the
@@ -320,7 +325,7 @@ $\epsilon_\theta(x_t, t) = - \sigma_t s_\theta(x_t, t)$
 
 $s_\theta(x_t, t) \approx \nabla_{x_t} \log q(x_t) = \mathop{\mathbb{E}}_{\mathbf{x}\sim p_{data}}\left [ \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t | \mathbf{x}) \vert \mathbf{x}_t \right ] \approx \nabla_{\mathbf{x}_t} \log q(\mathbf{x}_t \vert \mathbf{x})$
 
-### 4. Multi-boundary Timesteps
+#### 4. Multi-boundary Timesteps
 
 The objective of this task was to implement the
 get_multi_boundary_timesteps function, which generates boundary points
@@ -337,7 +342,7 @@ Participants were expected to:
 -   Ensure that the timesteps are well-distributed and align with the
     requirements of the consistency distillation framework.
 
-### 5. Generated Images
+#### 5. Generated Images
 
 Once all the graded and non-graded tasks were completed, the next step
 was to train the Multi-boundary Consistency Model. This involved
@@ -353,7 +358,13 @@ The trained model was evaluated based on its ability to generate images
 that were consistent and high-quality, even with a reduced number of
 sampling steps.
 
-#### Sampling prompts
+::: {layout="[[1,1], [1]]"}
+![Consistency Distillation](CV_week_cd.png){.lightbox}
+
+![Multi-boundary Consistency Distillation](CV_week_mbcd.png){.lightbox}
+:::
+
+##### Sampling Prompts
 
 1.  A sad puppy with large eyes.
 2.  Astronaut in a jungle, cold color palette, muted colors, detailed,
@@ -368,19 +379,14 @@ sampling steps.
 8.  Green commercial building with refrigerator and refrigeration units
     outside.
 
-::: {layout="[[1,1], [1]]"}
-![Consistency Distillation](CV_week_cd.png){.lightbox}
-
-![Multi-boundary Consistency Distillation](CV_week_mbcd.png){.lightbox}
-:::
-
 ## Conclusion
 
 Participating in YSDA's intensive training programs has been both
-challenging and rewarding. My first experience was during GPT Week in
-2023, which did not require a qualifying assignment. The final project
-involved training a model to summarize articles, with flexibility
-regarding the architecture and implementation details.
+challenging and rewarding. My first experience was during [GPT
+Week](https://shad.yandex.ru/gptweek) in 2023, which did not require a
+qualifying assignment. The final project involved training a model to
+summarize articles, with flexibility regarding the architecture and
+implementation details.
 
 In contrast, CV Week 2024 presented a more rigorous experience. Both the
 qualifying assignment and the final project demanded significant effort,
@@ -389,6 +395,5 @@ intensive pushed me to expand my knowledge and skills, making the
 experience both demanding and educational.
 
 For those interested in exploring similar topics, YSDA offers a range of
-online courses, including an Introduction to Machine Learning. These
-resources can provide a solid foundation for tackling advanced subjects
-in data analysis and machine learning.
+online courses. These resources can provide a solid foundation for
+tackling advanced subjects in data analysis and machine learning.
