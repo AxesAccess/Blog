@@ -13,7 +13,7 @@ website:
   google-analytics: "G-H2HYLD7LV5"
 format:
   html:
-    theme: litera
+    theme: sandstone
     css: styles.css
 editor: visual
 
