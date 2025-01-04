@@ -1,0 +1,70 @@
+---
+title: "BI Blueprint"
+author: "Aleksei"
+date: "2025-01-06"
+categories: [BI, ETL]
+image: "image.png"
+draft: true
+---
+
+## Intro
+
+In this post, I'd like to present a blueprint of a BI system that I've
+been working on. The system is designed to provide insights into the
+company's performance and help make data-driven decisions.
+
+## Architecture
+
+The BI system is built on top of Google Cloud Platform, which provides a
+scalable and secure infrastructure for running data-intensive workloads.
+
+The BI system consists of several modules that work together to deliver
+insights to end-users. The flowchart below illustrates the main
+components of the system and how they interact with each other.
+
+![BI system flowchart](bi-flowchart.png){.lightbox fig-align="center"
+width="560"}
+
+## Modules
+
+### ETL
+
+The first step in the process is to collect data from various sources
+such as databases, APIs, and files. The data is then stored in Google
+BigQuery.
+
+### Airflow
+
+The ETL process is orchestrated by Apache Airflow, an open-source
+platform that allows you to programmatically author, schedule, and
+monitor workflows. Some of the tasks are triggered [by the arrival of
+new data](../20241105-airflow-filesensor/), while others are scheduled
+to run at regular intervals.
+
+### DBT
+
+While the data stored in BigQuery is already structured, it may need to
+be transformed to make it more suitable for analysis. **dbt** is a tool
+that allows you to define transformations, often as views in SQL and run
+them in a reproducible manner.
+
+### ML models
+
+In addition to traditional BI analytics, the system also includes
+machine learning models that are used to predict future outcomes based
+on historical data. The predicted values are then stored in BigQuery and
+used in the reporting process.
+
+### Power BI
+
+The final step in the process is to visualize the data using Power BI, a
+business analytics tool that provides interactive visualizations and
+business intelligence capabilities.
+
+## Conclusion
+
+In conclusion, the BI system described in this post is designed to
+provide insights into the company's performance and help make
+data-driven decisions. By combining ETL, Airflow, dbt, and Power BI, we
+can create a powerful analytics platform that can scale with the needs
+of the business.
