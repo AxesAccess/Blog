@@ -1,0 +1,29 @@
+---
+config:
+  look: handDrawn
+  theme: neutral
+---
+flowchart BT
+ subgraph s3["Datasets"]
+        n22["Sales"]
+        n23["Supply"]
+        n24["Finance"]
+        n25["HR"]
+  end
+ subgraph s4["Reports and dashboards"]
+        n26["Report 2"]
+        n27["Report 3"]
+        n29["Report 1"]
+        n40["Dashboard 1"]
+        n42["..."]
+        n41["Report n"]
+  end
+ subgraph s5["Google BigQuery"]
+        n51["Views"]
+  end
+    n51 --> n24 & n22 & n25 & n23
+    n22 --> n26 & n40
+    n23 --> n27 & n40 & n41
+    n24 --> n29
+    n25 --> n40
+    style s3 fill:#ffffff

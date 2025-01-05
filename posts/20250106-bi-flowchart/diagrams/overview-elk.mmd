@@ -1,0 +1,56 @@
+---
+config:
+  layout: elk
+  look: handDrawn
+  theme: neutral
+---
+
+flowchart-elk BT
+
+ subgraph s3["Semantic models"]
+        n22["Sales"]
+        n23["Supply"]
+        n24["Finance"]
+        n25["HR"]
+  end
+ subgraph s4["Reports and dashboards"]
+        n26["Report 1"]
+        n27["Report 2"]
+        n29["..."]
+  end
+ subgraph s5["Google BigQuery"]
+        n51["Views"]
+        n52["Tables"]
+  end
+ subgraph s2["Data sources"]
+        n6["Helpdesk software"]
+        n7["PM software"]
+        n8["CMS"]
+        n9["IMAP"]
+        n1["ERP reporting<br>subsystem"]
+        s7["s7"]
+  end
+ subgraph s6["Extract and transform"]
+        n11["ETL scripts"]
+        n17["dbt"]
+        n54["Text to Speech"]
+  end
+ subgraph s7["PBX"]
+        n53["Records"]
+        n12["PBX CDR DB"]
+  end
+    n51 --> s3
+    s3 --> s4
+    n1 -- Reports --> n11
+    n6 -- Tickets --> n11
+    n7 -- Tasks --> n11
+    n8 -- SKU metadata --> n11
+    n9 -- Messages --> n11
+    n12 -- Calls metadata --> n11
+    n11 -- Table data --> n52
+    n17 -- Models --> n51
+    n52 -- Data --> n51 & n20["ML models"]
+    n20 -- Forecasts --> n52
+    n53 -- WAV files --> n54
+    n54 -- Transcribed<br>records --> n52
+

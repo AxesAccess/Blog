@@ -1,0 +1,27 @@
+---
+config:
+  look: handDrawn
+  theme: neutral
+---
+flowchart BT
+ subgraph s5["Google BigQuery"]
+        n51["Views"]
+        n52["Tables"]
+  end
+ subgraph s6["Extract and transform"]
+        n11["ETL scripts"]
+        n17["dbt"]
+  end
+ subgraph s7["Data sources"]
+        n61["DBs"]
+        n62["APIs"]
+        n63["Files"]
+        n64["..."]
+  end
+    n5["Airflow"] -.-> n11 & n17 & s3["Power BI"] & n20["ML models"]
+    n52 -- Data --> n20 & n51
+    n51 -- Data --> s3
+    n11 -- Table data --> n52
+    n17 -- Models --> n51
+    n20 -- Forecasts --> n52
+    s7 -- Data --> n11

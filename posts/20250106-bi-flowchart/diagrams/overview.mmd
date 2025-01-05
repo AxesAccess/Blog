@@ -1,0 +1,44 @@
+---
+config:
+  look: handDrawn
+  theme: neutral
+---
+flowchart BT
+ subgraph s3["Datasets"]
+        n22["Sales"]
+        n23["Supply"]
+        n24["Finance"]
+        n25["HR"]
+  end
+ subgraph s4["Reports and dashboards"]
+        n26["Report 1"]
+        n27["Report 2"]
+        n29["..."]
+  end
+ subgraph s5["Google BigQuery"]
+        n51["Views"]
+        n52["Tables"]
+  end
+ subgraph s7["PBX"]
+        n53["Records"]
+        n12["CDR DB"]
+  end
+ subgraph s8["ERP system"]
+        n1["ERP reporting<br>subsystem"]
+  end
+    n51 --> s3
+    s3 --> s4
+    n1 -- CSV files --> n55["SMB share"]
+    n6["Helpdesk software"] -- Tickets --> n11["ETL scripts"]
+    n7["PM software"] -- Tasks --> n11
+    n8["CMS"] -- SKU metadata --> n11
+    n9["IMAP"] -- Messages --> n11
+    n12 -- Calls metadata --> n11
+    n11 -- Table data --> n52
+    n17["dbt"] -- Models --> n51
+    n52 -- Data --> n51 & n20["ML models"]
+    n20 -- Forecasts --> n52
+    n53 -- WAV files --> n54["Text to Speech"]
+    n54 -- Transcribed<br>records --> n11
+    n55 -- Reports --> n11
+
