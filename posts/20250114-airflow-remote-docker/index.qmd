@@ -1,0 +1,175 @@
+---
+title: "Run Docker Containers Remotely with Airflow"
+author: "Aleksei"
+date: "2025-01-08"
+categories: [Airflow, Docker]
+image: "image.png"
+---
+
+## Introduction
+
+Airflow is a powerful tool for automating workflows. Once you start
+using it, you’ll likely find it a great replacement for cron jobs on
+Linux machines. One common use case is running Docker containers on a
+remote machine—a valuable feature for executing data processing tasks or
+deploying applications.
+
+![Apache AirFlow Logo](AirflowLogo.png){fig-alt="Apache AirFlow Logo"}
+
+Setting up Airflow to run Docker containers on a remote machine is a
+straightforward process. While many guides are available online, they
+often lack complete and up-to-date instructions. Based on my experience,
+I decided to write this guide. Let’s walk through the necessary steps to
+get it running.
+
+## Remote Host Setup
+
+Assuming you have a remote Linux machine with Docker installed, you will
+need to configure it to allow remote access through ssh.
+
+### 1. Create a Dedicated User
+
+For the security reasons, it is recommended to use a dedicated user for
+running remote commands. You can create a new user like this:
+
+``` bash
+sudo useradd -m airflow
+sudo usermod -aG docker airflow
+```
+
+The last command will add the user to the `docker` group, allowing it to
+run Docker commands without `sudo.`
+
+Note, that if you will run `sudo` as the `airflow` user, you will need to
+add the user to the `sudoers` file. You can do this by adding the
+`/etc/sudoers.d/airflow` file with the following content:
+
+``` bash
+airflow ALL=(ALL) NOPASSWD: /path/to/command
+```
+
+### 2. Configure SSH Server
+
+Next, you will need to configure the ssh server to allow remote access.
+You can do this by editing the `/etc/ssh/sshd_config` file and
+adding/editing the following line:
+
+``` bash
+AllowUsers airflow
+PasswordAuthentication no
+PubkeyAuthentication yes
+```
+
+This will allow only the `airflow` user to access the server through ssh
+and disable password authentication, requiring the use of ssh keys
+instead.
+
+### 3. Set Up SSH Keys
+
+You will also need to generate an ssh key pair on your Airflow machine
+and copy the public key to the remote machine. You can do this with the
+following commands (assuming you are logged in as the user that will run
+Airflow):
+
+``` bash
+ssh-keygen
+cat ~/.ssh/id_rsa.pub
+```
+
+Then copy the output of the second command to the
+`~/.ssh/authorized_keys` file on the remote machine:
+
+``` bash
+mkdir -p /home/airflow/.ssh
+echo "your_public_key" >> /home/airflow/.ssh/authorized_keys
+```
+
+Make sure that the `.ssh` folder and `authorized_keys` file have the
+correct permissions:
+
+``` bash
+chown airflow:airflow /home/airflow/.ssh/authorized_keys
+chown -R airflow:airflow /home/airflow/.ssh
+chmod 600 /home/airflow/.ssh/authorized_keys
+chmod 700 /home/airflow/.ssh
+```
+
+Test the ssh connection by running the following command from your
+Airflow machine:
+
+``` bash
+ssh airflow@your_remote_machine_ip
+```
+
+If everything is set up correctly, you should be able to connect to the
+remote machine without being prompted for a password.
+
+## Airflow Setup
+
+Now that the remote machine is set up, you can add the task to your
+Airflow DAG. You will need to use the `SSHOperator` to run the Docker
+command on the remote machine. Here is an example of how to do this.
+
+### 1. Install the required package
+
+You will need to install the `apache-airflow-providers-ssh` package to
+use the `SSHOperator`. You can do this by running the following command
+(in your Airflow environment):
+
+``` bash
+pip install apache-airflow-providers-ssh
+```
+
+### 2. Create the connection
+
+In the Airflow UI, go to Admin -\> Connections and create a new
+connection with the following settings:
+
+-   Connection Id: `remote_docker`
+-   Conn Type: `SSH`
+-   Host: `your_remote_machine_ip`
+-   Username: `airflow`
+-   Password: (leave it blank)
+-   Extra: `{"key_file": "/path/to/your/private/key"}`
+
+### 3. Create the DAG
+
+Now you can create a new DAG that will run the Docker command on the
+remote machine. Here is an example of how to do this:
+
+``` python
+
+from airflow.models.dag import DAG
+from airflow.providers.ssh.operators.ssh import SSHOperator
+import pendulum
+
+
+with DAG(
+    dag_id="remote_docker_tasks",
+    description="Runs Docker commands on a remote machine",
+    schedule='@daily',
+    start_date=pendulum.datetime(2025, 1, 1, 0, 0, 0, tz="UTC"),
+    catchup=False,
+    tags=["docker", "remote"],
+) as dag:
+
+    hello_world = SSHOperator(
+        task_id="hello_world",
+        ssh_conn_id="remote_docker",
+        command="docker run --rm hello-world",
+    )
+
+    hello_world
+    
+```
+
+This DAG will run the `hello-world` Docker container on the remote
+machine every day at midnight. You can modify the `command` parameter to
+run any Docker command you want.
+
+## Conclusion
+
+In this guide, I have shown you how to set up Airflow to run Docker
+containers on a remote machine. I'll be happy if it saves you a couple
+of hours of your time. If you have any questions or suggestions, feel
+free to leave a comment under the LinkedIn post.
