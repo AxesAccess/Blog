@@ -40,8 +40,8 @@ sudo usermod -aG docker airflow
 The last command will add the user to the `docker` group, allowing it to
 run Docker commands without `sudo.`
 
-Note, that if you will run `sudo` as the `airflow` user, you will need to
-add the user to the `sudoers` file. You can do this by adding the
+Note, that if you will run `sudo` as the `airflow` user, you will need
+to add the user to the `sudoers` file. You can do this by adding the
 `/etc/sudoers.d/airflow` file with the following content:
 
 ``` bash
@@ -172,4 +172,5 @@ run any Docker command you want.
 In this guide, I have shown you how to set up Airflow to run Docker
 containers on a remote machine. I'll be happy if it saves you a couple
 of hours of your time. If you have any questions or suggestions, feel
-free to leave a comment under the LinkedIn post.
+free to leave a comment under [the LinkedIn
+artickle](https://www.linkedin.com/pulse/run-docker-containers-remotely-airflow-alex-vladimirovich-5tnhe/).
