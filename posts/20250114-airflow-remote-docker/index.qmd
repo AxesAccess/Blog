@@ -173,4 +173,4 @@ In this guide, I have shown you how to set up Airflow to run Docker
 containers on a remote machine. I'll be happy if it saves you a couple
 of hours of your time. If you have any questions or suggestions, feel
 free to leave a comment under [the LinkedIn
-artickle](https://www.linkedin.com/pulse/run-docker-containers-remotely-airflow-alex-vladimirovich-5tnhe/).
+article](https://www.linkedin.com/pulse/run-docker-containers-remotely-airflow-alex-vladimirovich-5tnhe/).
