@@ -1,0 +1,16 @@
+---
+config:
+  theme: default
+  look: classic
+---
+flowchart LR
+    A["Reference<br>documents<br>📄📄📄"] --> n1["Embedding<br>🔢🔢🔢"]
+    n1 --> n3["Vector database<br>🗄️🗄️🗄️"]
+    n3 --> n4["Retriever<br>🔎"]
+    n5["User query<br>👤💬"] --> n6["Embedding<br>🔢🔢🔢"]
+    n5 -- 💬 --> n8["Augmented<br>query 📄💬<br>"]
+    n6 --> n4
+    n8 --> n9["Large Language<br>Model 🧠"]
+    n9 --> n10["Response<br>🗨️"]
+    n4 -- 📄 --> n8
+
