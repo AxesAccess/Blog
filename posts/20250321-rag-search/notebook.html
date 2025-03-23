@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.5">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Задание – Blog</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ff4371ef257df69894857e99c6ad0d06.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-4a1bf7c3264c6d434bc0885489b31088.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-H2HYLD7LV5"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
+</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/AxesAccess"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/telecamera/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Задание</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<ol type="1">
+<li><p>Создайте собственную RAG-систему на основе кода. Выберите другую тематику для создания базы данных</p></li>
+<li><p>Интегрировать другую языковую модель (например, Llama, Mistral или Falcon). Сделайте модификацию промпта для специфических задач: объяснение информации детям, экспертам, написание статей и пр. Модифицируйте количество фрагментов и их длину в векторной базе</p></li>
+<li><p>Реализуйте альтернативные варианты выявления близких фрагментов текста. Ппротестируйте и укажит лучший из них</p></li>
+<li><p>Напишите заключение с описанием проекта: кто является потенциалным пользователем, какие мрдификации были произведены, что получилось/не получилось</p></li>
+<li><p>Оформите результат в виде colab тетрадки с названием разделов, указанием шагов и выводами</p></li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| colab: {base_uri: https://localhost:8080/}</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>pip install langchain langchain_community langchain<span class="op">-</span>openai langchain_huggingface faiss<span class="op">-</span>cpu sentence<span class="op">-</span>transformers bitsandbytes <span class="op">--</span>quiet</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| colab: {base_uri: https://localhost:8080/}</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bs4 <span class="im">import</span> BeautifulSoup</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pickle</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.embeddings <span class="im">import</span> HuggingFaceEmbeddings</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_core.documents <span class="im">import</span> Document</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.vectorstores.faiss <span class="im">import</span> FAISS</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_community.document_loaders <span class="im">import</span> WebBaseLoader</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.text_splitter <span class="im">import</span> RecursiveCharacterTextSplitter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Спарсим ссылки на статьи для контекста</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib.parse <span class="im">import</span> urlparse</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Функция для извлечения ссылок на статьи</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fetch_links(url):</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    links <span class="op">=</span> []</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> requests.get(url)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    soup <span class="op">=</span> BeautifulSoup(response.text, <span class="st">'html.parser'</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    domain <span class="op">=</span> urlparse(url).netloc</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ul <span class="kw">in</span> soup.find_all(<span class="st">'ul'</span>):</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> li <span class="kw">in</span> ul.find_all(<span class="st">'li'</span>):</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>            link <span class="op">=</span> li.find(<span class="st">'a'</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> link <span class="kw">and</span> <span class="st">"href"</span> <span class="kw">in</span> link.attrs:</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                href <span class="op">=</span> link.attrs[<span class="st">"href"</span>]</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="st">"/wiki"</span> <span class="kw">in</span> href[:<span class="dv">5</span>]:</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>                    links.append(<span class="ss">f"https://</span><span class="sc">{</span>domain<span class="sc">}{</span>href<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> links</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># URL страницы</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">'https://ru.wikipedia.org/wiki/%D0%9A%D0%B0%D1</span><span class="sc">%82%</span><span class="st">D0%B5%D0%B3%D0%BE%D1</span><span class="sc">%80%</span><span class="st">D0%B8%D1</span><span class="sc">%8F</span><span class="st">:%D0</span><span class="sc">%9F</span><span class="st">%D0%B5%D1</span><span class="sc">%80%</span><span class="st">D0%B5%D0%B2%D0%BE%D0%B4'</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>links <span class="op">=</span> fetch_links(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Загрузим документы</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Притворимся браузером</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">"USER_AGENT"</span>] <span class="op">=</span> <span class="st">"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0"</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>loader <span class="op">=</span> WebBaseLoader(links, show_progress<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> loader.load()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Сохраним локально, чтобы не загружать повторно после рестарта сессии</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"docs.pickle"</span>, <span class="st">"wb"</span>) <span class="im">as</span> f:</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    pickle.dump(docs, f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Загрузим документы, ранее сохраненные</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"docs.pickle"</span>, <span class="st">"rb"</span>) <span class="im">as</span> f:</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    docs <span class="op">=</span> pickle.load(f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Разобьем на чанки</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>text_splitter <span class="op">=</span> RecursiveCharacterTextSplitter(chunk_size<span class="op">=</span><span class="dv">1000</span>, chunk_overlap<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>split_docs <span class="op">=</span> text_splitter.split_documents(docs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Переведем тексты в эмбеддинги</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain_huggingface <span class="im">import</span> HuggingFaceEmbeddings</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>model_name <span class="op">=</span> <span class="st">"sentence-transformers/paraphrase-multilingual-mpnet-base-v2"</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>model_kwargs <span class="op">=</span> {<span class="st">'device'</span>: <span class="st">'cuda'</span>}</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>encode_kwargs <span class="op">=</span> {<span class="st">'normalize_embeddings'</span>: <span class="va">False</span>}</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>embedding <span class="op">=</span> HuggingFaceEmbeddings(model_name<span class="op">=</span>model_name,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                                  model_kwargs<span class="op">=</span>model_kwargs,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                                  encode_kwargs<span class="op">=</span>encode_kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>vector_store <span class="op">=</span> FAISS.from_documents(split_docs, embedding<span class="op">=</span>embedding)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Сохраним</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"vector_store.pickle"</span>, <span class="st">"wb"</span>) <span class="im">as</span> f:</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    pickle.dump(vector_store, f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"vector_store.pickle"</span>, <span class="st">"rb"</span>) <span class="im">as</span> f:</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    vector_store <span class="op">=</span> pickle.load(f)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Функция для извлечения релевантных запросу документов</p>
+<p>Пока остановились на предложенном в исходном ноутбуке методе, но можно подобрать лучший.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| colab: {base_uri: https://localhost:8080/, height: 369, referenced_widgets: [6ccd6163c45c4682a153ca5aa2091d42, 0d006c159ac04ba1bd22e37cd2446e6d, 4dcadf59924a48aaba6274e308d07342, f4d885e2b59d460e8a0422fc46079db8, 7249e05a9a3c4ed880d041b9ac26d43b, 5d9b84ffd7934bed8fedaa94ff33d94d, 5e680fe1329245e5b4c8916334b121c7, b70208e9576749eab1659af6eb53fd89, e2c14b07138e4e22ac5ee2c7c8308fb5, e91a791ddc704a2990b4a73ade6f5594, 092eccbaa604417fba39dac36b937380, 9a76a9354b43491aa1fde6fce04a1823, 22054a38ffdf4b7fbd6b2ec8fd5f58b4, 16d69d926e8346049014b18dcfc63ab2, 9531204031e047f6b5a345cb1c5cd1c3, a36c5a344fcc45aca3f87f041483244b, 7843c66ea7c0472a8c2465dc9543efba, d1499128a27f472bbd5ec74278006b57, 1c5565d385e142cb9aeec9e0d5aaee51, 1036be4fe8854d2a9fd591f874286a4e, b3d76fe3921d445b9233d26dd3c4c32b, 49f813f5fb7840b2ad7c55f980bdfc20, 06b4bd0726bb4d009b5cbc11e21d206d, 4114f9215123447a8cca1ed9adfc79a6, 13e69da27c4c40dfafcb27ee47a6d03d, 551299da32df468389eded2e09a5d1f2, 9e79f64b87644b6db8877d12216f20f9, 6b736e5963bf4e72a2395b6d60d90dd2, ecbc4e5f38c8427899835b5562e5bb97, 7bd81bfcb6f54a53851af3acd6885416, 5cb1ae61378f441fb7412f1e7a60ef5a, 4794196e7ae34c8ea80e8b57868be075, 1efd1c0978e844c38555a194a32b20db, 8cbe3c6180104952b622b71b5db330be, 9f0075957d134214ac93b477d33211a8, cd8677a17b2d4183aaa1fbeb5a586d93, 2c95e1502d4c4b1daf8fb97acccd22ce, 78e8ed667089488e96ecb7b3e8e11a1e, b56dd7fef8e04772a49b9c84beadd6e4, fc3733b95781479cb5ba1f8824ad2b05, a5c1f74113834dbcb54403ebe3b29099, 4629b7b317af41468a1461145a611638, 418c59b48112498490d946854d5793ad, 7383f1bfa0c8418185340da40135aa3a, a6fce121bbdf4b67b2ba10a0aaa73992, eb496d16dff6409abf0f43db475c80f2, d10710dd00fd4853bfb30c07a374d535, 09071ce751824fbcbbe2c907c1ec5d8b, 0550aeb63f954e18a3c63782f284ea66, 1ef723d81dac45f3be678e197fd6ba07, cc4264c69c6a423c8902971fe6d6fa7a, 9193beb8fff44cd5accca551add0a2dc, 9b38e8053ab847b2afa2b927baebafb3, 7169c688df304417a3f6f5f9fff6bb7a, 69ffb54b0f9444b78fd105e6761dffb5, 62fd920040ea4c0d8877a45766b04206, 3cd223333e4942809fdb71862f823fb1, c04a89ecaa0c453995867a0f140b71ee, 76a64b7c622d44cb9057d2b2f42803d0, c672e234d2e4448fb42914d0eb43a3a5, 9a68122cf5434ffe8d0e1f5aff504a17, e8feb4ab2f3e4840834a5f776403691e, 1adac52a069a4ff2bf7f4d0212f259cb, 033e9b1326fa480faa7b73fcfe9e41be, 0cdd1b46ca954dee8dc4fc029701fbf5, d6f96954111d4252b14e299583d1ac35, 86e5c0c3dce94ea4a20ee60d78b2b3a9, 953b4b6ac9604c9897e0068d1d5a3292, fa786fd39b924084a2bdc410c687f31c, a27b88938407411586d74c91228ea9ff, 9e75cb2e41e04476a15f21230286e492, 11f537bbe12e490b815a6970db722553, 4349962f5fcf449684a05abdc0dcd5ba, 335f1256676942da8432e56e31de6029, 1654c7877d80416f9c4c1120601f2153, ea13952045234cb9b534fde49dd4fd89, 3568ee5661764507a9700d5b969afaec, 33eeb75d541d4ee691da4c0ddb8b20c3, 9591b066ea54479480eed158234a3b45, 677faf7b7bc94293870f9665d279a945, 5551242fbd604a0f998113acf8f1174c, 50697674cacb45b6be79c14be48ad799, 04cb1e96bc4a4faa9a7a2e25638f3529, a537ace110654021aff3fd91524f3103, 7cfece78cb8142e08bf1a6e2dd13bcc4, 3a6faba610654f2eb5e94d69b7f8fb42, bd14415b44c54d4aad112ef4741fd201, 2c642f3b542642e990476b76d4b4be6f, 63bd48960cb5409e94c5fb6f0e8a7be1, 593dd1580a8542bdb4af68d93b484078, 7fd8308e55434c03a1233427bc78b30b, 3d9a505fb3a3487fb16162bdfcb65666, 64e03134d39246f18f0b46550a2eee61, 33d6eab236eb45a7adefbab89407a1e3, d93fddd6debc4e89ae77e39cefa8d99b, c146559c27394de895bc193920463324, 317a2e2cb48240189aaff3cc9cf09d34, d706046f8011443fb2b4732498c75bde, 2167a0e5a7964893892e245a36b2b2f5, 1ac9bad458284303aeb917efb7ce42c2, e86f00675907494ab05cadb2dc9823dc, f3cecaafceae4beb8064449f678cfcaa, d7b5f6ae9e0248c5855625191f3233fa, 5d3b1f5ed286491f967a2b95fc231e0a, c89628c5475f45469c9e8bea48bdd7dd, 73bdd78efbbc4feb920de6e5020011f5, 624df29bbb404224aedfdb4351acbe35, f6a86aaa485749ee8c7d838ca5e9dfc4, 34b9a112d3404b8997d07dc796470943, 51f9dfdced5746dfa6262ad8e728aa55, fbb05b0d2d064770b458b36bbefcee49, d047f351ef6742d6ad2e282ec9c7ac97, a9cba69604eb465a9ed1377cbf5d6d2f, 1a212d10662a4e79ace0f352bab24e11, ba0f3bef55cd4652a2f7398f8652cf38, ee7221dc14ca4f53a8a6acf0f432db79, 686b15aa551d420f869c4a41e48924be, b29aa086b8784dc484b4440b234b0695, f31670c4c8994984a475fec5ab059163, 3f61567796e04dbcb8e66ba9d6b37a37, bd5c0a8a734445479e5fbe1539ff0a47]}</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>encoder <span class="op">=</span> SentenceTransformer(<span class="st">'all-MiniLM-L6-v2'</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> retrieve(query, top_k<span class="op">=</span><span class="dv">2</span>):</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    query_vector <span class="op">=</span> np.array(encoder.encode([query]))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    documents <span class="op">=</span> vector_store.search(query, <span class="st">"similarity"</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> documents[:top_k]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Залогинимся на HuggingFace (требуется для некоторых моделей)</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># from huggingface_hub import login</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># from google.colab import userdata</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># login(token = userdata.get("HF_TOKEN"))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Загрузим модель для генерации текстов</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| colab: {base_uri: https://localhost:8080/, height: 418, referenced_widgets: [f814329409d9487a8783f906d22e24ed, 1b72d6af49674f0eb40f9ac486b3e0a2, 0d159cd9eae14f2a8bfa0fb80c7bd602, 9df35067b372462fab1f29986b83694d, 0f9224bdc63a429893a01c872138674d, bd7a8c9bcd5b49b085baac9b43a70b84, 2a621aa13c954dd4a961666aff42a065, 6420b7a6540c4ac89407d02a847439d6, b204718027624d1fac04491317e5c789, 2164e94c8e9c4d1395dc461d961dcf1c, 0cfddb9ef22940e2ba6b9d6f037f192b, 3f8fc822c6b24e69b19d891394821800, 4e710e41d3e04e619595977de7657bca, 5d4d7b15ed3449ea822b72c4df623341, 3e7a49ce506a487296bed05d5baf5c5b, a24a23f152c34506b24780621a5a93d4, 96b82cf5f173465599cc37327cdfbaf5, f6b50eff9eba407985c03aa72bcde099, f6a21d175eb845b6a183da27d90670ae, e85150dcd8fd4ec386eab0f0b2897343, c5d2207130fe4b1083ca82b7dcc448fb, 00bb4a5ee6d040a6af87c00514a5c327, 0315b4117af34a3c951240f34512405d, e67aa232780d470bac087b6b04093ec7, a612f38ee8154442bfcfc3269b5155e4, 14e7595df73341bd9b228f7f1812dd31, 34b67b8b0cff4ff4b89cd71e3d1e6850, 8edbd2f89659423aa0a8e9c2d1ff40d4, a8b34186b57745b898baa198e36172e4, c02bb94041bc44cf85d656d91d466205, 94daf8efa6bb4b09b82e555f77a2d5c1, 7c7539e3d3f4496ea07bf64556359462, e9e232d2825548e8bc5e29c857466ab1, ec73de9f014743929356e72e7e08f280, d594645f3e3e4210b39ec988d0a97697, cd4cfdd99299451586845e18590a77ef, 1977579bc6b6469c82a68d21441c1f40, dde4363d809342738a5a4251cf6349c7, 60965efec64743d688d57fe0f0333d88, f9ad2326455548319130f35395d1282d, dd31dec10d44421c9ab0ebbe7efa58d7, 5672842ad7c54a59b7928d7899cc6142, 0637a387925b402a91c003ebe86be312, 976238c7ab664aba910c1ce38a12fb06, 80256b52150645a5ad7bfe2554331b99, b905023b41ac4dae9901a9b0f4e48b06, 097c4a17f71c435eaa629867aecf715d, 0286b3709bb24c8992b4662ae3762968, e888bc3d344f4574859466dd0ef2e2b3, b536a67579574601af6f7109be4429e8, fef7a754c3154bd4b1404e8b59370232, 7791661748284d3fb3d72ac09161b944, 110a53bfd36a417dac70f87e4ced3c40, 2546ac347f2145f8b18b074cf012364c, e1be9d060a0c44268d67bef62e05604d, dddddaeeed3647469508865681fd0935, e38ee2e2ac4346b0964c0f578148cd35, 79dba45264734de4832bc9673c8b3b56, 5563bf1e452049f2b2437d686b8746c6, 8cd8cabbf5634ac9829ce8b0932e20e1, b8b41e4584d142169abaae703e73a1fc, fb6aebb3242a40419327a1029ff2e323, 0ab1099f329d40f4a51721e79d132ee4, 7e20add6a97e45b8b62e0b20927640ad, f36991d52a0c470fbb70466b0bfd2e96, 520e26aa4fdf43b2b8e9ff532c649fd4, 5cc1813c5def427487005825a9865ed7, 431d64c961304485821af5de4b7a5d39, 1d64347efd79467c974d2beb4b11c98d, 2ef718400bb946509a50f6bf84ce0b62, b900fb6ab9864e42af8a343e8238de9b, 8a90f45175ee442c829dfd78e7df7e92, 82680eba3cd34a888795f8f26434b8c1, 4ee91a061b5c4363b5f17f57fa0ceec6, 0ef202d8bddc4fc281c66bbd32845a83, de5e1d75f02d4bec948b365602c56683, 317ff2e57189416497dfc255c46fe6ae, c7a5162b76f7450fbe85d4b49ba47470, 848c2cc97a234498b8439de145d56756, c38100e49c784c90aed12df74b668903, aba6622c608d47b7845372f6803f07af, 81f0f91954254767a83c79ddb7bd244e, 1e41a29c535446e3afdc2d9e3cdcaea3, 8289c75021b345ccbf23952ebe401646, 67a65044111c42fa82aa7eec1354bfee, 29322bf5ff59412791380c767aef6597, ba15c41ee16448e0997cc27d109cb222, 9eeed280edd54437b614ea26c6548b0b, a3b45a9c91fa453cb7b02c70e724a920, 5e4bbdc6d0c34ec7a8534f898a36963c, a7e4d781c83f4e69b7ada3461c08eb3c, e0dd028d27514d08ae80ba5371ec859c, d47b99e403ac42d8a2f7e88f34421a59, f065908866674e1e8e928cc2e21bc8cf, 1f3c43caddaa42b198a1dd23ce4d7f88, ab004c145019442d9bfb470e3977244d, 6d41950979d240f88ffa329233981e8e, 084acfe1b438434286429391ee9eecc7, f56ea9507b54441496604678a5442141, adea890cba5a4b7c852923ac6f13bb36, 57be7cab9ef34ba7bb1e20a988814d11, f0d851c03fc64463b556336814d44c18, 74cf72ae5845465db34c3b788fb6d803, 45cf4a2b9c154921be2919d93ef16197, 2e8fc1de559849eb8f119f72390c1da5, 9f49f7722d45475987a5170da10804fa, d5a153b9293d4330a820269f34ee4966, 6c3d6f20750145648381f52fb2983e47, 5fb490c29a934e889601bfdfe2d031b3, 0c33971417e04576b1caf5bcabaa5ec1, 0c257bcc3d154e5da7326e4bc4b3c7c4, e6997c6b04a743e7b035a26764958bac, 1d620a45ca3343708a304febab5d5914, 4cc30580a32746eaafaddb5a22dea007, 8daa46c74b4f4083b2daccf144bc395a, 0a7ec586456943a4bfbe7f31120991db, 707d202602ab460da1916aee7cb88197, 960ceb41cf774ce1a84265a4050bc383, 6b94db1e4c204cc4bf4020ba2decf9dc, c9e36fab25894b368c232d5de5fc98ca, 558305e32f9540ebb30dd40f8961f4f6, 6dea7ba92c374f68aeeee6fad6e119f0, 3338628fac3140678402360439eed410, 3ae97dc261d045cb9c2caa21f6b523c1, 74f17696ca174e3492225ecc18864953, 185fa33810ca4f08993ab920916a537c, 344699c62e8c4219a210e81ffaa1dd57, 29ddb6d0f064427581a4a6cb3fffe360, 96db8cc70c16421bb2dcf9ac1a4f77d0, 432bf76a9e0d4fd297535e232c27b8fa, 180d4d269de947e0a990aa66456151b8, c1443fd7cb9a4225a82743b385ba8439]}</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer, GenerationConfig</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># MODEL_NAME = "facebook/opt-1.3b"</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>MODEL_NAME <span class="op">=</span> <span class="st">"IlyaGusev/saiga_llama3_8b"</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    MODEL_NAME,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    load_in_8bit<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    torch_dtype<span class="op">=</span>torch.bfloat16,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    device_map<span class="op">=</span><span class="st">"cuda"</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>()</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(MODEL_NAME)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>generation_config <span class="op">=</span> GenerationConfig.from_pretrained(MODEL_NAME)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| colab: {base_uri: https://localhost:8080/}</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>gen_pipeline <span class="op">=</span> pipeline(<span class="st">"text-generation"</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                        model<span class="op">=</span>model,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                        tokenizer<span class="op">=</span>tokenizer,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                        return_full_text<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Функция для генерации ответов</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_response(query):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    relevant_texts <span class="op">=</span> retrieve(query)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    context <span class="op">=</span> <span class="st">' '</span>.join([t.model_dump()[<span class="st">'page_content'</span>] <span class="cf">for</span> t <span class="kw">in</span> relevant_texts])</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">=</span> <span class="ss">f"""Ответь на вопрос пользователя.</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="ss">    Используй при этом только информацию из контекста. Если в контексте нет</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="ss">    информации для ответа, сообщи об этом пользователю.</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="ss">    Контекст: '''</span><span class="sc">{</span>context<span class="sc">}</span><span class="ss">'''</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="ss">    Вопрос: </span><span class="sc">{</span>query<span class="sc">}</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="ss">    Ответ:</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="ss">    """</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> gen_pipeline(prompt)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> response[<span class="dv">0</span>][<span class="st">"generated_text"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| colab: {base_uri: https://localhost:8080/}</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"Когда празднуют международный день переводчика?"</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>answer <span class="op">=</span> generate_response(query)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(answer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| colab: {base_uri: https://localhost:8080/}</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"Что такое Татоэба?"</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>answer <span class="op">=</span> generate_response(query)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(answer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>На некоторые запросы система возвращает некачественные ответы. Это связано с поиском по базе документов, который выполняется по семантической близости и не учитывает смысл вопроса. Также можно улучшить предобработку текстов документов, в которых сейчас много мусора.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| colab: {base_uri: https://localhost:8080/}</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co">#| collapsed: true</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"Что такое глоссирование?"</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>answer <span class="op">=</span> generate_response(query)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(answer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
