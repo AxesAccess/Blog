@@ -183,8 +183,8 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 <div>
 <pre class="mermaid mermaid-js" data-label="fig-architecture">---
 config:
-  look: handDrawn
-  theme: neutral
+  theme: default
+  look: classic
 ---
 flowchart BT
  subgraph s5["Google BigQuery"]
@@ -208,33 +208,9 @@ flowchart BT
     n17 -- Models --&gt; n51
     n20 -- Forecasts --&gt; n52
     s7 -- Data --&gt; n11
-     n51:::Blueprint
-     n52:::Blueprint
-     n11:::Blueprint
-     n17:::Blueprint
-     n61:::Blueprint
-     n62:::Blueprint
-     n63:::Blueprint
-     n64:::Blueprint
-     n5:::Blueprint
-     s3:::Blueprint
-     n20:::Blueprint
-     n20:::Blueprint
-    classDef Blueprint stroke-width:2px, stroke-dasharray:none, stroke:#374D7C, fill:0754a6, color:#ffffff
-    style s7 stroke:#0754a6
-    style s6 stroke:#0754a6
-    style s5 stroke:#0754a6
-    linkStyle 0 stroke:#0754a6,fill:none
-    linkStyle 1 stroke:#0754a6,fill:none
-    linkStyle 2 stroke:#0754a6,fill:none
-    linkStyle 3 stroke:#0754a6,fill:none
-    linkStyle 4 stroke:#0754a6,fill:none
-    linkStyle 5 stroke:#0754a6,fill:none
-    linkStyle 6 stroke:#0754a6,fill:none
-    linkStyle 7 stroke:#0754a6
-    linkStyle 8 stroke:#0754a6,fill:none
-    linkStyle 9 stroke:#0754a6,fill:none
-    linkStyle 10 stroke:#0754a6,fill:none
+    style s5 fill:transparent
+    style s6 fill:transparent
+    style s7 fill:transparent
 </pre>
 </div>
 </div>
@@ -263,8 +239,8 @@ Figure&nbsp;1: Data and control flows in the BI system
 <div>
 <pre class="mermaid mermaid-js" data-label="fig-etl">---
 config:
-  look: handDrawn
-  theme: neutral
+  theme: default
+  look: classic
 ---
 flowchart BT
  subgraph s7["PBX"]
@@ -285,32 +261,8 @@ flowchart BT
     n54 -- Transcribed&lt;br&gt;records --&gt; n11
     n58["Google Analytics"] -- Events flow --&gt; n57
     n59 -- Reports --&gt; n11
-     n53:::Blueprint
-     n12:::Blueprint
-     n1:::Blueprint
-     n59:::Blueprint
-     n6:::Blueprint
-     n11:::Blueprint
-     n7:::Blueprint
-     n8:::Blueprint
-     n9:::Blueprint
-     n54:::Blueprint
-     n57:::Blueprint
-     n58:::Blueprint
-    classDef Blueprint stroke-width:2px, stroke-dasharray:none, stroke:#374D7C, fill:0754a6, color:#ffffff
-    style s7 stroke:#0754a6
-    style s8 stroke:#0754a6
-    linkStyle 0 stroke:#0754a6,fill:none
-    linkStyle 1 stroke:#0754a6,fill:none
-    linkStyle 2 stroke:#0754a6,fill:none
-    linkStyle 3 stroke:#0754a6,fill:none
-    linkStyle 4 stroke:#0754a6,fill:none
-    linkStyle 5 stroke:#0754a6,fill:none
-    linkStyle 6 stroke:#0754a6,fill:none
-    linkStyle 7 stroke:#0754a6,fill:none
-    linkStyle 8 stroke:#0754a6,fill:none
-    linkStyle 9 stroke:#0754a6,fill:none
-    linkStyle 10 stroke:#0754a6,fill:none
+    style s7 fill:transparent
+    style s8 fill:transparent
 </pre>
 </div>
 </div>
@@ -342,8 +294,8 @@ Figure&nbsp;2: ETL subsystem
 <div>
 <pre class="mermaid mermaid-js" data-label="fig-powerbi">---
 config:
-  look: handDrawn
-  theme: neutral
+  theme: default
+  look: classic
 ---
 flowchart BT
  subgraph s3["Datasets"]
@@ -368,32 +320,9 @@ flowchart BT
     n23 --&gt; n27 &amp; n40 &amp; n41
     n24 --&gt; n29
     n25 --&gt; n40
-     n22:::Blueprint
-     n23:::Blueprint
-     n24:::Blueprint
-     n25:::Blueprint
-     n26:::Blueprint
-     n27:::Blueprint
-     n29:::Blueprint
-     n40:::Blueprint
-     n42:::Blueprint
-     n41:::Blueprint
-     n51:::Blueprint
-    classDef Blueprint stroke-width:2px, stroke-dasharray:none, stroke:#374D7C, fill:0754a6, color:#ffffff
-    style s3 stroke:#0754a6,color:#0754a6
-    style s5 stroke:#0754a6,color:#0754a6
-    style s4 stroke:#0754a6,color:#0754a6
-    linkStyle 0 stroke:#0754a6,fill:none
-    linkStyle 1 stroke:#0754a6,fill:none
-    linkStyle 2 stroke:#0754a6,fill:none
-    linkStyle 3 stroke:#0754a6,fill:none
-    linkStyle 4 stroke:#0754a6,fill:none
-    linkStyle 5 stroke:#0754a6,fill:none
-    linkStyle 6 stroke:#0754a6,fill:none
-    linkStyle 7 stroke:#0754a6,fill:none
-    linkStyle 8 stroke:#0754a6,fill:none
-    linkStyle 9 stroke:#0754a6,fill:none
-    linkStyle 10 stroke:#0754a6,fill:none
+    style s3 fill:transparent
+    style s4 fill:transparent
+    style s5 fill:transparent
 </pre>
 </div>
 </div>
@@ -417,8 +346,8 @@ Figure&nbsp;3: Power BI reports and dashboards
 <div>
 <pre class="mermaid mermaid-js" data-label="fig-conclusion">---
 config:
-  look: handDrawn
-  theme: neutral
+  theme: default
+  look: classic
 ---
 flowchart BT
  subgraph s3["Datasets"]
@@ -458,49 +387,12 @@ flowchart BT
     n53 -- WAV files --&gt; n54["Text to Speech"]
     n54 -- Transcribed&lt;br&gt;records --&gt; n11
     n55 -- Reports --&gt; n11
-     n22:::Blueprint
-     n23:::Blueprint
-     n24:::Blueprint
-     n25:::Blueprint
-     n26:::Blueprint
-     n27:::Blueprint
-     n29:::Blueprint
-     n51:::Blueprint
-     n52:::Blueprint
-     n53:::Blueprint
-     n12:::Blueprint
-     n1:::Blueprint
-     n55:::Blueprint
-     n6:::Blueprint
-     n11:::Blueprint
-     n7:::Blueprint
-     n8:::Blueprint
-     n9:::Blueprint
-     n17:::Blueprint
-     n20:::Blueprint
-     n54:::Blueprint
-    classDef Blueprint stroke-width:2px, stroke-dasharray:none, stroke:#374D7C, fill:0754a6, color:#ffffff, stroke-width:2px, stroke-dasharray:none, stroke:#374D7C, fill:0754a6, color:#ffffff, stroke-width:2px, stroke-dasharray:none, stroke:#374D7C, fill:0754a6, color:#ffffff
-    style s3 stroke:#0754a6,color:#0754a6
-    style s4 stroke:#0754a6,color:#0754a6
-    style s5 stroke:#0754a6,color:#0754a6
-    style s7 stroke:#0754a6,color:#0754a6
-    style s8 stroke:#0754a6,color:#0754a6
-    linkStyle 0 stroke:#0754a6,fill:none
-    linkStyle 1 stroke:#0754a6,fill:none
-    linkStyle 2 stroke:#0754a6,fill:none
-    linkStyle 3 stroke:#0754a6,fill:none
-    linkStyle 4 stroke:#0754a6,fill:none
-    linkStyle 5 stroke:#0754a6,fill:none
-    linkStyle 6 stroke:#0754a6,fill:none
-    linkStyle 7 stroke:#0754a6,fill:none
-    linkStyle 8 stroke:#0754a6,fill:none
-    linkStyle 9 stroke:#0754a6,fill:none
-    linkStyle 10 stroke:#0754a6,fill:none
-    linkStyle 11 stroke:#0754a6,fill:none
-    linkStyle 12 stroke:#0754a6,fill:none
-    linkStyle 13 stroke:#0754a6,fill:none
-    linkStyle 14 stroke:#0754a6,fill:none
-    linkStyle 15 stroke:#0754a6,fill:none
+
+    style s3 fill:transparent
+    style s4 fill:transparent
+    style s5 fill:transparent
+    style s7 fill:transparent
+    style s8 fill:transparent
 </pre>
 </div>
 </div>
