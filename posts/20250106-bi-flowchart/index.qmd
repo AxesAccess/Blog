@@ -8,14 +8,20 @@ image: "image.png"
 
 ## Intro
 
-In this post, I’d like to present a blueprint for a BI system that I’ve been working on. The system is designed to provide insights into the company’s performance and support data-driven decision-making.
+In this post, I’d like to present a blueprint for a BI system that I’ve
+been working on. The system is designed to provide insights into the
+company’s performance and support data-driven decision-making.
 
 ## Architecture
 
-The BI system primarily revolves around Microsoft Power BI, which serves as the key instrument for creating dozens of reports with hundreds of indicators. Data is sourced and structured using various tools and pipelines, with Google BigQuery acting as the central data warehouse.
+The BI system primarily revolves around Microsoft Power BI, which serves
+as the key instrument for creating dozens of reports with hundreds of
+indicators. Data is sourced and structured using various tools and
+pipelines, with Google BigQuery acting as the central data warehouse.
 
-The system consists of several modules that work together to deliver actionable insights to end-users. The flowchart below illustrates the main components of the system and their interactions.
-
+The system consists of several modules that work together to deliver
+actionable insights to end-users. The flowchart below illustrates the
+main components of the system and their interactions.
 
 ```{mermaid}
 %%| label: fig-architecture
@@ -29,13 +35,17 @@ The system consists of several modules that work together to deliver actionable 
 
 ### Airflow
 
-The ETL process is orchestrated by Apache Airflow, an open-source platform for programmatically authoring, scheduling, and monitoring workflows. Some tasks are triggered [by the arrival of
-new data](../20241105-airflow-filesensor/), while others run at predefined intervals.
+The ETL process is orchestrated by Apache Airflow, an open-source
+platform for programmatically authoring, scheduling, and monitoring
+workflows. Some tasks are triggered [by the arrival of new
+data](../20241105-airflow-filesensor/), while others run at predefined
+intervals.
 
 ### Extract and Transform
 
-The first step in the process is collecting data from various sources such as databases, APIs, and files. The collected data is then stored in Google BigQuery.
-
+The first step in the process is collecting data from various sources
+such as databases, APIs, and files. The collected data is then stored in
+Google BigQuery.
 
 ```{mermaid}
 %%| label: fig-etl
@@ -46,21 +56,29 @@ The first step in the process is collecting data from various sources such as da
 
 ### dbt
 
-While the data in BigQuery is already structured, further transformation may be required to optimize it for analysis. *dbt (data build tool)* facilitates this by allowing you to define transformations, often as SQL views, and execute them in a reproducible manner.
+While the data in BigQuery is already structured, further transformation
+may be required to optimize it for analysis. *dbt (data build tool)*
+facilitates this by allowing you to define transformations, often as SQL
+views, and execute them in a reproducible manner.
 
 ### ML models
 
-In addition to traditional BI analytics, the system incorporates machine learning models to predict future outcomes based on historical data. The predicted values are stored in BigQuery and integrated into the reporting process.
-
-
+In addition to traditional BI analytics, the system incorporates machine
+learning models to predict future outcomes based on historical data. The
+predicted values are stored in BigQuery and integrated into the
+reporting process.
 
 ### Power BI
 
-The final step is visualizing the data using Power BI, a business analytics tool that provides interactive visualizations and business intelligence capabilities.
+The final step is visualizing the data using Power BI, a business
+analytics tool that provides interactive visualizations and business
+intelligence capabilities.
 
-The data is fetched from BigQuery and stored in Power BI datasets. Although a direct connection to BigQuery is available, importing the data is necessary to fully leverage the DAX language for creating complex calculations. Data refreshes are triggered by Airflow DAGs after the ETL tasks are completed.
-
-
+The data is fetched from BigQuery and stored in Power BI datasets.
+Although a direct connection to BigQuery is available, importing the
+data is necessary to fully leverage the DAX language for creating
+complex calculations. Data refreshes are triggered by Airflow DAGs after
+the ETL tasks are completed.
 
 ```{mermaid}
 %%| label: fig-powerbi
@@ -71,7 +89,12 @@ The data is fetched from BigQuery and stored in Power BI datasets. Although a di
 
 ## Conclusion
 
-In summary, the BI system outlined in this post is purpose-built to deliver deep insights into the company’s performance and empower data-driven decision-making. By integrating tools like ETL pipelines, Airflow for orchestration, dbt for data transformation, and Power BI for advanced analytics and visualization, it establishes a scalable and robust analytics platform tailored to meet evolving business needs.
+In summary, the BI system outlined in this post is purpose-built to
+deliver deep insights into the company’s performance and empower
+data-driven decision-making. By integrating tools like ETL pipelines,
+Airflow for orchestration, dbt for data transformation, and Power BI for
+advanced analytics and visualization, it establishes a scalable and
+robust analytics platform tailored to meet evolving business needs.
 
 ```{mermaid}
 %%| label: fig-conclusion

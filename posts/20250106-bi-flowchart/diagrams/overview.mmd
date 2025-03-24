@@ -1,7 +1,7 @@
 ---
 config:
-  look: handDrawn
-  theme: neutral
+  theme: default
+  look: classic
 ---
 flowchart BT
  subgraph s3["Datasets"]
@@ -41,46 +41,9 @@ flowchart BT
     n53 -- WAV files --> n54["Text to Speech"]
     n54 -- Transcribed<br>records --> n11
     n55 -- Reports --> n11
-     n22:::Blueprint
-     n23:::Blueprint
-     n24:::Blueprint
-     n25:::Blueprint
-     n26:::Blueprint
-     n27:::Blueprint
-     n29:::Blueprint
-     n51:::Blueprint
-     n52:::Blueprint
-     n53:::Blueprint
-     n12:::Blueprint
-     n1:::Blueprint
-     n55:::Blueprint
-     n6:::Blueprint
-     n11:::Blueprint
-     n7:::Blueprint
-     n8:::Blueprint
-     n9:::Blueprint
-     n17:::Blueprint
-     n20:::Blueprint
-     n54:::Blueprint
-    classDef Blueprint stroke-width:2px, stroke-dasharray:none, stroke:#374D7C, fill:0754a6, color:#ffffff, stroke-width:2px, stroke-dasharray:none, stroke:#374D7C, fill:0754a6, color:#ffffff, stroke-width:2px, stroke-dasharray:none, stroke:#374D7C, fill:0754a6, color:#ffffff
-    style s3 stroke:#0754a6,color:#0754a6
-    style s4 stroke:#0754a6,color:#0754a6
-    style s5 stroke:#0754a6,color:#0754a6
-    style s7 stroke:#0754a6,color:#0754a6
-    style s8 stroke:#0754a6,color:#0754a6
-    linkStyle 0 stroke:#0754a6,fill:none
-    linkStyle 1 stroke:#0754a6,fill:none
-    linkStyle 2 stroke:#0754a6,fill:none
-    linkStyle 3 stroke:#0754a6,fill:none
-    linkStyle 4 stroke:#0754a6,fill:none
-    linkStyle 5 stroke:#0754a6,fill:none
-    linkStyle 6 stroke:#0754a6,fill:none
-    linkStyle 7 stroke:#0754a6,fill:none
-    linkStyle 8 stroke:#0754a6,fill:none
-    linkStyle 9 stroke:#0754a6,fill:none
-    linkStyle 10 stroke:#0754a6,fill:none
-    linkStyle 11 stroke:#0754a6,fill:none
-    linkStyle 12 stroke:#0754a6,fill:none
-    linkStyle 13 stroke:#0754a6,fill:none
-    linkStyle 14 stroke:#0754a6,fill:none
-    linkStyle 15 stroke:#0754a6,fill:none
+
+    style s3 fill:transparent
+    style s4 fill:transparent
+    style s5 fill:transparent
+    style s7 fill:transparent
+    style s8 fill:transparent
