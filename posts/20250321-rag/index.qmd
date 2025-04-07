@@ -2,7 +2,7 @@
 title: "Implementing a Local Retrieval-Augmented Generation System"
 author: "Aleksei"
 date: "2025-03-21"
-categories: [RAG, LLM, Python]
+categories: [RAG, NLP, LLM, Python]
 image: "image.png"
 ---
 
@@ -148,10 +148,7 @@ Here we define function for retrieving relevant documents from the
 database.
 
 ``` python
-encoder = SentenceTransformer('all-MiniLM-L6-v2')
-
 def retrieve(query, top_k=2):
-    query_vector = np.array(encoder.encode([query]))
     documents = vector_store.search(query, "similarity")
     return documents[:top_k]
 ```
@@ -169,7 +166,7 @@ login(token = userdata.get("HF_TOKEN"))
 Download model, define tokenizer and create config.
 
 ``` python
-from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 
 MODEL_NAME = "Qwen/Qwen2.5-7B"
@@ -183,7 +180,6 @@ model = AutoModelForCausalLM.from_pretrained(
 model.eval()
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-generation_config = GenerationConfig.from_pretrained(MODEL_NAME)
 ```
 
 Let's put context retrieval and generation pipeline into a function.
@@ -386,4 +382,5 @@ and reinforcement learning. The RAG system demonstrates the potential of
 combining retrieval and generation techniques to produce informative and
 contextually relevant answers.
 
-Source code for this tutorial is available on [GitHub](https://github.com/AxesAccess/Implementing-a-Local-Retrieval-Augmented-Generation-System/blob/main/Implementing_a_Local_Retrieval_Augmented_Generation_System.ipynb).
+Source code for this tutorial is available on
+[GitHub](https://github.com/AxesAccess/Implementing-a-Local-Retrieval-Augmented-Generation-System/blob/main/Implementing_a_Local_Retrieval_Augmented_Generation_System.ipynb).
