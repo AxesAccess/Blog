@@ -8,11 +8,18 @@ image: "image.png"
 
 ## Introduction
 
-This notebook demonstrates how to create Anki flashcards from a list of words. The example uses a list of German words related to "Die Stadt" (The City) and translates them into English. It also generates audio files for the words using Google Text-to-Speech.
+This notebook demonstrates how to create Anki flashcards from a list of
+words. The example uses a list of German words related to "Die Stadt"
+(The City) and translates them into English. It also generates audio
+files for the words using Google Text-to-Speech.
+
+::: {#fig-banner}
+![](banner.png)
+:::
 
 ## Install Required Libraries
 
-```python
+``` python
 !pip install pandas googletrans gtts genanki
 ```
 
@@ -28,7 +35,8 @@ AUDIO_DIR = "data/audio"
 
 ## Load Words List
 
-Here we load the list of words from a text file. The file should contain one word per line, and we will remove any empty lines.
+Here we load the list of words from a text file. The file should contain
+one word per line, and we will remove any empty lines.
 
 ```{python}
 import pandas as pd
@@ -41,9 +49,9 @@ df = pd.DataFrame(lines, columns=["Word"])
 df.tail(5)
 ```
 
-
-
-In the particular example, the words are in the format "Word / Plural". For example, "die Stadt / die Städte" means "the city / the cities (plural)". Let's split singular and plural forms into separate rows.
+In the particular example, the words are in the format "Word / Plural".
+For example, "die Stadt / die Städte" means "the city / the cities
+(plural)". Let's split singular and plural forms into separate rows.
 
 ```{python}
 df["Word"] = df["Word"].str.split(" / ")
@@ -51,10 +59,64 @@ df = df.explode("Word").reset_index(drop=True)
 df.tail(5)
 ```
 
+```{python}
+#| echo: false
+
+import random
+import numpy as np
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+random.seed(42)
+COLORMAP = "Dark2"
+
+words = df.sample(frac=1)["Word"].str.split(" ").explode().to_list()
+words = list(set(words))
+
+# Generate a word cloud image
+wordcloud = WordCloud(
+    font_path="data/fonts/Ubuntu-R.ttf",
+    width=800,
+    height=360,
+    mode='RGBA',
+    background_color=None,
+    min_font_size=14,
+    max_font_size=144,
+    prefer_horizontal=0.75,
+    colormap=COLORMAP,
+).generate(" ".join(words[:32])).fit_words(
+    {word: random.randint(0, 6) for word in words[:32]})
+
+
+wordcloud.to_file("banner.png")
+
+x, y = np.ogrid[:300, :300]
+mask = (x - 150) ** 2 + (y - 150) ** 2 > 130 ** 2
+mask = 255 * mask.astype(int)
+
+# Generate image.png
+wordcloud = WordCloud(
+    font_path="data/fonts/Ubuntu-R.ttf",
+    width=300,
+    height=300,
+    background_color="white",
+    mask=mask,
+    prefer_horizontal=0.5,
+    colormap=COLORMAP,
+).generate(" ".join(words[:24])).fit_words(
+    {word: random.randint(0, 6) for word in words[:16]})
+
+
+wordcloud.to_file("image.png")
+
+plt.close()
+```
 
 ## Translate Words
 
-We will use the `googletrans` library to translate the words from German to English. The library provides an asynchronous interface for translation, which is useful for bulk processing.
+We will use the `googletrans` library to translate the words from German
+to English. The library provides an asynchronous interface for
+translation, which is useful for bulk processing.
 
 ```{python}
 from googletrans import Translator
@@ -71,7 +133,8 @@ await translate_bulk(
 )
 ```
 
-In the next chunk of code, we will create list of words to translate, then will apply the `translate_bulk` function to this list.
+In the next chunk of code, we will create list of words to translate,
+then will apply the `translate_bulk` function to this list.
 
 ```{python}
 texts = df["Word"].to_list()
@@ -81,7 +144,10 @@ translations = await translate_bulk(texts)
 translations[:5]
 ```
 
-The `googletrans` library employs undocumented Google Translate API, which may lead to rate limiting or blocking. We will hope that it will work for our case. If you encounter issues, consider using a paid translation service or API. 
+The `googletrans` library employs undocumented Google Translate API,
+which may lead to rate limiting or blocking. We will hope that it will
+work for our case. If you encounter issues, consider using a paid
+translation service or API.
 
 Next, we will add the translations to the DataFrame.
 
@@ -91,7 +157,10 @@ df["Translation"] = translations
 
 ## Generate Audio Files
 
-We will use the `gtts` library to generate audio files for the words. This library uses Google Text-to-Speech API and it's free. The generated audio files will be saved in the `AUDIO_DIR` directory. The filenames will be generated using a hash of the word.
+We will use the `gtts` library to generate audio files for the words.
+This library uses Google Text-to-Speech API and it's free. The generated
+audio files will be saved in the `AUDIO_DIR` directory. The filenames
+will be generated using a hash of the word.
 
 ```{python}
 from gtts import gTTS
@@ -117,7 +186,13 @@ sample_audio = gen_audio("die Krankenhäuser")
 print(f"Audio file saved as: {sample_audio}")
 ```
 
-The `gen_audio` function generates a hash of the word and checks if the audio file already exists in the `AUDIO_DIR`. If it does, it returns the filename. If not, it generates the audio file and saves it.
+The `gen_audio` function generates a hash of the word and checks if the
+audio file already exists in the `AUDIO_DIR`. If it does, it returns the
+filename. If not, it generates the audio file and saves it.
+
+<audio controls="1" src="data/audio/308d817b87e2.mp3" preload="auto">
+
+</audio>
 
 ## Add Audio File Paths to DataFrame
 
@@ -131,13 +206,14 @@ We will shuffle the DataFrame to randomize the order of the flashcards.
 
 ```{python}
 df = df.sample(frac=1).reset_index(drop=True)
-
-df = df.head(5)
 ```
 
 ## Set Up Anki Deck and Model
 
-We will use the `genanki` library to create an Anki deck and model. The model defines the structure of the flashcards, while the deck contains the flashcards themselves. To get unique IDs for the model and deck, we will use random numbers. We will set seed for reproducibility.
+We will use the `genanki` library to create an Anki deck and model. The
+model defines the structure of the flashcards, while the deck contains
+the flashcards themselves. To get unique IDs for the model and deck, we
+will use random numbers. We will set seed for reproducibility.
 
 ```{python}
 import random
@@ -152,7 +228,8 @@ DECK_ID = random.randrange(1 << 30, 1 << 31)
 
 ## Add Cards to Anki Deck
 
-Next, will create a model for the flashcards and add the cards to the Anki deck. 
+Next, will create a model for the flashcards and add the cards to the
+Anki deck.
 
 ```{python}
 import genanki
@@ -199,10 +276,36 @@ for i, row in df.iterrows():
 
 ## Export Anki Deck
 
-Finally, we will export the Anki deck to a file. The file will be saved in the `DATA_DIR` directory with the name `{python} print(f"{DECK_NAME}.apkg")`. The audio files will be included in the package.
+Finally, we will export the Anki deck to a file. The file will be saved
+in the `DATA_DIR` directory with the name
+**`{python} f"{DECK_NAME}.apkg"`**. The audio files will be included in
+the package.
 
 ```{python}
 my_package = genanki.Package(my_deck)
 my_package.media_files = [f"{AUDIO_DIR}/{filename}" for filename in df["Audio"].values]
 my_package.write_to_file(f"{DATA_DIR}/{DECK_NAME}.apkg")
 ```
+
+## Conclusion
+
+In this notebook, we learned how to create Anki flashcards from a list
+of words. We used the `googletrans` library to translate the words from
+German to English and the `gtts` library to generate audio files for the
+words. Finally, we used the `genanki` library to create an Anki deck and
+export it to a file. The generated Anki deck can be imported into Anki
+app and used for studying the vocabulary.
+
+## References
+
+-   [Googletrans library for Google Translate
+    API](https://github.com/ssut/py-googletrans){target="_blank"}
+-   [Google Text-to-Speech API
+    (gTTS)](https://github.com/pndurette/gTTS){target="_blank"}
+-   [genanki: A Library for Generating Anki
+    Decks](https://github.com/kerrickstaley/genanki/){target="_blank"}
+
+## Next Steps
+
+In the next notebook we will create Anki flashcards from an arbitrary
+document like an article or a book.
