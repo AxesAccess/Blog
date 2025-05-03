@@ -1,0 +1,233 @@
+---
+title: "SARIMA Cheatsheet"
+author: "Aleksei"
+date: "2025-03-25"
+categories: ["Time Series", SARIMA, R]
+image: "image.png"
+draft: true
+---
+
+```{r}
+library("lubridate")
+library("zoo")
+library("xts") 
+library("dplyr")
+library("ggplot2")
+library("forecast")
+
+```
+
+## AR(1)
+
+$y_t=0.7y_{t-1}+\varepsilon_t$
+
+```{r}
+y <- arima.sim(n = 100, list(ar = 0.7))
+tsdisplay(y)
+```
+
+## MA(1)
+
+$y_t=\varepsilon_t-0.8\varepsilon_{t-1}$
+
+```{r}
+y <- arima.sim(n = 100, list(ma = -0.8))
+tsdisplay(y)
+```
+
+## ARMA(1,1)
+
+$y_t=0.5y_{t-1}+\varepsilon_t-0.8\varepsilon{_t-1}$
+
+```{r}
+y <- arima.sim(n = 100, list(ma = -0.8, ar = 0.5))
+tsdisplay(y)
+```
+
+## ARMA(1,1)
+
+$y_t=-0.5y_{t-1}+\varepsilon_t-0.8\varepsilon_{t-1}$
+
+```{r}
+y <- arima.sim(n = 100, list(ma = -0.8, ar = -0.5))
+tsdisplay(y)
+```
+
+## Random Walk
+
+$y_t=y_{t-1}+\varepsilon_t$
+
+100 observations
+
+```{r}
+y <- arima.sim(n = 100, list(order = c(0, 1, 0)))
+tsdisplay(y)
+```
+
+500 observations
+
+```{r}
+y <- arima.sim(n = 500, list(order = c(0, 1, 0)))
+tsdisplay(y, points=F)
+```
+
+# AR with trend
+
+$y_t=0.1t+0.7y_{t-1}+\varepsilon_t$
+
+```{r}
+y <- seq(0, 10, length = 100) + arima.sim(n = 100, list(ar = 0.7))
+tsdisplay(y)
+```
+
+$y_t=0.02t+0.7y_{t-1}+\varepsilon_t$
+
+```{r}
+y <- seq(0, 2, length = 100) + arima.sim(n = 100, list(ar = 0.7))
+tsdisplay(y)
+```
+
+```{r}
+
+# динамика уровня воды в озере Гурон
+y <- LakeHuron
+tsdisplay(y)
+```
+
+```{r}
+
+# оценим AR(2)
+mod_1 <- Arima(y, order = c(2, 0, 0))
+# оценим ARMA(1,1)
+mod_2 <- Arima(y, order = c(1, 0, 1))
+
+# результаты оценивания:
+summary(mod_1)
+```
+
+```{r}
+summary(mod_2)
+```
+
+```{r}
+
+# штрафной критерий AIC
+AIC(mod_1)
+```
+
+```{r}
+AIC(mod_2)
+```
+
+```{r}
+
+# оценим ARMA(2,1)
+mod_3 <- Arima(y, order = c(2, 0, 1))
+summary(mod_3)
+AIC(mod_3)
+```
+
+```{r}
+
+# прогнозируем по модели 2 на 5 шагов вперед
+prognoz <- forecast(mod_2, h = 5)
+prognoz
+```
+
+```{r}
+
+# строим график прогноза
+plot(prognoz)
+```
+
+```{r}
+
+# оценим ARIMA(1,1,0)
+mod_4 <- Arima(y, order = c(1, 1, 0))
+AIC(mod_4)
+```
+
+```{r}
+
+# прогноз по модели ARIMA(1,1,0)
+prognoz_4 <- forecast(mod_4, h = 5)
+plot(prognoz_4)
+
+```
+
+``` r
+
+# автоматический подбор модели по штрафному критерию
+mod_a <- auto.arima(y)
+summary(mod_a)
+```
+
+``` r
+
+# прогноз по автоматически подбираемой модели
+prognoz_a <- forecast(mod_a, h = 5)
+plot(prognoz_a)
+
+# загружаем данные по стоимости акций Гугла
+getSymbols(Symbols = "GOOGL", from = "2014-01-01", to = "2016-05-11", src = "yahoo")
+
+
+
+head(GOOGL)  # начало набора данных
+y <- GOOGL$GOOGL.Close  # поместим цену закрытия в переменную y
+
+tsdisplay(y)  # три графика для исходного ряда
+dy <- diff(y)
+tsdisplay(dy)  # три графика для приращений исходного ряда (для первой разности)
+```
+
+``` r
+
+# похоже на случайное блуждание, оценим ARIMA(0,1,0)
+mod_1 <- Arima(y, order = c(0, 1, 0))
+summary(mod_1)
+
+# прогнозируем на 20 шагов вперед
+prognoz_1 <- forecast(mod_1, h = 20)
+prognoz_1
+
+# строим график прогноза
+plot(prognoz_1)
+```
+
+``` r
+
+# автоматический подбор модели
+mod_a <- auto.arima(y)
+summary(mod_a)
+```
+
+``` r
+
+time(y)  # из временного ряда достанет номера моментов времени
+ym <- y[97:nrow(y), ]  # возьмем наблюдения с 97 по последнее
+tsdisplay(as.ts(ym))
+
+# оценим модель AR(1) с сезонной составляющей SAR(1)
+mod_1 <- Arima(ym, order = c(1, 0, 0), seasonal = c(1, 0, 0))
+summary(mod_1)
+AIC(mod_1)
+
+# прогнозируем на год вперед
+prognoz_1 <- forecast(mod_1, h = 12)
+plot(prognoz_1)
+```
+
+``` r
+
+# оцениваем автоматически подбираемую модель
+mod_a <- auto.arima(ym)
+
+# упрощенная версия максимального правдоподобия не прошла запускаем полную, это
+# чуть подольше
+mod_a <- auto.arima(ym, approximation = FALSE)
+
+# прогнозируем на год вперед
+prognoz_a <- forecast(mod_a, h = 12)
+plot(prognoz_a)
+```
