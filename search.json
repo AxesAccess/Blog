@@ -231,20 +231,6 @@
     "text": "Conclusion\nParticipating in YSDA’s intensive training programs has been both challenging and rewarding. My first experience was during GPT Week in 2023, which did not require a qualifying assignment. The final project involved training a model to summarize articles, with flexibility regarding the architecture and implementation details.\nIn contrast, CV Week 2024 presented a more rigorous experience. Both the qualifying assignment and the final project demanded significant effort, especially given my limited background in computer vision. This intensive pushed me to expand my knowledge and skills, making the experience both demanding and educational.\nFor those interested in exploring similar topics, YSDA offers a range of online courses. These resources can provide a solid foundation for tackling advanced subjects in data analysis and machine learning.\nSource code and presentations can be found in my GitHub repository: CV_Week."
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Systems, Data, and a Dash of Curiosity",
-    "section": "",
-    "text": "Implementing a Local Retrieval-Augmented Generation System\n\n\n \n\n\nRAG\n\nNLP\n\nLLM\n\nPython\n\n\n \n\n\n\n\n\nMar 21, 2025\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNerdy Valentine's in Python, R, and Matlab\n\n\n \n\n\nPython\n\nR\n\nMatlab\n\n\n \n\n\n\n\n\nFeb 14, 2025\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nRun Docker Containers Remotely with Airflow\n\n\n \n\n\nAirflow\n\nDocker\n\n\n \n\n\n\n\n\nJan 8, 2025\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nBI System Blueprint\n\n\n \n\n\nBI\n\nETL\n\n\n \n\n\n\n\n\nJan 6, 2025\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCV Week 2024\n\n\n \n\n\nCompVis\n\nML\n\n\n \n\n\n\n\n\nDec 18, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUsing Airflow FileSensor for Triggering ETL Process\n\n\n \n\n\nETL\n\nAirflow\n\n\n \n\n\n\n\n\nNov 5, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nEuropean Tech Salaries\n\n\n \n\n\nMoney\n\nR\n\n\n \n\n\n\n\n\nSep 27, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPython Library for Russian Macroeconomics Data\n\n\n \n\n\nTimeseries\n\nMacroeconomics\n\nPython\n\n\n \n\n\n\n\n\nAug 22, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nKano Method for Prioritization of Features\n\n\n \n\n\nMarketing\n\nProduct\n\nPython\n\n\n \n\n\n\n\n\nAug 5, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nMerging Customers Records Using Graphs in Python\n\n\n \n\n\nPython\n\nGraphs\n\n\n \n\n\n\n\n\nJul 31, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nExploring Geospatial Insights with R and rnaturalearth\n\n\n \n\n\nR\n\nGeo\n\n\n \n\n\n\n\n\nJul 25, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n \n\n\nNews\n\n\n \n\n\n\n\n\nJul 21, 2024\nAleksei \n\n\n\n\n\n\n\nNo matching items"
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "A Systems Engineer’s Take on Data"
-  },
-  {
     "objectID": "posts/20240731-customers-graphs/index.html",
     "href": "posts/20240731-customers-graphs/index.html",
     "title": "Merging Customers Records Using Graphs in Python",
@@ -327,6 +313,125 @@
     "title": "Merging Customers Records Using Graphs in Python",
     "section": "Conclusion",
     "text": "Conclusion\nIn this article, we explored how to merge customer records using graphs. We created a graph of customers, emails, and phones and found groups of connected customers. We assigned a group to each customer and saved the data to a file. This approach can help us identify duplicate records and perform actions depending on our business logic. We also visualized the graph and subgraphs to better understand the relationships between customers. This can be useful for marketing analysis, customer segmentation, and other tasks that require a deep understanding of customer relationships."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "A Systems Engineer’s Take on Data"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Systems, Data, and a Dash of Curiosity",
+    "section": "",
+    "text": "Creating Anki Flashcards From List of Words\n\n\n \n\n\nNLP\n\nPython\n\n\n \n\n\n\n\n\nMay 3, 2025\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nImplementing a Local Retrieval-Augmented Generation System\n\n\n \n\n\nRAG\n\nNLP\n\nLLM\n\nPython\n\n\n \n\n\n\n\n\nMar 21, 2025\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNerdy Valentine's in Python, R, and Matlab\n\n\n \n\n\nPython\n\nR\n\nMatlab\n\n\n \n\n\n\n\n\nFeb 14, 2025\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nRun Docker Containers Remotely with Airflow\n\n\n \n\n\nAirflow\n\nDocker\n\n\n \n\n\n\n\n\nJan 8, 2025\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nBI System Blueprint\n\n\n \n\n\nBI\n\nETL\n\n\n \n\n\n\n\n\nJan 6, 2025\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nCV Week 2024\n\n\n \n\n\nCompVis\n\nML\n\n\n \n\n\n\n\n\nDec 18, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUsing Airflow FileSensor for Triggering ETL Process\n\n\n \n\n\nETL\n\nAirflow\n\n\n \n\n\n\n\n\nNov 5, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nEuropean Tech Salaries\n\n\n \n\n\nMoney\n\nR\n\n\n \n\n\n\n\n\nSep 27, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPython Library for Russian Macroeconomics Data\n\n\n \n\n\nTimeseries\n\nMacroeconomics\n\nPython\n\n\n \n\n\n\n\n\nAug 22, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nKano Method for Prioritization of Features\n\n\n \n\n\nMarketing\n\nProduct\n\nPython\n\n\n \n\n\n\n\n\nAug 5, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nMerging Customers Records Using Graphs in Python\n\n\n \n\n\nPython\n\nGraphs\n\n\n \n\n\n\n\n\nJul 31, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nExploring Geospatial Insights with R and rnaturalearth\n\n\n \n\n\nR\n\nGeo\n\n\n \n\n\n\n\n\nJul 25, 2024\nAleksei \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n \n\n\nNews\n\n\n \n\n\n\n\n\nJul 21, 2024\nAleksei \n\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html",
+    "href": "posts/20250503-anki-part-1/index.html",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "",
+    "text": "This notebook demonstrates how to create Anki flashcards from a list of words. The example uses a list of German words related to “Die Stadt” (The City) and translates them into English. It also generates audio files for the words using Google Text-to-Speech.\n\n\n\n\n\n\nFigure 1"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#introduction",
+    "href": "posts/20250503-anki-part-1/index.html#introduction",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "",
+    "text": "This notebook demonstrates how to create Anki flashcards from a list of words. The example uses a list of German words related to “Die Stadt” (The City) and translates them into English. It also generates audio files for the words using Google Text-to-Speech.\n\n\n\n\n\n\nFigure 1"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#install-required-libraries",
+    "href": "posts/20250503-anki-part-1/index.html#install-required-libraries",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Install Required Libraries",
+    "text": "Install Required Libraries\n!pip install pandas googletrans gtts genanki"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#set-parameters",
+    "href": "posts/20250503-anki-part-1/index.html#set-parameters",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Set Parameters",
+    "text": "Set Parameters\n\nSRC_LANG = \"de\"\nDST_LANG = \"en\"\nDATA_DIR = \"data\"\nSRC_FILE = \"die Stadt.txt\"\nAUDIO_DIR = \"data/audio\""
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#load-words-list",
+    "href": "posts/20250503-anki-part-1/index.html#load-words-list",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Load Words List",
+    "text": "Load Words List\nHere we load the list of words from a text file. The file should contain one word per line, and we will remove any empty lines.\n\nimport pandas as pd\n\nwith open(f\"{DATA_DIR}/{SRC_FILE}\", \"r\") as f:\n    lines = f.readlines()\nlines = [line.strip() for line in lines if line.strip()]  # Remove empty lines\n\ndf = pd.DataFrame(lines, columns=[\"Word\"])\ndf.tail(5)\n\n\n\n\n\n\n\n\nWord\n\n\n\n\n113\ndas Kreuzfahrtschiff / die Kreuzfahrtschiffe\n\n\n114\nzu Fuß\n\n\n115\ndie Fahrkarte / die Fahrkarten\n\n\n116\nder Fahrplan / die Fahrpläne\n\n\n117\ndie Endstation / die Endstationen\n\n\n\n\n\n\n\nIn the particular example, the words are in the format “Word / Plural”. For example, “die Stadt / die Städte” means “the city / the cities (plural)”. Let’s split singular and plural forms into separate rows.\n\ndf[\"Word\"] = df[\"Word\"].str.split(\" / \")\ndf = df.explode(\"Word\").reset_index(drop=True)\ndf.tail(5)\n\n\n\n\n\n\n\n\nWord\n\n\n\n\n228\ndie Fahrkarten\n\n\n229\nder Fahrplan\n\n\n230\ndie Fahrpläne\n\n\n231\ndie Endstation\n\n\n232\ndie Endstationen"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#translate-words",
+    "href": "posts/20250503-anki-part-1/index.html#translate-words",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Translate Words",
+    "text": "Translate Words\nWe will use the googletrans library to translate the words from German to English. The library provides an asynchronous interface for translation, which is useful for bulk processing.\n\nfrom googletrans import Translator\n\n\nasync def translate_bulk(texts: list):\n    async with Translator() as translator:\n        translations = await translator.translate(texts, src=SRC_LANG, dest=DST_LANG)\n        return [translation.text for translation in translations]\n\n\n# await translate_bulk(\n#     [\"die Polizei\", \"die Motorräder\", \"die Krankenhäuser\", \"die Bahnhöfe\", \"die Flugzeuge\"]\n# )\n\nIn the next chunk of code, we will create list of words to translate, then will apply the translate_bulk function to this list.\n\ndf = df.tail(2)\n\ntexts = df[\"Word\"].to_list()\n\ntranslations = await translate_bulk(texts)\n\ntranslations[:5]\n\n['The end station', 'The end stations']\n\n\nThe googletrans library employs undocumented Google Translate API, which may lead to rate limiting or blocking. We will hope that it will work for our case. If you encounter issues, consider using a paid translation service or API.\nNext, we will add the translations to the DataFrame.\n\ndf[\"Translation\"] = translations"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#generate-audio-files",
+    "href": "posts/20250503-anki-part-1/index.html#generate-audio-files",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Generate Audio Files",
+    "text": "Generate Audio Files\nWe will use the gtts library to generate audio files for the words. This library uses Google Text-to-Speech API and it’s free. The generated audio files will be saved in the AUDIO_DIR directory. The filenames will be generated using a hash of the word.\n\nfrom gtts import gTTS\nimport os\nimport hashlib\nfrom functools import lru_cache\n\n\n@lru_cache(maxsize=None)\ndef gen_audio(sentence):\n    h = hashlib.shake_128(sentence.encode()).hexdigest(6)\n    filename = f\"{h}.mp3\"\n    if filename in [f for f in os.listdir(AUDIO_DIR)]:\n        return filename\n    try:\n        gTTS(text=sentence, lang=SRC_LANG, slow=True).save(f\"{AUDIO_DIR}/{filename}\")\n    except Exception as e:\n        return None\n    return filename\n\n\nsample_audio = gen_audio(\"die Krankenhäuser\")\nprint(f\"Audio file saved as: {sample_audio}\")\n\nAudio file saved as: 308d817b87e2.mp3\n\n\nThe gen_audio function generates a hash of the word and checks if the audio file already exists in the AUDIO_DIR. If it does, it returns the filename. If not, it generates the audio file and saves it."
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#add-audio-file-paths-to-dataframe",
+    "href": "posts/20250503-anki-part-1/index.html#add-audio-file-paths-to-dataframe",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Add Audio File Paths to DataFrame",
+    "text": "Add Audio File Paths to DataFrame\n\ndf[\"Audio\"] = df[\"Word\"].apply(gen_audio)"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#shuffle-dataframe",
+    "href": "posts/20250503-anki-part-1/index.html#shuffle-dataframe",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Shuffle DataFrame",
+    "text": "Shuffle DataFrame\nWe will shuffle the DataFrame to randomize the order of the flashcards.\n\ndf = df.sample(frac=1).reset_index(drop=True)"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#set-up-anki-deck-and-model",
+    "href": "posts/20250503-anki-part-1/index.html#set-up-anki-deck-and-model",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Set Up Anki Deck and Model",
+    "text": "Set Up Anki Deck and Model\nWe will use the genanki library to create an Anki deck and model. The model defines the structure of the flashcards, while the deck contains the flashcards themselves. To get unique IDs for the model and deck, we will use random numbers. We will set seed for reproducibility.\n\nimport random\n\nrandom.seed(42)\n\nMODEL_NAME = \"Vocabulary\"\nDECK_NAME = \"Die Stadt\"\nMODEL_ID = random.randrange(1 &lt;&lt; 30, 1 &lt;&lt; 31)\nDECK_ID = random.randrange(1 &lt;&lt; 30, 1 &lt;&lt; 31)"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#add-cards-to-anki-deck",
+    "href": "posts/20250503-anki-part-1/index.html#add-cards-to-anki-deck",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Add Cards to Anki Deck",
+    "text": "Add Cards to Anki Deck\nNext, will create a model for the flashcards and add the cards to the Anki deck.\n\nimport genanki\n\nmy_model = genanki.Model(\n    MODEL_ID,\n    MODEL_NAME,\n    fields=[\n        {\"name\": \"Question\"},\n        {\"name\": \"Answer\"},\n        {\"name\": \"Audio\"},\n    ],\n    templates=[\n        {\n            \"name\": \"{{Question}}\",\n            \"qfmt\": '&lt;div class=\"head\"&gt;{{Question}}&lt;/div&gt;',\n            \"afmt\": '&lt;div class=\"head\"&gt;{{Question}}&lt;/div&gt;&lt;hr id=\"answer\"&gt; \\\n                &lt;div class=\"head\"&gt;{{Answer}}&lt;/div&gt; {{Audio}}',\n        },\n    ],\n    css=\"\"\"\n        .head {font-size: x-large;} \n        .spot {text-decoration: underline;} \n        .sentence {font-style: italic; font-size: normal!important;}\n    \"\"\",\n)\n\nmy_deck = genanki.Deck(\n    DECK_ID,\n    DECK_NAME,\n)\n\nfor i, row in df.iterrows():\n    my_note = genanki.Note(\n        model=my_model,\n        fields=[\n            row[\"Translation\"],\n            row[\"Word\"],\n            f\"[sound:{row['Audio']}]\",\n        ],\n    )\n    my_deck.add_note(my_note)"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#export-anki-deck",
+    "href": "posts/20250503-anki-part-1/index.html#export-anki-deck",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Export Anki Deck",
+    "text": "Export Anki Deck\nFinally, we will export the Anki deck to a file. The file will be saved in the DATA_DIR directory with the name Die Stadt.apkg. The audio files will be included in the package.\n\nmy_package = genanki.Package(my_deck)\nmy_package.media_files = [f\"{AUDIO_DIR}/{filename}\" for filename in df[\"Audio\"].values]\nmy_package.write_to_file(f\"{DATA_DIR}/{DECK_NAME}.apkg\")"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#conclusion",
+    "href": "posts/20250503-anki-part-1/index.html#conclusion",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Conclusion",
+    "text": "Conclusion\nIn this notebook, we learned how to create Anki flashcards from a list of words. We used the googletrans library to translate the words from German to English and the gtts library to generate audio files for the words. Finally, we used the genanki library to create an Anki deck and export it to a file. The generated Anki deck can be imported into Anki app and used for studying the vocabulary."
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#references",
+    "href": "posts/20250503-anki-part-1/index.html#references",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "References",
+    "text": "References\n\nGoogletrans library for Google Translate API\nGoogle Text-to-Speech API (gTTS)\ngenanki: A Library for Generating Anki Decks"
+  },
+  {
+    "objectID": "posts/20250503-anki-part-1/index.html#next-steps",
+    "href": "posts/20250503-anki-part-1/index.html#next-steps",
+    "title": "Creating Anki Flashcards From List of Words",
+    "section": "Next Steps",
+    "text": "Next Steps\nIn the next post we will create Anki flashcards from an arbitrary document like an article or a book."
   },
   {
     "objectID": "posts/20240725-views-of-russia/index.html",
