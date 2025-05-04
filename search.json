@@ -368,7 +368,7 @@
     "href": "posts/20250503-anki-part-1/index.html#translate-words",
     "title": "Creating Anki Flashcards From List of Words",
     "section": "Translate Words",
-    "text": "Translate Words\nWe will use the googletrans library to translate the words from German to English. The library provides an asynchronous interface for translation, which is useful for bulk processing.\n\nfrom googletrans import Translator\n\n\nasync def translate_bulk(texts: list):\n    async with Translator() as translator:\n        translations = await translator.translate(texts, src=SRC_LANG, dest=DST_LANG)\n        return [translation.text for translation in translations]\n\n\n# await translate_bulk(\n#     [\"die Polizei\", \"die Motorräder\", \"die Krankenhäuser\", \"die Bahnhöfe\", \"die Flugzeuge\"]\n# )\n\nIn the next chunk of code, we will create list of words to translate, then will apply the translate_bulk function to this list.\n\ndf = df.tail(2)\n\ntexts = df[\"Word\"].to_list()\n\ntranslations = await translate_bulk(texts)\n\ntranslations[:5]\n\n['The end station', 'The end stations']\n\n\nThe googletrans library employs undocumented Google Translate API, which may lead to rate limiting or blocking. We will hope that it will work for our case. If you encounter issues, consider using a paid translation service or API.\nNext, we will add the translations to the DataFrame.\n\ndf[\"Translation\"] = translations"
+    "text": "Translate Words\nWe will use the googletrans library to translate the words from German to English. The library provides an asynchronous interface for translation, which is useful for bulk processing.\n\nfrom googletrans import Translator\n\n\nasync def translate_bulk(texts: list):\n    async with Translator() as translator:\n        translations = await translator.translate(texts, src=SRC_LANG, dest=DST_LANG)\n        return [translation.text for translation in translations]\n\n\nawait translate_bulk(\n    [\"die Polizei\", \"die Motorräder\", \"die Krankenhäuser\", \"die Bahnhöfe\", \"die Flugzeuge\"]\n)\n\n['the police',\n 'The motorcycles',\n 'The hospitals',\n 'The train stations',\n 'The aircraft']\n\n\nIn the next chunk of code, we will create list of words to translate, then will apply the translate_bulk function to this list.\n\ntexts = df[\"Word\"].to_list()\n\ntranslations = await translate_bulk(texts)\n\ntranslations[:5]\n\n['the city', 'the cities', 'the village', 'The villages', 'the street']\n\n\nThe googletrans library employs undocumented Google Translate API, which may lead to rate limiting or blocking. We will hope that it will work for our case. If you encounter issues, consider using a paid translation service or API.\nNext, we will add the translations to the DataFrame.\n\ndf[\"Translation\"] = translations"
   },
   {
     "objectID": "posts/20250503-anki-part-1/index.html#generate-audio-files",
@@ -424,14 +424,14 @@
     "href": "posts/20250503-anki-part-1/index.html#references",
     "title": "Creating Anki Flashcards From List of Words",
     "section": "References",
-    "text": "References\n\nGoogletrans library for Google Translate API\nGoogle Text-to-Speech API (gTTS)\ngenanki: A Library for Generating Anki Decks"
+    "text": "References\n\nAnki apps\nShared Decks - AnkiWeb"
   },
   {
     "objectID": "posts/20250503-anki-part-1/index.html#next-steps",
     "href": "posts/20250503-anki-part-1/index.html#next-steps",
     "title": "Creating Anki Flashcards From List of Words",
     "section": "Next Steps",
-    "text": "Next Steps\nIn the next post we will create Anki flashcards from an arbitrary document like an article or a book."
+    "text": "Next Steps\nIn the next notebook we will create Anki flashcards from an arbitrary document like an article or a book."
   },
   {
     "objectID": "posts/20240725-views-of-russia/index.html",
