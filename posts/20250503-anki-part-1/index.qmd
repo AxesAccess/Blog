@@ -298,12 +298,8 @@ app and used for studying the vocabulary.
 
 ## References
 
--   [Googletrans library for Google Translate
-    API](https://github.com/ssut/py-googletrans){target="_blank"}
--   [Google Text-to-Speech API
-    (gTTS)](https://github.com/pndurette/gTTS){target="_blank"}
--   [genanki: A Library for Generating Anki
-    Decks](https://github.com/kerrickstaley/genanki/){target="_blank"}
+-   [Anki apps](https://apps.ankiweb.net/){target="_blank"}
+-   [Shared Decks - AnkiWeb](https://ankiweb.net/shared/decks){target="_blank"}
 
 ## Next Steps
 
