@@ -221,7 +221,7 @@ Figure&nbsp;1
 </section>
 <section id="set-parameters" class="level2">
 <h2 class="anchored" data-anchor-id="set-parameters">Set Parameters</h2>
-<div id="321ba91c" class="cell" data-execution_count="1">
+<div id="a7cd7cf2" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>SRC_LANG <span class="op">=</span> <span class="st">"de"</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>DST_LANG <span class="op">=</span> <span class="st">"en"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>DATA_DIR <span class="op">=</span> <span class="st">"data"</span></span>
@@ -232,7 +232,7 @@ Figure&nbsp;1
 <section id="load-words-list" class="level2">
 <h2 class="anchored" data-anchor-id="load-words-list">Load Words List</h2>
 <p>Here we load the list of words from a text file. The file should contain one word per line, and we will remove any empty lines.</p>
-<div id="2c2447c8" class="cell" data-execution_count="2">
+<div id="c817e2e3" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="ss">f"</span><span class="sc">{</span>DATA_DIR<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>SRC_FILE<span class="sc">}</span><span class="ss">"</span>, <span class="st">"r"</span>) <span class="im">as</span> f:</span>
@@ -241,7 +241,7 @@ Figure&nbsp;1
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(lines, columns<span class="op">=</span>[<span class="st">"Word"</span>])</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>df.tail(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
+<div class="cell-output cell-output-display" data-execution_count="19">
 <div>
 
 
@@ -280,11 +280,11 @@ Figure&nbsp;1
 </div>
 </div>
 <p>In the particular example, the words are in the format “Word / Plural”. For example, “die Stadt / die Städte” means “the city / the cities (plural)”. Let’s split singular and plural forms into separate rows.</p>
-<div id="38e042fe" class="cell" data-execution_count="3">
+<div id="414b7eb5" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Word"</span>] <span class="op">=</span> df[<span class="st">"Word"</span>].<span class="bu">str</span>.split(<span class="st">" / "</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.explode(<span class="st">"Word"</span>).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>df.tail(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="20">
 <div>
 
 
@@ -326,20 +326,19 @@ Figure&nbsp;1
 <section id="translate-words" class="level2">
 <h2 class="anchored" data-anchor-id="translate-words">Translate Words</h2>
 <p>We will use the <code>googletrans</code> library to translate the words from German to English. The library provides an asynchronous interface for translation, which is useful for bulk processing.</p>
-<div id="bf1857b8" class="cell" data-execution_count="5">
+<div id="b40f21cd" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> googletrans <span class="im">import</span> Translator</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> translate_bulk(texts: <span class="bu">list</span>):</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">async</span> <span class="cf">with</span> Translator() <span class="im">as</span> translator:</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        translations <span class="op">=</span> <span class="cf">await</span> translator.translate(texts, src<span class="op">=</span>SRC_LANG, dest<span class="op">=</span>DST_LANG)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [translation.text <span class="cf">for</span> translation <span class="kw">in</span> translations]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> translate_bulk(texts: <span class="bu">list</span>):</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">async</span> <span class="cf">with</span> Translator() <span class="im">as</span> translator:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        translations <span class="op">=</span> <span class="cf">await</span> translator.translate(texts, src<span class="op">=</span>SRC_LANG, dest<span class="op">=</span>DST_LANG)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [translation.text <span class="cf">for</span> translation <span class="kw">in</span> translations]</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> translate_bulk(</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"die Polizei"</span>, <span class="st">"die Motorräder"</span>, <span class="st">"die Krankenhäuser"</span>, <span class="st">"die Bahnhöfe"</span>, <span class="st">"die Flugzeuge"</span>]</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> translate_bulk(</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    [<span class="st">"die Polizei"</span>, <span class="st">"die Motorräder"</span>, <span class="st">"die Krankenhäuser"</span>, <span class="st">"die Bahnhöfe"</span>, <span class="st">"die Flugzeuge"</span>]</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
 <pre><code>['the police',
  'The motorcycles',
  'The hospitals',
@@ -348,72 +347,69 @@ Figure&nbsp;1
 </div>
 </div>
 <p>In the next chunk of code, we will create list of words to translate, then will apply the <code>translate_bulk</code> function to this list.</p>
-<div id="5717d7d6" class="cell" data-execution_count="6">
+<div id="950a3770" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>texts <span class="op">=</span> df[<span class="st">"Word"</span>].to_list()</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>translations <span class="op">=</span> <span class="cf">await</span> translate_bulk(texts)</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>translations[:<span class="dv">5</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
+<div class="cell-output cell-output-display" data-execution_count="23">
 <pre><code>['the city', 'the cities', 'the village', 'The villages', 'the street']</code></pre>
 </div>
 </div>
 <p>The <code>googletrans</code> library employs undocumented Google Translate API, which may lead to rate limiting or blocking. We will hope that it will work for our case. If you encounter issues, consider using a paid translation service or API.</p>
 <p>Next, we will add the translations to the DataFrame.</p>
-<div id="3e5cf50f" class="cell" data-execution_count="7">
+<div id="e700393c" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Translation"</span>] <span class="op">=</span> translations</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="generate-audio-files" class="level2">
 <h2 class="anchored" data-anchor-id="generate-audio-files">Generate Audio Files</h2>
 <p>We will use the <code>gtts</code> library to generate audio files for the words. This library uses Google Text-to-Speech API and it’s free. The generated audio files will be saved in the <code>AUDIO_DIR</code> directory. The filenames will be generated using a hash of the word.</p>
-<div id="006d665b" class="cell" data-execution_count="8">
+<div id="20163430" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gtts <span class="im">import</span> gTTS</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> hashlib</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> lru_cache</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="at">@lru_cache</span>(maxsize<span class="op">=</span><span class="va">None</span>)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_audio(sentence):</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> hashlib.shake_128(sentence.encode()).hexdigest(<span class="dv">6</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    filename <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>h<span class="sc">}</span><span class="ss">.mp3"</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> filename <span class="kw">in</span> [f <span class="cf">for</span> f <span class="kw">in</span> os.listdir(AUDIO_DIR)]:</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> filename</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        gTTS(text<span class="op">=</span>sentence, lang<span class="op">=</span>SRC_LANG, slow<span class="op">=</span><span class="va">True</span>).save(<span class="ss">f"</span><span class="sc">{</span>AUDIO_DIR<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>filename<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> filename</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>sample_audio <span class="op">=</span> gen_audio(<span class="st">"die Krankenhäuser"</span>)</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Audio file saved as: </span><span class="sc">{</span>sample_audio<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gen_audio(sentence):</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> hashlib.shake_128(sentence.encode()).hexdigest(<span class="dv">6</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    filename <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>h<span class="sc">}</span><span class="ss">.mp3"</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> filename <span class="kw">in</span> [f <span class="cf">for</span> f <span class="kw">in</span> os.listdir(AUDIO_DIR)]:</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> filename</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        gTTS(text<span class="op">=</span>sentence, lang<span class="op">=</span>SRC_LANG, slow<span class="op">=</span><span class="va">True</span>).save(<span class="ss">f"</span><span class="sc">{</span>AUDIO_DIR<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>filename<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> filename</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>sample_audio <span class="op">=</span> gen_audio(<span class="st">"die Krankenhäuser"</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Audio file saved as: </span><span class="sc">{</span>sample_audio<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Audio file saved as: 308d817b87e2.mp3</code></pre>
 </div>
 </div>
 <p>The <code>gen_audio</code> function generates a hash of the word and checks if the audio file already exists in the <code>AUDIO_DIR</code>. If it does, it returns the filename. If not, it generates the audio file and saves it.</p>
-<audio controls="1" src="data/audio/308d817b87e2.mp3" preload="auto">
+<audio controls="1" src="https://github.com/AxesAccess/Blog/raw/refs/heads/main/posts/20250503-anki-part-1/data/audio/308d817b87e2.mp3" preload="auto">
 </audio>
 </section>
 <section id="add-audio-file-paths-to-dataframe" class="level2">
 <h2 class="anchored" data-anchor-id="add-audio-file-paths-to-dataframe">Add Audio File Paths to DataFrame</h2>
-<div id="ed592d46" class="cell" data-execution_count="9">
+<div id="84d2d3e4" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Audio"</span>] <span class="op">=</span> df[<span class="st">"Word"</span>].<span class="bu">apply</span>(gen_audio)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="shuffle-dataframe" class="level2">
 <h2 class="anchored" data-anchor-id="shuffle-dataframe">Shuffle DataFrame</h2>
 <p>We will shuffle the DataFrame to randomize the order of the flashcards.</p>
-<div id="96161ba5" class="cell" data-execution_count="10">
+<div id="cf13bb97" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.sample(frac<span class="op">=</span><span class="dv">1</span>).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="set-up-anki-deck-and-model" class="level2">
 <h2 class="anchored" data-anchor-id="set-up-anki-deck-and-model">Set Up Anki Deck and Model</h2>
 <p>We will use the <code>genanki</code> library to create an Anki deck and model. The model defines the structure of the flashcards, while the deck contains the flashcards themselves. To get unique IDs for the model and deck, we will use random numbers. We will set seed for reproducibility.</p>
-<div id="c0246c05" class="cell" data-execution_count="11">
+<div id="0c74803d" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>random.seed(<span class="dv">42</span>)</span>
@@ -427,7 +423,7 @@ Figure&nbsp;1
 <section id="add-cards-to-anki-deck" class="level2">
 <h2 class="anchored" data-anchor-id="add-cards-to-anki-deck">Add Cards to Anki Deck</h2>
 <p>Next, will create a model for the flashcards and add the cards to the Anki deck.</p>
-<div id="fb29ce81" class="cell" data-execution_count="12">
+<div id="662d184a" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> genanki</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>my_model <span class="op">=</span> genanki.Model(</span>
@@ -473,7 +469,7 @@ Figure&nbsp;1
 <section id="export-anki-deck" class="level2">
 <h2 class="anchored" data-anchor-id="export-anki-deck">Export Anki Deck</h2>
 <p>Finally, we will export the Anki deck to a file. The file will be saved in the <code>DATA_DIR</code> directory with the name <strong>Die Stadt.apkg</strong>. The audio files will be included in the package.</p>
-<div id="cb4a7691" class="cell" data-execution_count="13">
+<div id="3f07f93e" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>my_package <span class="op">=</span> genanki.Package(my_deck)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>my_package.media_files <span class="op">=</span> [<span class="ss">f"</span><span class="sc">{</span>AUDIO_DIR<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>filename<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> filename <span class="kw">in</span> df[<span class="st">"Audio"</span>].values]</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>my_package.write_to_file(<span class="ss">f"</span><span class="sc">{</span>DATA_DIR<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>DECK_NAME<span class="sc">}</span><span class="ss">.apkg"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
