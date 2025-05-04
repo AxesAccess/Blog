@@ -60,14 +60,12 @@ df.tail(5)
 ```
 
 ```{python}
-#| echo: false
+#| include: false
 
-import random
 import numpy as np
+import random
 from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 
-random.seed(42)
 COLORMAP = "Dark2"
 
 words = df.sample(frac=1)["Word"].str.split(" ").explode().to_list()
@@ -108,8 +106,6 @@ wordcloud = WordCloud(
 
 
 wordcloud.to_file("image.png")
-
-plt.close()
 ```
 
 ## Translate Words
@@ -120,7 +116,6 @@ translation, which is useful for bulk processing.
 
 ```{python}
 from googletrans import Translator
-
 
 async def translate_bulk(texts: list):
     async with Translator() as translator:
@@ -166,10 +161,7 @@ will be generated using a hash of the word.
 from gtts import gTTS
 import os
 import hashlib
-from functools import lru_cache
 
-
-@lru_cache(maxsize=None)
 def gen_audio(sentence):
     h = hashlib.shake_128(sentence.encode()).hexdigest(6)
     filename = f"{h}.mp3"
@@ -190,7 +182,7 @@ The `gen_audio` function generates a hash of the word and checks if the
 audio file already exists in the `AUDIO_DIR`. If it does, it returns the
 filename. If not, it generates the audio file and saves it.
 
-<audio controls="1" src="data/audio/308d817b87e2.mp3" preload="auto">
+<audio controls="1" src="https://github.com/AxesAccess/Blog/raw/refs/heads/main/posts/20250503-anki-part-1/data/audio/308d817b87e2.mp3" preload="auto">
 
 </audio>
 
@@ -298,12 +290,9 @@ app and used for studying the vocabulary.
 
 ## References
 
--   [Googletrans library for Google Translate
-    API](https://github.com/ssut/py-googletrans){target="_blank"}
--   [Google Text-to-Speech API
-    (gTTS)](https://github.com/pndurette/gTTS){target="_blank"}
--   [genanki: A Library for Generating Anki
-    Decks](https://github.com/kerrickstaley/genanki/){target="_blank"}
+-   [Anki apps](https://apps.ankiweb.net/){target="_blank"}
+-   [Shared Decks -
+    AnkiWeb](https://ankiweb.net/shared/decks){target="_blank"}
 
 ## Next Steps
 
