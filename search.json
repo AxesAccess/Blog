@@ -317,9 +317,51 @@
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About",
+    "title": "About Me",
     "section": "",
-    "text": "A Systems Engineer’s Take on Data"
+    "text": "I’m an entrepreneur and data enthusiast with a strong focus on using analytics to drive smarter business decisions. After years of running my own company, I transitioned into the data space to turn intuition and experience into measurable insights."
+  },
+  {
+    "objectID": "about.html#from-business-to-data",
+    "href": "about.html#from-business-to-data",
+    "title": "About Me",
+    "section": "From Business to Data",
+    "text": "From Business to Data\nAs a business owner, I managed operations, strategy, and performance using data long before I wrote my first line of Python. That hands-on experience gave me a practical understanding of what metrics matter and how to translate numbers into action. Today, I apply data science tools to solve business problems at scale."
+  },
+  {
+    "objectID": "about.html#what-i-do",
+    "href": "about.html#what-i-do",
+    "title": "About Me",
+    "section": "What I Do",
+    "text": "What I Do\nMy work centers around solving business challenges with data. Current focus areas include:\n\nAutomating reporting and KPIs using SQL, Python, and Power BI\n\nForecasting finance using statistical and ML models\n\nDesigning ETL pipelines with Docker and Airflow\n\nMaking sense of real-world data to support business growth"
+  },
+  {
+    "objectID": "about.html#about-this-blog",
+    "href": "about.html#about-this-blog",
+    "title": "About Me",
+    "section": "About This Blog",
+    "text": "About This Blog\nThis blog is my portfolio and a space to explore ideas, document projects, and share solutions. It’s built to demonstrate how I approach analytics from a business-first perspective."
+  },
+  {
+    "objectID": "about.html#featured-projects",
+    "href": "about.html#featured-projects",
+    "title": "About Me",
+    "section": "Featured Projects",
+    "text": "Featured Projects\n\nBusiness Intelligence System\n\nForecash: Income and Expenses Forecasting Using TSLM\n\nContentMate: End-to-End Product Cards Generation Using LLMs\n\nRetrieval-Augmented Generation"
+  },
+  {
+    "objectID": "about.html#outside-of-work",
+    "href": "about.html#outside-of-work",
+    "title": "About Me",
+    "section": "Outside of Work",
+    "text": "Outside of Work\n  Instagram     Facebook \nWhen I’m not working with data, you can find me behind the camera. Photography is my creative outlet—it helps me slow down, observe the world, and enjoy the process of framing and storytelling in a different medium."
+  },
+  {
+    "objectID": "about.html#lets-connect",
+    "href": "about.html#lets-connect",
+    "title": "About Me",
+    "section": "Let’s Connect",
+    "text": "Let’s Connect\n\n\nThanks for stopping by."
   },
   {
     "objectID": "index.html",
