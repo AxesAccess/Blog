@@ -1,8 +1,8 @@
 ---
-title: "About"
+title: "About Me"
 image: profile.jpg
 about:
-  template: jolla
+  template: solana
   links:
     - icon: linkedin
       text: LinkedIn
@@ -13,9 +13,73 @@ about:
     - icon: facebook
       text: Facebook
       href: https://www.facebook.com/aleksei.pr
-    - icon: twitter
-      text: Twitter
-      href: https://twitter.com/alexparty
+    - icon: instagram
+      text: Instagram
+      href: https://www.instagram.com/tele.camera
+
+format:
+  html:
+      include-in-header:
+      - text: |
+          <script src="https://platform.linkedin.com/badges/js/profile.js" async defer type="text/javascript"></script>
 ---
 
-A Systems Engineer's Take on Data
+I'm an entrepreneur and data enthusiast with a strong focus on using
+analytics to drive smarter business decisions. After years of running
+my own company, I transitioned into the data space to turn intuition
+and experience into measurable insights.
+
+## From Business to Data
+
+As a business owner, I managed operations, strategy, and performance
+using data long before I wrote my first line of Python. That hands-on
+experience gave me a practical understanding of what metrics matter
+and how to translate numbers into action. Today, I apply data science
+tools to solve business problems at scale.
+
+## What I Do
+
+My work centers around solving business challenges with data. Current
+focus areas include:
+
+-   Automating reporting and KPIs using SQL, Python, and Power BI\
+-   Forecasting finance using statistical and ML models\
+-   Designing ETL pipelines with Docker and Airflow\
+-   Making sense of real-world data to support business growth
+
+## About This Blog
+
+This blog is my portfolio and a space to explore ideas, document
+projects, and share solutions. It’s built to demonstrate how I approach
+analytics from a business-first perspective.
+
+## Featured Projects
+
+-   [Business Intelligence System](/Blog/posts/20250106-bi-flowchart/)\
+-   **Forecash**: Income and Expenses Forecasting Using TSLM\
+-   **ContentMate**: End-to-End Product Cards Generation Using LLMs\
+-   [Retrieval-Augmented Generation](/Blog/posts/20250321-rag/)
+
+## Outside of Work
+
+<a href="https://www.instagram.com/tele.camera" class="about-link" rel="" target="" data-original-href="https://www.instagram.com/tele.camera">
+  <i class="bi bi-instagram"></i>
+  <span class="about-link-text">Instagram</span>
+</a>&nbsp;
+<a href="https://www.facebook.com/aleksei.pr" class="about-link" rel="" target="" data-original-href="https://www.facebook.com/aleksei.pr">
+  <i class="bi bi-facebook"></i>
+  <span class="about-link-text">Facebook</span>
+</a>
+
+When I'm not working with data, you can find me behind the camera.
+Photography is my creative outlet—it helps me slow down, observe the
+world, and enjoy the process of framing and storytelling in
+a different medium. 
+
+
+## Let’s Connect
+
+<div class="badge-base LI-profile-badge" data-locale="en_US" data-size="large" data-theme="light" data-type="HORIZONTAL" data-vanity="telecamera" data-version="v1"></div>
+
+
+*Thanks for stopping by.*
