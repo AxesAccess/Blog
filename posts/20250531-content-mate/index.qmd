@@ -1,0 +1,18 @@
+---
+title: "Product Cards Creation Application"
+author: "Aleksei"
+date: "2025-05-31"
+categories: [App, LLM, Python]
+image: "mark-konig-Tl8mDaue_II-unsplash_square.jpg"
+---
+
+This application is designed to create product cards for an online
+store. It utilizes a large language model (LLM) and programming libraries to
+generate detailed descriptions based on product specifications, images,
+and files. This allows a business to streamline the process of crafting
+informative and engaging product listings with minimal manual effort.
+This enhances both productivity and content quality.
+
+<iframe src="https://www.slideshare.net/slideshow/embed_code/key/IbRieUYqIHBipZ" width="799" height="505" frameborder="0" marginwidth="0" marginheight="0" scrolling="no">
+
+</iframe>
