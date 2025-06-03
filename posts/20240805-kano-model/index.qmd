@@ -3,7 +3,7 @@ title: "Kano Method for Prioritization of Features"
 author: "Aleksei"
 date: "2024-08-05"
 categories: [Marketing, Product, Python]
-image: "image.png"
+image: "image.svg"
 ---
 
 The Kano model is a theory for product development and customer
@@ -555,7 +555,7 @@ plt.legend(
 )
 
 
-plt.savefig("image.png", dpi=300, bbox_inches="tight")
+plt.savefig("image.svg", dpi=300, bbox_inches="tight")
 plt.close()
 ```
 

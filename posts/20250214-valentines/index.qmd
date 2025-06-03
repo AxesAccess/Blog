@@ -3,7 +3,7 @@ title: "Nerdy Valentine's in Python, R, and Matlab"
 author: "Aleksei"
 date: "2025-02-14"
 categories: [Python, R, Matlab]
-image: "image.png"
+image: "image.svg"
 ---
 
 Let's celebrate Valentine's Day with some nerdy love! In this post, we
@@ -76,7 +76,7 @@ ax.set_xticklabels([])
 ax.set_yticklabels([])
 ax.set_zticklabels([])
 
-fig.savefig("image.png", dpi=150, bbox_inches="tight")
+fig.savefig("image.svg", dpi=150, bbox_inches="tight")
 
 ```
 
@@ -120,8 +120,8 @@ contour3d(values,
 
 ## Matlab
 
-The code for plotting 3D shape in Matlab is much more laconic than in Python or R. Here
-is how to plot a heart shape in Matlab:
+The code for plotting 3D shape in Matlab is much more laconic than in
+Python or R. Here is how to plot a heart shape in Matlab:
 
 ``` matlab
 

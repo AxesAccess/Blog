@@ -3,7 +3,7 @@ title: "Implementing a Local Retrieval-Augmented Generation System"
 author: "Aleksei"
 date: "2025-03-21"
 categories: [RAG, NLP, LLM, Python]
-image: "image.png"
+image: "image.svg"
 ---
 
 ## What is RAG?
@@ -45,7 +45,8 @@ Let's get started by installing the necessary libraries and setting up
 the components for our RAG system.
 
 ``` python
-!pip install bitsandbytes faiss-cpu langchain langchain_community langchain_huggingface sentence-transformers --quiet
+!pip install bitsandbytes faiss-cpu langchain langchain_community \
+langchain_huggingface sentence-transformers --quiet
 ```
 
 ``` python
