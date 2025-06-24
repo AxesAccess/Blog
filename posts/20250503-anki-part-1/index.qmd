@@ -205,17 +205,15 @@ df = df.sample(frac=1).reset_index(drop=True)
 We will use the `genanki` library to create an Anki deck and model. The
 model defines the structure of the flashcards, while the deck contains
 the flashcards themselves. To get unique IDs for the model and deck, we
-will use random numbers. We will set seed for reproducibility.
+will use hash of the deck name and model name.
 
 ```{python}
-import random
-
-random.seed(42)
+from hashlib import shake_128
 
 MODEL_NAME = "Vocabulary"
 DECK_NAME = "Die Stadt"
-MODEL_ID = random.randrange(1 << 30, 1 << 31)
-DECK_ID = random.randrange(1 << 30, 1 << 31)
+MODEL_ID = shake_128(MODEL_NAME.encode()).hexdigest(10)
+DECK_ID = shake_128(DECK_NAME.encode()).hexdigest(10)
 ```
 
 ## Add Cards to Anki Deck
