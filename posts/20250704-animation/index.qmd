@@ -1,0 +1,317 @@
+---
+title: "Animation of Spatial Data"
+author: "Aleksei"
+date: "2025-07-04"
+categories: [Visualization, Timeseries, R]
+image: "image.png"
+draft: true
+---
+
+```{r libraries}
+#| message: false
+#| warning: false
+#| include: false
+library(ggplot2)
+library(dplyr)
+library(gganimate)
+library(stringr)
+library(data.table)
+library(rvest)
+library(here)
+
+library(sf)
+library(ggplot2)
+library(scales)
+library(tidyterra)
+library(ggthemes)
+library(rgeoboundaries)
+library(h3jsr)
+library(maptiles)
+library(gganimate)
+
+knitr::opts_chunk$set(dpi = 300, fig.width = 7)
+knitr::opts_knit$set(root.dir = "~/Blog/posts/20250704-animation")
+setwd("~/Blog/posts/20250704-animation")
+```
+
+## Load the stations data
+
+```{r load-stations-data}
+url <- "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/subdaily/air_temperature/historical/"
+stations_file <- "TU_Terminwerte_Beschreibung_Stationen.txt"
+if (!file.exists("data")) {
+  dir.create("data")
+}
+if (!file.exists(paste0("data/", stations_file))) {
+  download.file(paste0(url, stations_file), paste0("data/", stations_file), mode = "wb")
+}
+```
+
+```{r}
+url <- "https://opendata.dwd.de/climate_environment/CDC/observations_germany/climate/subdaily/air_temperature/historical/"
+
+pageMen <- read_html(url)
+
+links <- pageMen |>
+  html_nodes("a") |>
+  html_attr("href")
+
+links <- links[!is.na(links) & str_detect(links, "terminwerte")]
+links <- links |> data.table()
+links[1:5]
+```
+
+```{r}
+links[, STATIONS_ID := str_extract(links, "[0-9]{5}")]
+links[, STATIONS_ID := as.integer(STATIONS_ID)]
+```
+
+```{r read-stations-data}
+
+col_names <- c(
+  "STATIONS_ID", "von_datum", "bis_datum", "Stationshoehe", "lat",
+  "lon", "Stationsname", "Bundesland", "Abgabe"
+)
+
+stations <- read.fwf("data/TU_Terminwerte_Beschreibung_Stationen.txt",
+  widths = c(6, 9, 9, 15, 12, 10, 41, 41, 5), skip = 2,
+  fileEncoding = "Windows-1252", col.names = col_names
+) |> as.data.table()
+
+
+stations[, von_datum := as.Date(str_trim(von_datum), format = "%Y%m%d")]
+stations[, bis_datum := as.Date(str_trim(bis_datum), format = "%Y%m%d")]
+stations[, lon := as.numeric(lon)]
+stations[, lat := as.numeric(lat)]
+```
+
+```{r filter-stations-data}
+stations <- stations[von_datum <= "2015-01-01" & bis_datum >= "2025-01-01"]
+
+links <- links[stations, on = "STATIONS_ID"]
+```
+
+```{r}
+#| message: false
+#| warning: false
+
+# check if the files exist
+files <- list.files("data", full.names = TRUE)
+files <- files[str_detect(files, "produkt_tu_termin")]
+
+if (length(files) == 0) {
+  for (link in links$links) {
+    download.file(paste0(url, link), paste0("data/", link), mode = "wb")
+    unzip(paste0("data/", link), exdir = "data")
+    unlink("data/Metadaten*")
+    unlink("data/*.html")
+  }
+  
+}
+unlink("data/*.zip")
+```
+
+```{r}
+library(duckdb)
+
+con <- dbConnect(duckdb(), dbdir = here("posts/20250704-animation/db", "weather.duckdb"))
+tables <- dbGetQuery(con, "SHOW ALL TABLES;")["name"] |> as.character()
+
+if (!("observations" %in% tables)) {
+  files <- list.files("data", full.names = TRUE)
+  files <- files[str_detect(files, "produkt_tu_termin")]
+
+  start_date <- "2015-01-01"
+
+  observations <- data.table()
+
+  for (file in files) {
+    temp_data <- read.csv(file, sep = ";") |> as.data.table()
+    temp_data[, MESS_DATUM := as.Date(str_trim(MESS_DATUM), format = "%Y%m%d")]
+    temp_data <- temp_data[MESS_DATUM >= start_date]
+    temp_data
+    observations <- rbind(
+      observations,
+      temp_data
+    )
+  }
+
+  observations <- observations[TT_TER != -999 & RF_TER != -999]
+
+  if (!file.exists("db")) {
+    dir.create("db")
+  }
+
+  con <- dbConnect(duckdb(), dbdir = here("posts/20250704-animation/db", "weather.duckdb"))
+  dbWriteTable(con, "observations", observations, overwrite = TRUE)
+}
+
+observations <- dbGetQuery(con, "SELECT * FROM observations") |> as.data.table()
+observations |> glimpse()
+```
+
+
+```{r}
+observations <- observations[, .(
+  .N,
+  temp_min = min(TT_TER, na.rm = TRUE),
+  temp_max = max(TT_TER, na.rm = TRUE),
+  humidity_min = min(RF_TER, na.rm = TRUE),
+  humidity_max = max(RF_TER, na.rm = TRUE)
+), by = c("STATIONS_ID", "MESS_DATUM")]
+
+observations <- observations[N > 1]
+```
+
+```{r}
+library(zoo)
+
+observations[MESS_DATUM > "2024-01-01" & STATIONS_ID == 73] |>
+  ggplot(aes(x = MESS_DATUM, y = temp_max)) +
+  geom_line() +
+  geom_line(aes(y = rollmean(temp_max, 7, na.pad = TRUE)), color = "blue") +
+  labs(title = "Temperature Observations", x = NULL, y = "Maximum Temperature (°C)") +
+  theme_minimal()
+```
+
+```{r process-stations-data}
+points <- stations[, .(lon, lat)] |> unique()
+
+points[, h3_address := point_to_cell(points, res = 5)]
+
+stations <- stations[, c(
+  "STATIONS_ID", "von_datum", "bis_datum", "Stationshoehe",
+  "lat", "lon", "Stationsname", "Bundesland", "Abgabe"
+)]
+
+stations[points, on = .(lon, lat), h3_address := h3_address]
+
+stations <- stations[, geometry := cell_to_polygon(h3_address, simple = F)[2]]
+```
+
+```{r}
+boundaries <- geoboundaries("Germany", release_type = "gbOpen", adm_lvl = "adm1")
+```
+
+```{r}
+observations <- observations[stations, on = "STATIONS_ID"]
+```
+
+```{r}
+
+min_date <- observations[, MESS_DATUM] |> min(na.rm = TRUE)
+max_date <- observations[, MESS_DATUM] |> max(na.rm = TRUE)
+
+min_date <- max(c(min_date, as.Date("2024-01-01")))
+max_date <- min(c(max_date, as.Date("2024-12-31")))
+
+max_temp <- observations[(MESS_DATUM >= min_date) & (MESS_DATUM <= max_date), temp_max] |> max(na.rm = TRUE)
+min_temp <- observations[(MESS_DATUM >= min_date) & (MESS_DATUM <= max_date), temp_min] |> min(na.rm = TRUE)
+
+dates <- seq(min_date, max_date, by=1)
+
+for (d in as.character(dates)) {
+  p <- ggplot(aes(fill = temp_max), data = observations[MESS_DATUM == d] |> as.data.frame()) +
+    geom_sf(data = boundaries, fill = "gray78", color = "gray54") +
+    geom_sf(aes(geometry = geometry), color = "gray78") +
+    scale_fill_whitebox_c(
+      palette = "bl_yl_rd",
+      direction = 1,
+      limits = c(min_temp, max_temp)
+    ) +
+    coord_sf(default_crs = sf::st_crs(4326)) +
+    theme_void() +
+    theme(
+      legend.position = "bottom",
+      legend.key.height = unit(4, "pt"),
+      legend.key.width = unit(40, "pt"),
+      legend.title.position = "top",
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      plot.background = element_rect(fill = NA, color = NA),
+      title = element_text(size = 8, color = "gray35")
+    ) +
+    labs(title = d, fill = "Max Temp (°C)")
+
+  ggsave(here("posts", "20250704-animation", "figures", paste0("temp-", d, ".png")),
+    plot = p,
+    units = "px",
+    width = 1200,
+    height = 1200,
+    dpi = 300
+  )
+}
+
+
+```
+
+```{r}
+library(gifski)
+
+png_files <- list.files(here("posts", "20250704-animation", "figures"), full.names = TRUE, pattern = "temp.+\\.png") |>
+  sort() |>
+  as.character()
+
+gif_file <- here("posts", "20250704-animation", "figures", "animation.gif")
+
+gifski(png_files, gif_file, width = 1200, height = 1200, delay = 0.1, loop = TRUE)
+```
+
+```{r}
+
+max_humidity <- observations[, humidity_max] |> max(na.rm = TRUE)
+min_humidity <- observations[, humidity_min] |> min(na.rm = TRUE)
+min_date <- observations[, MESS_DATUM] |> min(na.rm = TRUE)
+max_date <- observations[, MESS_DATUM] |> max(na.rm = TRUE)
+
+min_date <- max(c(min_date, as.Date("2024-01-01")))
+max_date <- min(c(max_date, as.Date("2024-12-31")))
+
+dates <- seq(min_date, max_date, by="day")
+
+for (d in as.character(dates)) {
+  p <- ggplot(aes(fill = temp_max), data = observations[MESS_DATUM == d] |> as.data.frame()) +
+    geom_sf(data = boundaries, fill = "gray78", color = "gray54") +
+    geom_sf(aes(geometry = geometry), color = "gray78") +
+    scale_fill_whitebox_c(
+      palette = "bl_yl_rd",
+      direction = 1,
+      limits = c(min_humidity, max_humidity)
+    ) +
+    coord_sf(default_crs = sf::st_crs(4326)) +
+    theme_void() +
+    theme(
+      legend.position = "bottom",
+      legend.key.height = unit(4, "pt"),
+      legend.key.width = unit(40, "pt"),
+      legend.title.position = "top",
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      plot.background = element_rect(fill = NA, color = NA),
+      title = element_text(size = 8, color = "gray35")
+    ) +
+    labs(title = d, fill = "Max Humidity (%)")
+
+  ggsave(here("posts", "20250704-animation", "figures", paste0("humidity-", d, ".png")),
+    plot = p,
+    units = "px",
+    width = 1200,
+    height = 1200,
+    dpi = 300
+  )
+}
+
+
+```
+
+```{r}
+library(gifski)
+
+png_files <- list.files(here("posts", "20250704-animation", "figures"), full.names = TRUE, pattern = "humidity.+\\.png") |>
+  sort() |>
+  as.character()
+
+gif_file <- here("posts", "20250704-animation", "figures", "humidity-animation.gif")
+
+gifski(png_files, gif_file, width = 1200, height = 1200, delay = 0.25, loop = TRUE)
+```
