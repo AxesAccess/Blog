@@ -8,7 +8,7 @@
 
 <meta name="author" content="Aleksei">
 <meta name="dcterms.date" content="2025-07-04">
-<meta name="description" content="Creating an animated visualization of cloudiness in Germany using R.">
+<meta name="description" content="Creating an animated visualization of spatial data using R">
 
 <title>Animation of Spatial Data – Blog</title>
 <style>
@@ -162,7 +162,7 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
       <h1 class="title">Animation of Spatial Data</h1>
                   <div>
         <div class="description">
-          Creating an animated visualization of cloudiness in Germany using R.
+          Creating an animated visualization of spatial data using R
         </div>
       </div>
                           <div class="quarto-categories">
@@ -207,6 +207,7 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 
 
 <p>This is an example of how to create an animated visualization of spatial data using R. The data is sourced from the German Weather Service (Deutscher Wetterdienst, DWD) and includes cloud coverage and density observations from various weather stations across Germany.</p>
+<p><img src="banner.png" class="img-fluid"></p>
 <section id="load-the-stations-data" class="level2">
 <h2 class="anchored" data-anchor-id="load-the-stations-data">Load the stations data</h2>
 <p>Here we will download the stations data from the DWD website. The data contains information about weather stations, including their IDs, names, locations, and the time period they were active.</p>
@@ -518,6 +519,7 @@ optimized.</code></pre>
 </div>
 <p><img src="animation-cloudiness.gif" class="img-fluid"></p>
 <p>The resulting GIF animation shows the cloud coverage in Germany for each day in 2024, with a rolling average of 7 days to smooth the data. The animation provides a clear visual representation of how cloud coverage changed over time across different regions in Germany.</p>
+<p>Source code available in the repository: <a href="https://github.com/AxesAccess/Animations-in-R">Animations-in-R</a></p>
 
 
 </section>
