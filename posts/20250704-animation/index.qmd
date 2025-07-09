@@ -41,6 +41,8 @@ data using R. The data is sourced from the German Weather Service
 (Deutscher Wetterdienst, DWD) and includes cloud coverage and density
 observations from various weather stations across Germany.
 
+![Image credits: Author](banner.png){.lightbox}
+
 ## Load the stations data
 
 Here we will download the stations data from the DWD website. The data
@@ -113,11 +115,10 @@ links[, STATIONS_ID := as.integer(STATIONS_ID)]
 ## Filter the stations data
 
 We will download only those stations data that were active during the
-period from 2015 to 2025.
+specified time period.
 
 ```{r filter-stations-data}
 stations <- stations[von_datum <= "2023-12-01" & bis_datum >= "2025-01-01"]
-
 links <- links[stations, on = "STATIONS_ID"]
 ```
 
@@ -156,12 +157,11 @@ con <- dbConnect(duckdb(),
   dbdir = here("posts", "20250704-animation", "db", "weather.duckdb")
 )
 tables <- dbGetQuery(con, "SHOW ALL TABLES;")["name"]
+start_date <- "2023-12-01"
 
-if (!("cloudiness" %in% tables)) {
+if (!("cloudiness" %in% tables$name)) {
   files <- list.files("data", full.names = TRUE)
   files <- files[str_detect(files, "produkt_n_termin")]
-
-  start_date <- "2023-12-01"
 
   observations <- data.table()
 
@@ -190,8 +190,11 @@ if (!("cloudiness" %in% tables)) {
   dbWriteTable(con, "cloudiness", observations, overwrite = TRUE)
 }
 
-observations <- dbGetQuery(con, "SELECT * FROM cloudiness") |> as.data.table()
-
+observations <- dbGetQuery(
+  con,
+  sprintf("SELECT * FROM cloudiness WHERE MESS_DATUM >= '%s'", start_date)
+) |>
+  as.data.table()
 dbDisconnect(con)
 
 observations |> glimpse()
@@ -218,12 +221,12 @@ visualize the data.
 
 observations[MESS_DATUM > "2024-01-01" & STATIONS_ID == 433] |>
   ggplot(aes(x = MESS_DATUM, y = cloud_coverage)) +
-  # geom_line() +
+  geom_line(color = "gray") +
   geom_line(aes(y = rollapply(cloud_coverage,
     width = 7, FUN = mean, align = "center", partial = TRUE
   )), color = "blue") +
   labs(title = NULL, x = NULL, y = "Cloud Coverage") +
-  theme_minimal()
+  theme_gray()
 ```
 
 ## Add H3 addresses
@@ -260,7 +263,7 @@ address and drop duplicates.
 
 ```{r join-stations-observations}
 observations <- observations[stations, on = "STATIONS_ID"]
-observations[, coud_coverage := mean(cloud_coverage, rm = T), by = h3_address]
+observations[, coud_coverage := mean(cloud_coverage, na.rm = TRUE), by = h3_address]
 observations <- observations |> unique(by = c("h3_address", "MESS_DATUM"))
 ```
 
@@ -373,4 +376,4 @@ animation provides a clear visual representation of how cloud coverage
 changed over time across different regions in Germany.
 
 Source code available in the repository:
-[Animations-in-R](https://github.com/AxesAccess/Animations-in-R)
+[Animations-in-R](https://github.com/AxesAccess/Animations-in-R){target="_blank"}
