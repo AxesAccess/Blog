@@ -210,7 +210,12 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 
 
 <p>This is an example of how to create an animated visualization of spatial data using R. The data is sourced from the German Weather Service (Deutscher Wetterdienst, DWD) and includes cloud coverage and density observations from various weather stations across Germany.</p>
-<p><a href="banner.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="banner.png" class="img-fluid"></a></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="banner.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Image credits: Author"><img src="banner.png" class="img-fluid figure-img" alt="Image credits: Author"></a></p>
+<figcaption>Image credits: Author</figcaption>
+</figure>
+</div>
 <section id="load-the-stations-data" class="level2">
 <h2 class="anchored" data-anchor-id="load-the-stations-data">Load the stations data</h2>
 <p>Here we will download the stations data from the DWD website. The data contains information about weather stations, including their IDs, names, locations, and the time period they were active.</p>
@@ -281,11 +286,10 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 </section>
 <section id="filter-the-stations-data" class="level2">
 <h2 class="anchored" data-anchor-id="filter-the-stations-data">Filter the stations data</h2>
-<p>We will download only those stations data that were active during the period from 2015 to 2025.</p>
+<p>We will download only those stations data that were active during the specified time period.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>stations <span class="ot">&lt;-</span> stations[von_datum <span class="sc">&lt;=</span> <span class="st">"2023-12-01"</span> <span class="sc">&amp;</span> bis_datum <span class="sc">&gt;=</span> <span class="st">"2025-01-01"</span>]</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>links <span class="ot">&lt;-</span> links[stations, on <span class="ot">=</span> <span class="st">"STATIONS_ID"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>links <span class="ot">&lt;-</span> links[stations, on <span class="ot">=</span> <span class="st">"STATIONS_ID"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="download-and-process-the-data-files" class="level2">
@@ -314,45 +318,47 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">dbdir =</span> <span class="fu">here</span>(<span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"db"</span>, <span class="st">"weather.duckdb"</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>tables <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"SHOW ALL TABLES;"</span>)[<span class="st">"name"</span>]</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span>(<span class="st">"cloudiness"</span> <span class="sc">%in%</span> tables)) {</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"data"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  files <span class="ot">&lt;-</span> files[<span class="fu">str_detect</span>(files, <span class="st">"produkt_n_termin"</span>)]</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  start_date <span class="ot">&lt;-</span> <span class="st">"2023-12-01"</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  observations <span class="ot">&lt;-</span> <span class="fu">data.table</span>()</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (file <span class="cf">in</span> files) {</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    temp_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(file, <span class="at">sep =</span> <span class="st">";"</span>) <span class="sc">|&gt;</span> <span class="fu">as.data.table</span>()</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    temp_data[, MESS_DATUM <span class="sc">:</span><span class="er">=</span> <span class="fu">as.Date</span>(<span class="fu">str_trim</span>(MESS_DATUM), <span class="at">format =</span> <span class="st">"%Y%m%d"</span>)]</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    temp_data <span class="ot">&lt;-</span> temp_data[MESS_DATUM <span class="sc">&gt;=</span> start_date]</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    observations <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>      observations,</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>      temp_data</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  observations <span class="ot">&lt;-</span> observations[N_TER <span class="sc">!=</span> <span class="sc">-</span><span class="dv">999</span>]</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  observations[, CD_TER <span class="sc">:</span><span class="er">=</span> <span class="fu">ifelse</span>(CD_TER <span class="sc">==</span> <span class="sc">-</span><span class="dv">999</span>, <span class="cn">NA</span>, CD_TER)]</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"db"</span>)) {</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dir.create</span>(<span class="st">"db"</span>)</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(),</span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">dbdir =</span> <span class="fu">here</span>(</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>      <span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"db"</span>, <span class="st">"weather.duckdb"</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dbWriteTable</span>(con, <span class="st">"cloudiness"</span>, observations, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>observations <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(con, <span class="st">"SELECT * FROM cloudiness"</span>) <span class="sc">|&gt;</span> <span class="fu">as.data.table</span>()</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>observations <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>start_date <span class="ot">&lt;-</span> <span class="st">"2023-12-01"</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span>(<span class="st">"cloudiness"</span> <span class="sc">%in%</span> tables<span class="sc">$</span>name)) {</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"data"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  files <span class="ot">&lt;-</span> files[<span class="fu">str_detect</span>(files, <span class="st">"produkt_n_termin"</span>)]</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  observations <span class="ot">&lt;-</span> <span class="fu">data.table</span>()</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (file <span class="cf">in</span> files) {</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    temp_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(file, <span class="at">sep =</span> <span class="st">";"</span>) <span class="sc">|&gt;</span> <span class="fu">as.data.table</span>()</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    temp_data[, MESS_DATUM <span class="sc">:</span><span class="er">=</span> <span class="fu">as.Date</span>(<span class="fu">str_trim</span>(MESS_DATUM), <span class="at">format =</span> <span class="st">"%Y%m%d"</span>)]</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    temp_data <span class="ot">&lt;-</span> temp_data[MESS_DATUM <span class="sc">&gt;=</span> start_date]</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    observations <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>      observations,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>      temp_data</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  observations <span class="ot">&lt;-</span> observations[N_TER <span class="sc">!=</span> <span class="sc">-</span><span class="dv">999</span>]</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  observations[, CD_TER <span class="sc">:</span><span class="er">=</span> <span class="fu">ifelse</span>(CD_TER <span class="sc">==</span> <span class="sc">-</span><span class="dv">999</span>, <span class="cn">NA</span>, CD_TER)]</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"db"</span>)) {</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dir.create</span>(<span class="st">"db"</span>)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(),</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">dbdir =</span> <span class="fu">here</span>(</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>      <span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"db"</span>, <span class="st">"weather.duckdb"</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dbWriteTable</span>(con, <span class="st">"cloudiness"</span>, observations, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>observations <span class="ot">&lt;-</span> <span class="fu">dbGetQuery</span>(</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>  con,</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sprintf</span>(<span class="st">"SELECT * FROM cloudiness WHERE MESS_DATUM &gt;= '%s'"</span>, start_date)</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.table</span>()</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>observations <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 231,108
 Columns: 6
@@ -376,12 +382,12 @@ $ eor         &lt;chr&gt; "eor", "eor", "eor", "eor", "eor", "eor", "eor", "eor"
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>observations[MESS_DATUM <span class="sc">&gt;</span> <span class="st">"2024-01-01"</span> <span class="sc">&amp;</span> STATIONS_ID <span class="sc">==</span> <span class="dv">433</span>] <span class="sc">|&gt;</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> MESS_DATUM, <span class="at">y =</span> cloud_coverage)) <span class="sc">+</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># geom_line() +</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">rollapply</span>(cloud_coverage,</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="dv">7</span>, <span class="at">FUN =</span> mean, <span class="at">align =</span> <span class="st">"center"</span>, <span class="at">partial =</span> <span class="cn">TRUE</span></span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  )), <span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="cn">NULL</span>, <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Cloud Coverage"</span>) <span class="sc">+</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_gray</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -417,112 +423,105 @@ $ eor         &lt;chr&gt; "eor", "eor", "eor", "eor", "eor", "eor", "eor", "eor"
 <p>Join the stations data with the observations data to have the geometry of the stations in the observations data. Calculate mean for each H3 address and drop duplicates.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>observations <span class="ot">&lt;-</span> observations[stations, on <span class="ot">=</span> <span class="st">"STATIONS_ID"</span>]</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>observations[, coud_coverage <span class="sc">:</span><span class="er">=</span> <span class="fu">mean</span>(cloud_coverage, <span class="at">rm =</span> T), by <span class="ot">=</span> h3_address]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in `[.data.table`(observations, , `:=`(coud_coverage,
-mean(cloud_coverage, : Unable to optimize call to mean() and could be very
-slow. You must name 'na.rm' like that otherwise if you do mean(x,TRUE) the TRUE
-is taken to mean 'trim' which is the 2nd argument of mean. 'trim' is not yet
-optimized.</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>observations <span class="ot">&lt;-</span> observations <span class="sc">|&gt;</span> <span class="fu">unique</span>(<span class="at">by =</span> <span class="fu">c</span>(<span class="st">"h3_address"</span>, <span class="st">"MESS_DATUM"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>observations[, coud_coverage <span class="sc">:</span><span class="er">=</span> <span class="fu">mean</span>(cloud_coverage, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), by <span class="ot">=</span> h3_address]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>observations <span class="ot">&lt;-</span> observations <span class="sc">|&gt;</span> <span class="fu">unique</span>(<span class="at">by =</span> <span class="fu">c</span>(<span class="st">"h3_address"</span>, <span class="st">"MESS_DATUM"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="create-animations-of-cloud-coverage-in-germany" class="level2">
 <h2 class="anchored" data-anchor-id="create-animations-of-cloud-coverage-in-germany">Create animations of cloud coverage in Germany</h2>
 <p>In the following section, we will create animations of cloud coverage in Germany using the observations data in 2024. This code creates a series of maps showing the average cloud coverage for each day in 2024, with a rolling average of 7 days to smooth the data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>min_date <span class="ot">&lt;-</span> observations[, MESS_DATUM] <span class="sc">|&gt;</span> <span class="fu">min</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>max_date <span class="ot">&lt;-</span> observations[, MESS_DATUM] <span class="sc">|&gt;</span> <span class="fu">max</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>min_date <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">c</span>(min_date, <span class="fu">as.Date</span>(<span class="st">"2024-01-01"</span>)))</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>max_date <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">c</span>(max_date, <span class="fu">as.Date</span>(<span class="st">"2024-12-31"</span>)))</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>max_coverage <span class="ot">&lt;-</span> observations[(MESS_DATUM <span class="sc">&gt;=</span> min_date) <span class="sc">&amp;</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  (MESS_DATUM <span class="sc">&lt;=</span> max_date), cloud_coverage] <span class="sc">|&gt;</span> <span class="fu">max</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>min_coverage <span class="ot">&lt;-</span> observations[(MESS_DATUM <span class="sc">&gt;=</span> min_date) <span class="sc">&amp;</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  (MESS_DATUM <span class="sc">&lt;=</span> max_date), cloud_coverage] <span class="sc">|&gt;</span> <span class="fu">min</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>table_dates <span class="ot">&lt;-</span> <span class="fu">seq</span>(min_date <span class="sc">-</span> <span class="dv">7</span>, max_date <span class="sc">+</span> <span class="dv">7</span>, <span class="at">by =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.table</span>() <span class="sc">|&gt;</span></span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">MESS_DATUM =</span> V1)</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>observations <span class="ot">&lt;-</span> table_dates[observations, on <span class="ot">=</span> <span class="st">"MESS_DATUM"</span>]</span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>observations[, cloud_coverage_r7 <span class="sc">:</span><span class="er">=</span> <span class="fu">rollapply</span>(cloud_coverage,</span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">7</span>, <span class="at">FUN =</span> mean, <span class="at">align =</span> <span class="st">"center"</span>, <span class="at">partial =</span> <span class="cn">TRUE</span></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>),</span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>by <span class="ot">=</span> STATIONS_ID</span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>dates <span class="ot">&lt;-</span> <span class="fu">seq</span>(min_date, max_date, <span class="at">by =</span> <span class="dv">1</span>)</span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"figures"</span>)) {</span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(<span class="st">"figures"</span>)</span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (d <span class="cf">in</span> <span class="fu">as.character</span>(dates)) {</span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">fill =</span> cloud_coverage_r7),</span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> observations[MESS_DATUM <span class="sc">==</span> d] <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="at">data =</span> boundaries, <span class="at">fill =</span> <span class="st">"gray78"</span>, <span class="at">color =</span> <span class="st">"gray54"</span>) <span class="sc">+</span></span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">geometry =</span> geometry), <span class="at">color =</span> <span class="st">"gray78"</span>) <span class="sc">+</span></span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_whitebox_c</span>(</span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">palette =</span> <span class="st">"deep"</span>,</span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">direction =</span> <span class="dv">1</span>,</span>
-<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">limits =</span> <span class="fu">c</span>(min_coverage, max_coverage)</span>
-<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
-<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_sf</span>(<span class="at">default_crs =</span> sf<span class="sc">::</span><span class="fu">st_crs</span>(<span class="dv">4326</span>)) <span class="sc">+</span></span>
-<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>() <span class="sc">+</span></span>
-<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
-<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.position =</span> <span class="st">"bottom"</span>,</span>
-<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.key.height =</span> <span class="fu">unit</span>(<span class="dv">4</span>, <span class="st">"pt"</span>),</span>
-<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.key.width =</span> <span class="fu">unit</span>(<span class="dv">20</span>, <span class="st">"pt"</span>),</span>
-<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.title.position =</span> <span class="st">"top"</span>,</span>
-<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>      <span class="at">plot.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
-<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>, <span class="at">color =</span> <span class="st">"gray35"</span>)</span>
-<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
-<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> d, <span class="at">fill =</span> <span class="st">"Cloud Coverage"</span>)</span>
-<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggsave</span>(</span>
-<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">here</span>(</span>
-<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>      <span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"figures"</span>,</span>
-<span id="cb19-57"><a href="#cb19-57" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="st">"cloudiness-"</span>, d, <span class="st">".png"</span>)</span>
-<span id="cb19-58"><a href="#cb19-58" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb19-59"><a href="#cb19-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot =</span> p,</span>
-<span id="cb19-60"><a href="#cb19-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">units =</span> <span class="st">"px"</span>,</span>
-<span id="cb19-61"><a href="#cb19-61" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="dv">1200</span>,</span>
-<span id="cb19-62"><a href="#cb19-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">height =</span> <span class="dv">1200</span>,</span>
-<span id="cb19-63"><a href="#cb19-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">dpi =</span> <span class="dv">300</span></span>
-<span id="cb19-64"><a href="#cb19-64" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb19-65"><a href="#cb19-65" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>min_date <span class="ot">&lt;-</span> observations[, MESS_DATUM] <span class="sc">|&gt;</span> <span class="fu">min</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>max_date <span class="ot">&lt;-</span> observations[, MESS_DATUM] <span class="sc">|&gt;</span> <span class="fu">max</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>min_date <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">c</span>(min_date, <span class="fu">as.Date</span>(<span class="st">"2024-01-01"</span>)))</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>max_date <span class="ot">&lt;-</span> <span class="fu">min</span>(<span class="fu">c</span>(max_date, <span class="fu">as.Date</span>(<span class="st">"2024-12-31"</span>)))</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>max_coverage <span class="ot">&lt;-</span> observations[(MESS_DATUM <span class="sc">&gt;=</span> min_date) <span class="sc">&amp;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  (MESS_DATUM <span class="sc">&lt;=</span> max_date), cloud_coverage] <span class="sc">|&gt;</span> <span class="fu">max</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>min_coverage <span class="ot">&lt;-</span> observations[(MESS_DATUM <span class="sc">&gt;=</span> min_date) <span class="sc">&amp;</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  (MESS_DATUM <span class="sc">&lt;=</span> max_date), cloud_coverage] <span class="sc">|&gt;</span> <span class="fu">min</span>(<span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>table_dates <span class="ot">&lt;-</span> <span class="fu">seq</span>(min_date <span class="sc">-</span> <span class="dv">7</span>, max_date <span class="sc">+</span> <span class="dv">7</span>, <span class="at">by =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">MESS_DATUM =</span> V1)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>observations <span class="ot">&lt;-</span> table_dates[observations, on <span class="ot">=</span> <span class="st">"MESS_DATUM"</span>]</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>observations[, cloud_coverage_r7 <span class="sc">:</span><span class="er">=</span> <span class="fu">rollapply</span>(cloud_coverage,</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">7</span>, <span class="at">FUN =</span> mean, <span class="at">align =</span> <span class="st">"center"</span>, <span class="at">partial =</span> <span class="cn">TRUE</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>),</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>by <span class="ot">=</span> STATIONS_ID</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>dates <span class="ot">&lt;-</span> <span class="fu">seq</span>(min_date, max_date, <span class="at">by =</span> <span class="dv">1</span>)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(<span class="st">"figures"</span>)) {</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(<span class="st">"figures"</span>)</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (d <span class="cf">in</span> <span class="fu">as.character</span>(dates)) {</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">fill =</span> cloud_coverage_r7),</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> observations[MESS_DATUM <span class="sc">==</span> d] <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="at">data =</span> boundaries, <span class="at">fill =</span> <span class="st">"gray78"</span>, <span class="at">color =</span> <span class="st">"gray54"</span>) <span class="sc">+</span></span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">geometry =</span> geometry), <span class="at">color =</span> <span class="st">"gray78"</span>) <span class="sc">+</span></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_whitebox_c</span>(</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">palette =</span> <span class="st">"deep"</span>,</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">direction =</span> <span class="dv">1</span>,</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">limits =</span> <span class="fu">c</span>(min_coverage, max_coverage)</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_sf</span>(<span class="at">default_crs =</span> sf<span class="sc">::</span><span class="fu">st_crs</span>(<span class="dv">4326</span>)) <span class="sc">+</span></span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.position =</span> <span class="st">"bottom"</span>,</span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.key.height =</span> <span class="fu">unit</span>(<span class="dv">4</span>, <span class="st">"pt"</span>),</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.key.width =</span> <span class="fu">unit</span>(<span class="dv">20</span>, <span class="st">"pt"</span>),</span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.title.position =</span> <span class="st">"top"</span>,</span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.grid.major =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>      <span class="at">plot.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>, <span class="at">color =</span> <span class="st">"gray35"</span>)</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> d, <span class="at">fill =</span> <span class="st">"Cloud Coverage"</span>)</span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggsave</span>(</span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">here</span>(</span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a>      <span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"figures"</span>,</span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a>      <span class="fu">paste0</span>(<span class="st">"cloudiness-"</span>, d, <span class="st">".png"</span>)</span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot =</span> p,</span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">units =</span> <span class="st">"px"</span>,</span>
+<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="dv">1200</span>,</span>
+<span id="cb17-62"><a href="#cb17-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">height =</span> <span class="dv">1200</span>,</span>
+<span id="cb17-63"><a href="#cb17-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">dpi =</span> <span class="dv">300</span></span>
+<span id="cb17-64"><a href="#cb17-64" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb17-65"><a href="#cb17-65" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="create-a-gif-animation" class="level2">
 <h2 class="anchored" data-anchor-id="create-a-gif-animation">Create a GIF animation</h2>
 <p>Finally, we will create a GIF animation from the generated PNG files. The GIF will show the cloud coverage in Germany over the course of 2024, with each frame representing a day.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>png_files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">here</span>(<span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"figures"</span>),</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">pattern =</span> <span class="st">"cloudiness.+</span><span class="sc">\\</span><span class="st">.png"</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sort</span>() <span class="sc">|&gt;</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.character</span>()</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>gif_file <span class="ot">&lt;-</span> <span class="fu">here</span>(</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"animation-cloudiness.gif"</span></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="fu">gifski</span>(png_files, gif_file, <span class="at">width =</span> <span class="dv">1200</span>, <span class="at">height =</span> <span class="dv">1200</span>, <span class="at">delay =</span> <span class="fl">0.1</span>, <span class="at">loop =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>png_files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">here</span>(<span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"figures"</span>),</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">full.names =</span> <span class="cn">TRUE</span>, <span class="at">pattern =</span> <span class="st">"cloudiness.+</span><span class="sc">\\</span><span class="st">.png"</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sort</span>() <span class="sc">|&gt;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.character</span>()</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>gif_file <span class="ot">&lt;-</span> <span class="fu">here</span>(</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"animation-cloudiness.gif"</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="fu">gifski</span>(png_files, gif_file, <span class="at">width =</span> <span class="dv">1200</span>, <span class="at">height =</span> <span class="dv">1200</span>, <span class="at">delay =</span> <span class="fl">0.1</span>, <span class="at">loop =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "/mnt/Projects/Blog/posts/20250704-animation/animation-cloudiness.gif"</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unlink</span>(<span class="fu">here</span>(<span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"figures"</span>, <span class="st">"cloudiness*"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unlink</span>(<span class="fu">here</span>(<span class="st">"posts"</span>, <span class="st">"20250704-animation"</span>, <span class="st">"figures"</span>, <span class="st">"cloudiness*"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><img src="animation-cloudiness.gif" class="img-fluid"></p>
 <p>The resulting GIF animation shows the cloud coverage in Germany for each day in 2024, with a rolling average of 7 days to smooth the data. The animation provides a clear visual representation of how cloud coverage changed over time across different regions in Germany.</p>
-<p>Source code available in the repository: <a href="https://github.com/AxesAccess/Animations-in-R">Animations-in-R</a></p>
+<p>Source code available in the repository: <a href="https://github.com/AxesAccess/Animations-in-R" target="_blank">Animations-in-R</a></p>
 
 
 </section>
