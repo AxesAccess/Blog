@@ -7,12 +7,11 @@ image: "mark-konig-Tl8mDaue_II-unsplash_square.jpg"
 ---
 
 This application is designed to create product cards for an online
-store. It utilizes a large language model (LLM) and programming libraries to
-generate detailed descriptions based on product specifications, images,
-and files. This allows a business to streamline the process of crafting
-informative and engaging product listings with minimal manual effort.
-This enhances both productivity and content quality.
+store. It utilizes a large language model (LLM) and programming
+libraries to generate detailed descriptions based on product
+specifications, images, and files. This allows a business to streamline
+the process of crafting informative and engaging product listings with
+minimal manual effort. This enhances both productivity and content
+quality.
 
-<iframe src="https://www.slideshare.net/slideshow/embed_code/key/IbRieUYqIHBipZ" width="799" height="505" frameborder="0" marginwidth="0" marginheight="0" scrolling="no">
-
-</iframe>
+<iframe src="https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7350848934489063424?collapsed=1" height="568" width="100%" frameborder="0" allowfullscreen="1" title="How I created an AI application from scratch"></iframe>
