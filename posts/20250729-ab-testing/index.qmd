@@ -1,0 +1,1105 @@
+---
+title: "A/B Testing: Concepts and Techniques"
+description: "Key components, metrics, errors, CUPED, multiple testing, peeking, and Bayesian vs frequentist approaches."
+author: "Aleksei"
+date: "2025-07-29"
+categories: ["A/B Testing", Statistics]
+image: "image.svg"
+fig-format: svg
+execute:
+  echo: false
+---
+
+```{python imports}
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
+from tqdm import tqdm
+import pandas as pd
+import random
+
+# plt.style.available
+plt.style.use("seaborn-v0_8-deep")
+plt.rcParams.update({"font.size": 8})
+```
+
+```{python functions}
+def safe_divide(x, y):
+    try:
+        return x / y
+    except ZeroDivisionError:
+        return np.nan
+
+
+def ratio_sample(num_users=10000, events_per_user=5, effect=0):
+    mu = np.random.uniform(300, 1000, size=num_users)
+    n = np.random.poisson(events_per_user - 1, size=num_users)
+    numerator = []
+    denominator = []
+
+    for i in range(num_users):
+        user_events = np.random.exponential(mu[i], n[i] + 1)
+        numerator.append((1 + effect) * np.sum(np.array(user_events)))
+        denominator.append(n[i] + 1)
+
+    return numerator, denominator
+
+
+def delta_var(numerator, denominator):
+
+    x = numerator
+    y = denominator
+    n = len(x)
+    mu_x = np.mean(x)
+    mu_y = np.mean(y)
+    var_x = np.var(x, ddof=1)
+    var_y = np.var(y, ddof=1)
+    cov_xy = np.cov(x, y, ddof=1)[0][1]
+    delta_var = safe_divide(
+        safe_divide(var_x, mu_y**2)
+        - 2 * cov_xy * safe_divide(mu_x, mu_y**3)
+        + var_y * safe_divide(mu_x**2, mu_y**4),
+        n,
+    )
+    return delta_var
+
+
+def group_sample_gen(mu_exp=500, mu_pois=3, n=1000):
+    noise_factors = [0.8, 0.9, 1, 1.1, 1.2]
+    test_event = []
+    control_event = []
+    test_user = []
+    control_user = []
+    for i in range(n):
+        k_test = np.random.poisson(lam=mu_pois)
+        noise_test = [random.choice(noise_factors) for _ in range(k_test)]
+        test_temp = [np.random.exponential(mu_exp)] * k_test
+        test_event = test_event + [a * b for a, b in zip(noise_test, test_temp)]
+        test_user = test_user + [sum([a * b for a, b in zip(noise_test, test_temp)])]
+        k_control = np.random.poisson(lam=mu_pois)
+        noise_control = [random.choice(noise_factors) for _ in range(k_control)]
+        control_temp = [np.random.exponential(mu_exp)] * k_control
+        control_event = control_event + [
+            a * b for a, b in zip(noise_control, control_temp)
+        ]
+        control_user = control_user + [
+            sum([a * b for a, b in zip(noise_control, control_temp)])
+        ]
+    return test_event, control_event, test_user, control_user
+
+
+def make_buckets_vec(sample, agg_type, n_buckets=100):
+
+    N_users = len(sample)
+    buckets = [[] for _ in range(n_buckets)]
+    for idx in range(N_users):
+        bucket_num = idx % n_buckets
+        buckets[bucket_num].append(idx)
+
+    random.shuffle(sample)
+    bucket_vec = []
+    for idxs in buckets:
+        if agg_type == "sum":
+            vec = np.sum([sample[i] for i in idxs], axis=0)
+        else:
+            vec = np.mean([sample[i] for i in idxs], axis=0)
+        bucket_vec.append(vec)
+    return bucket_vec
+
+
+def proportion_ci(pvalue_vector, alpha=0.05):
+    pvalue_vector = np.asarray(pvalue_vector).flatten()
+    n = len(pvalue_vector)
+    count = np.sum(pvalue_vector < alpha)
+    p = count / n
+    left_bound = p - np.sqrt(p * (1 - p) / n) * stats.norm.ppf(1 - alpha / 2)
+    right_bound = p + np.sqrt(p * (1 - p) / n) * stats.norm.ppf(1 - alpha / 2)
+    return p, left_bound, right_bound
+
+
+def plot_comparison_with_uniform(p_value_vector, title, color="skyblue"):
+
+    p, left_boundary, right_boundary = proportion_ci(p_value_vector)
+
+    fig1, ax1 = plt.subplots(1, 3, figsize=(8, 3))
+
+    ax1[0].hist(p_value_vector, bins=20, edgecolor="black", alpha=0.7, color=color)
+    ax1[0].set_title(
+        f"Type I error: {round(np.sum(np.array(p_value_vector) < 0.05) / len(p_value_vector), 3)}"
+    )
+    ax1[0].set_xlabel("P-value")
+    ax1[0].set_ylabel("Frequency")
+
+    stats.probplot(p_value_vector, dist=stats.uniform, plot=ax1[1])
+    ax1[1].get_lines()[1].set_linestyle("--")
+    ax1[1].set_title(f"{title} (QQ-Plot)")
+
+    pvals_sorted = np.sort(p_value_vector)
+    n = len(pvals_sorted)
+    ecdf = np.arange(1, n + 1) / n
+
+    x_uniform = np.linspace(0, 1, 100)
+    cdf_uniform = x_uniform
+
+    ax1[2].step(
+        pvals_sorted, ecdf, where="post", label="Empirical Distribution", color=color
+    )
+    ax1[2].plot(x_uniform, cdf_uniform, "k--", label="Theoretical CDF $U[0,1]$")
+
+    ks_statistic, ks_p_value = stats.kstest(p_value_vector, "uniform", args=(0, 1))
+
+    ax1[2].set_title("Empirical Distribution and CDF")
+    ax1[2].set_xlabel("p-value")
+    ax1[2].set_ylabel("F(p-value)")
+    ax1[2].legend(loc="lower right", fontsize=7)
+    ax1[2].text(
+        0.05,
+        0.9,
+        f"KS stat={ks_statistic:.3f}\np={ks_p_value:.3f}",
+        transform=ax1[2].transAxes,
+        fontsize=8,
+        verticalalignment="top",
+        bbox=dict(boxstyle="round", fc="w", alpha=0.5),
+    )
+
+    plt.tight_layout()
+    plt.show()
+    plt.close()
+
+
+def group_sample_gen(mu_exp=500, mu_pois=3, n=1000):
+    noise_factors = [0.8, 0.9, 1, 1.1, 1.2]
+    test_event = []
+    test_user = []
+    for i in range(n):
+        k_test = np.random.poisson(lam=mu_pois)
+        noise_test = [random.choice(noise_factors) for _ in range(k_test)]
+        test_temp = [np.random.exponential(mu_exp)] * k_test
+        test_event = test_event + [a * b for a, b in zip(noise_test, test_temp)]
+        test_user = test_user + [sum([a * b for a, b in zip(noise_test, test_temp)])]
+    return test_user
+
+
+def ratio_sample_new(num_users=10000, events_per_user=2, effect=0):
+
+    mu = np.random.uniform(300, 1000, size=num_users)
+
+    n = np.random.poisson(events_per_user - 1, size=num_users)
+    numerator = []
+    denominator = []
+    user_ids = []
+    for i in range(num_users):
+        curr_mu = mu[i] * (1 + effect)
+        user_events = np.random.exponential(curr_mu, n[i] + 1)
+
+        numerator.extend(user_events)
+        denominator.extend([1] * len(user_events))
+        user_ids.extend([i] * len(user_events))
+    df = pd.DataFrame(
+        {"user_id": user_ids, "numerator": numerator, "denominator": denominator}
+    )
+    return df
+
+
+def indicator_perc_iid(df, percentile=0.99, alpha=0.05):
+    p = percentile
+    z = stats.norm.ppf(1 - alpha / 2)
+    agg_df = df.groupby("user_id")["numerator"].sum().tolist()
+    sorted_vector = np.sort(agg_df)
+    n = len(agg_df)
+    sigma = np.sqrt(p * (1 - p) / n)
+    lower = max(0, int(np.floor(n * (p - z * sigma))))
+    upper = min(int(np.floor(n * (p + z * sigma))) + 1, n - 1)
+    return sorted_vector[lower], sorted_vector[upper]
+
+
+def indicator_perc(df, percentile=0.99, alpha=0.05):
+    X_p = np.percentile(df["numerator"].tolist(), percentile * 100)
+    df["indicator"] = (df["numerator"] <= X_p).astype(int)
+    num = df.groupby("user_id")["indicator"].sum().tolist()
+    denom = df.groupby("user_id")["denominator"].sum().tolist()
+    sigma = np.sqrt(delta_var(num, denom))
+    z = stats.norm.ppf(1 - alpha / 2)
+    p = df["indicator"].mean()
+    n = len(df)
+    lower = max(0, int(np.floor(n * (p - z * sigma))))
+    upper = min(int(np.floor(n * (p + z * sigma))) + 1, n - 1)
+    sorted_vector = np.sort(df["numerator"].tolist())
+    return sorted_vector[lower], sorted_vector[upper]
+```
+
+## 1. What is A/B testing and what are its key components?
+
+A/B testing is a method used to determine the impact of implemented
+changes on a product by isolating external factors. It involves dividing
+users into two groups: a control group (A) that experiences no changes,
+and a test group (B) that is exposed to a new feature.
+
+The key components of an A/B test include:
+
+-   **Infrastructure:** A robust system is required to conduct and
+    manage experiments.
+
+-   **Customer Base:** A large user base is necessary to ensure
+    statistically significant results.
+
+-   **Time:** Sufficient time is needed for the experiment to run and
+    for the data to be analyzed.
+
+-   **Metrics:** Carefully selected metrics are used to measure the
+    effect of the changes. These can be "value metrics" (e.g., total
+    cost of successful trips, number of unique completed orders) or
+    "ratio metrics" (e.g., acceptance rate, completed rate, tips as a
+    share of GMV).
+
+-   **User Aggregation:** Data is typically aggregated per user rather
+    than per event to ensure independent observations, which is crucial
+    for valid statistical analysis. Comparing raw event-level data can
+    introduce dependencies that invalidate standard statistical tests.
+
+```{python user-aggregation}
+# | fig-align: center
+# | fig-cap: "User aggregation vs Event-level data"
+
+
+per_iid = []
+per = []
+
+if os.path.exists("per_iid.npy") and os.path.exists("per.npy"):
+    per_iid = np.load("per_iid.npy").tolist()
+    per = np.load("per.npy").tolist()
+else:
+    percentile = 0.99
+    for i in range(10000):
+        df = ratio_sample_new(10000, 2)
+        agg_df = df.groupby("user_id")["numerator"].sum().tolist()
+        X_p_iid = np.percentile(agg_df, percentile * 100)
+        X_p = np.percentile(df["numerator"].tolist(), percentile * 100)
+
+        per_iid.append(X_p_iid)
+        per.append(X_p)
+    np.save("per_iid.npy", per_iid)
+    np.save("per.npy", per)
+
+
+percent_idd_const = np.mean(per_iid)
+percent_const = np.mean(per)
+
+good_cnt_iid = []
+good_cnt = []
+
+if os.path.exists("good_cnt_iid.npy") and os.path.exists("good_cnt.npy"):
+    good_cnt_iid = np.load("good_cnt_iid.npy").tolist()
+    good_cnt = np.load("good_cnt.npy").tolist()
+else:
+    for m in [1000, 2500, 5000, 7500, 10000]:
+        cnt_iid = 0
+        cnt = 0
+        for i in range(1000):
+            x_df = ratio_sample_new(m, 2, effect=0.05)
+            x_left, x_right = indicator_perc_iid(x_df, percentile=0.99, alpha=0.05)
+
+            sig_iid = 0
+            if (x_right - percent_idd_const) * (x_left - percent_idd_const) > 0:
+                sig_iid = 1
+
+            cnt_iid += sig_iid
+
+            x_left, x_right = indicator_perc(x_df, percentile=0.99, alpha=0.05)
+
+            sig = 0
+            if (x_right - percent_const) * (x_left - percent_const) > 0:
+                sig = 1
+            cnt += sig
+        good_cnt_iid.append(cnt_iid / 1000)
+        good_cnt.append(cnt / 1000)
+    np.save("good_cnt_iid.npy", good_cnt_iid)
+    np.save("good_cnt.npy", good_cnt)
+
+
+n = [1000, 2500, 5000, 7500, 10000]
+
+plt.figure(figsize=(5, 3))
+plt.plot(n, good_cnt_iid, marker="o", label="User aggregation")
+plt.plot(n, good_cnt, marker="o", label="Event-level data")
+
+plt.xlabel("Number of observations")
+plt.ylabel("Statistical power $(1 - \\beta)$")
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+### 2. What are the common types of metrics used in A/B testing and how are they handled?
+
+Metrics in A/B testing are broadly categorized into:
+
+-   **Value Metrics:** These represent absolute values or sums, such as
+    Gross Merchandise Value (GMV), total number of trips, or total
+    driver hours. For these metrics, the average (mean) is commonly
+    compared between test and control groups.
+
+-   **Ratio Metrics:** These represent a proportion or ratio, such as
+    Acceptance Rate (accepted offers to seen offers) or Trips per Hour
+    (completed orders to driver hours). These are more complex because
+    they involve both a numerator and a denominator, and the simple
+    t-test for means may not be appropriate due to the inherent
+    correlation between the numerator and denominator within each user.
+
+For ratio metrics, several advanced methods are used:
+
+-   **Delta Method:** This statistical technique estimates the variance
+    of a ratio by using the variances and covariance of its numerator
+    and denominator. It approximates the distribution of the ratio using
+    a Taylor series expansion.
+
+-   **Linearization:** This method transforms the ratio into a linear
+    approximation, allowing the use of standard t-tests on the
+    transformed data. There are different types of linearization,
+    typically involving a reference value (e.g., the control group's
+    ratio) to define the linear terms.
+
+-   **Bucketization (Bucketing):** Instead of analyzing individual user
+    data, users (or their aggregated events) are grouped into "buckets."
+    The ratio is then calculated for each bucket, and a t-test is
+    performed on the bucket-level ratios. This can help normalize the
+    distribution and reduce the impact of outliers but may lead to loss
+    of information or reduced power with too few buckets.
+
+```{python bucketing-vs-uniform}
+# | fig-cap: "Bucketing vs Uniform (without effect)"
+
+pvalue_tt_user = []
+pvalue_tt_backet = []
+
+if os.path.exists("pvalue_tt_user.npy") and os.path.exists("pvalue_tt_backet.npy"):
+    pvalue_tt_user = np.load("pvalue_tt_user.npy").tolist()
+    pvalue_tt_backet = np.load("pvalue_tt_backet.npy").tolist()
+else:
+    for i in range(1000):
+        test_user = group_sample_gen(mu_exp=500, mu_pois=3, n=1000)
+        control_user = group_sample_gen(mu_exp=500, mu_pois=3, n=1000)
+        test_backet = make_buckets_vec(test_user, agg_type="sum", n_buckets=100)
+        control_backet = make_buckets_vec(control_user, agg_type="sum", n_buckets=100)
+        _, p_value_user = stats.ttest_ind(test_user, control_user, equal_var=False)
+        _, p_value_backet = stats.ttest_ind(
+            test_backet, control_backet, equal_var=False
+        )
+        pvalue_tt_backet.append(p_value_backet)
+        pvalue_tt_user.append(p_value_user)
+    np.save("pvalue_tt_user.npy", pvalue_tt_user)
+    np.save("pvalue_tt_backet.npy", pvalue_tt_backet)
+
+plot_comparison_with_uniform(pvalue_tt_backet, "Bucketing vs Uniform")
+```
+
+-   **Bootstrap:** A non-parametric resampling technique that involves
+    repeatedly drawing samples with replacement from the observed data
+    to create an empirical distribution of the statistic of interest
+    (e.g., the difference in ratios). This distribution is then used to
+    construct confidence intervals and calculate p-values, making it
+    robust to distributional assumptions. Poisson bootstrap is a variant
+    suitable for large datasets, allowing parallelization.
+
+### 3. What are Type I and Type II errors in A/B testing, and how do they relate to MDE?
+
+In hypothesis testing:
+
+-   **Null Hypothesis (H0):** States there is no effect or difference
+    between groups (e.g., the new feature has no impact).
+
+-   **Alternative Hypothesis (H1):** States there is an effect or
+    difference.
+
+The two types of errors are:
+
+-   **Type I Error** $(\alpha)$: Rejecting the null hypothesis when it
+    is actually true. This is also known as the "level of significance"
+    and represents the probability of falsely concluding that an effect
+    exists when it doesn't.
+
+-   **Type II Error** $(\beta)$: Failing to reject the null hypothesis
+    when the alternative hypothesis is true. This means failing to
+    detect an effect that actually exists.
+
+There's an inverse relationship between Type I and Type II errors:
+decreasing alpha (making it harder to find an effect) will increase beta
+(making it harder to detect a real effect), and vice-versa.
+
+**Minimal Detectable Effect (MDE)** is the smallest true difference
+between the control and test groups that an A/B test can reliably detect
+as statistically significant, given predefined values for:
+
+-   **Sample Size** $(n)$: The number of users in each group.
+
+-   **Significance Level** $(\alpha)$: The probability of a Type I error
+    (e.g., 0.05).
+
+-   **Statistical Power** $(1 - \beta)$: The probability of correctly
+    detecting a true effect (e.g., 0.8 or 80%).
+
+MDE is crucial for experiment design, helping to estimate the required
+sample size and understand the sensitivity of the test to detect
+meaningful changes.
+
+```{python mde-vs-m}
+# | fig-align: center
+# | fig-cap: "Dependency of MDE on $m$"
+
+
+def size_mde(sigma, effect, k=1, alpha=0.05, beta=0.2):
+    dist = stats.norm(loc=0, scale=1)
+    const = (dist.ppf(1 - alpha / 2) + dist.ppf(1 - beta)) ** 2
+    var = sigma**2
+    return const * (1 + k) * var / (effect**2)
+
+
+alpha = 0.05
+beta = 0.2
+k = 1.0  # ratio of control to test group sizes
+req_mde = 0.15
+
+z_alpha = stats.norm.ppf(1 - alpha / 2)
+z_beta = stats.norm.ppf(1 - beta)
+coef = (z_alpha + z_beta) ** 2 * (1 + k)
+
+m = np.arange(10, 1200, 1)
+mde_classic = [np.sqrt(coef / x) for x in m]
+
+plt.figure(figsize=(5, 3))
+plt.plot(m, mde_classic, "--", label="Classic: $1/m$")
+plt.axhline(req_mde, ls="--", color="crimson", label="Required MDE")
+
+plt.ylim(0, max(0.3, req_mde * 2))
+plt.xlabel("$m$ (size of “meta-group”)")
+plt.ylabel("Minimal detectable effect (MDE)")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+plt.close()
+```
+
+### 4. How can the validity of a statistical criterion be checked using A/A tests?
+
+A/A testing is a method where two identical groups are compared to each
+other, with no actual changes introduced. Since no effect is expected,
+an A/A test helps validate the statistical criterion used in A/B tests.
+
+The primary principle for validation is that if the null hypothesis is
+true (i.e., there is no actual difference between the groups), the
+p-values obtained from the statistical tests should be uniformly
+distributed between 0 and 1.
+
+Validation steps involve:
+
+1.  **Synthetic Data Generation:** Create simulated datasets for test
+    and control groups where no effect is present.
+
+2.  **Repeated Testing:** Run the statistical criterion (e.g., t-test)
+    many times (e.g., 10,000 times) on these synthetic A/A datasets.
+
+-   **P-value Distribution Analysis: Histogram of P-values:** If the
+    p-values are uniformly distributed, the histogram should appear
+    flat. Any peaks or skews indicate issues with the criterion.
+
+-   **QQ-plot (Quantile-Quantile Plot):** This plot compares the
+    observed p-values' quantiles against the theoretical quantiles of a
+    uniform distribution. Points should fall approximately along a
+    45-degree line. Deviations suggest the p-values are not uniformly
+    distributed.
+
+-   **Empirical Cumulative Distribution Function (ECDF):** Plotting the
+    ECDF of the p-values against the theoretical CDF of a uniform
+    distribution (which is a straight line from 0,0 to 1,1). Similar to
+    QQ-plots, a close fit indicates uniformity.
+
+-   **Kolmogorov-Smirnov (KS) Test:** A non-parametric statistical test
+    that formally assesses whether the observed p-values significantly
+    differ from a uniform distribution. A high p-value from the KS test
+    (e.g., \> 0.05) would suggest uniformity.
+
+1.  **Confidence Interval for Type I Error:** Calculate a confidence
+    interval for the proportion of times the null hypothesis was
+    incorrectly rejected (Type I error rate). This observed error rate
+    should ideally be close to the chosen alpha level (e.g., 0.05) and
+    fall within its confidence interval.
+
+If any of these checks fail, it indicates that the chosen statistical
+criterion is not valid for the given data and experiment setup, even
+before considering any actual effects.
+
+```{python user-aggregation-vs-uniform}
+# | fig-cap: "User aggregation vs Uniform (A/A test without effect)"
+
+pvalue_tt_user = []
+pvalue_tt_backet = []
+
+if os.path.exists("pvalue_tt_user.npy") and os.path.exists("pvalue_tt_backet.npy"):
+    pvalue_tt_user = np.load("pvalue_tt_user.npy").tolist()
+    pvalue_tt_backet = np.load("pvalue_tt_backet.npy").tolist()
+else:
+    for i in range(1000):
+        test_user = group_sample_gen(mu_exp=500, mu_pois=3, n=1000)
+        control_user = group_sample_gen(mu_exp=500, mu_pois=3, n=1000)
+        test_backet = make_buckets_vec(test_user, agg_type="sum", n_buckets=100)
+        control_backet = make_buckets_vec(control_user, agg_type="sum", n_buckets=100)
+        _, p_value_user = stats.ttest_ind(test_user, control_user, equal_var=False)
+        _, p_value_backet = stats.ttest_ind(
+            test_backet, control_backet, equal_var=False
+        )
+        pvalue_tt_backet.append(p_value_backet)
+        pvalue_tt_user.append(p_value_user)
+    np.save("pvalue_tt_user.npy", pvalue_tt_user)
+    np.save("pvalue_tt_backet.npy", pvalue_tt_backet)
+
+plot_comparison_with_uniform(pvalue_tt_user, "User aggregation vs Uniform")
+```
+
+### 5. What are the challenges with "peeking" at A/B test results and how can they be addressed?
+
+"Peeking" or "p-hacking" refers to the practice of repeatedly checking
+the results of an A/B test as data accumulates and stopping the
+experiment as soon as a statistically significant result is observed.
+
+**Challenges:**
+
+-   **Increased Type I Error (False Positives):** Every time you "peek"
+    at the data and run a statistical test, you increase the probability
+    of encountering a false positive (Type I error). If you test
+    multiple times, the cumulative probability of making at least one
+    Type I error across all checks dramatically inflates beyond the
+    chosen alpha level (e.g., 0.05). This leads to unreliable and
+    irreproducible findings.
+
+-   **Misinterpretation of P-values:** The p-value's interpretation
+    relies on the assumption of a single, pre-specified test. Continuous
+    monitoring violates this.
+
+**Solutions to Address Peeking:**
+
+-   **Group Sequential Testing (GST):** This approach allows for
+    multiple interim analyses (peeks) while controlling the overall
+    Family-Wise Error Rate (FWER). It achieves this by adjusting the
+    significance thresholds for each sequential look. Common methods for
+    setting these boundaries include:
+
+-   **O'Brien-Fleming (OBF) Boundaries:** These set very stringent
+    (hard-to-cross) thresholds at early stages of the experiment, which
+    gradually become less strict as more data accumulates, approaching
+    the traditional alpha level at the final analysis.
+
+-   **Pocock Boundaries:** These set constant (but higher than
+    traditional alpha) thresholds for all interim analyses.
+
+-   **Fixed Sample Size:** Pre-determining the sample size and running
+    the experiment until that size is reached, then performing a single
+    statistical test. This avoids the temptation to peek and minimizes
+    Type I error inflation.
+
+-   **Sequential Testing with Alpha Spending Functions:** More flexible
+    methods that distribute the total Type I error rate across multiple
+    analyses, allowing for adaptive monitoring of experiments.
+
+```{python peeking}
+# | fig-align: center
+# | fig-cap: "GST: dynamic thresholds for z-statistic"
+
+n_iters = 10
+total_n = 450
+steps = np.arange(20, total_n + 1, 10)
+alpha = 0.05
+threshold = stats.norm.ppf(1 - alpha / 2)  # 1.96
+
+z_mat = []
+
+for exp in range(n_iters):
+    control = np.random.normal(0, 1, total_n)
+    test = np.random.normal(0, 1, total_n)
+    z_line = []
+    for step in steps:
+        mean_c = control[:step].mean()
+        mean_t = test[:step].mean()
+        std_c = control[:step].std(ddof=1)
+        std_t = test[:step].std(ddof=1)
+        z = (mean_t - mean_c) / np.sqrt(std_t**2 / step + std_c**2 / step)
+        z_line.append(z)
+    z_mat.append(z_line)
+z_mat = np.array(z_mat)
+
+plt.figure(figsize=(8, 5))
+mask_gst = []
+
+for idx in range(n_iters):
+    this_z = z_mat[idx]
+    s_peeked = False
+    for i, step in enumerate(steps):
+        boundary = stats.norm.ppf(1 - alpha / (2 * (len(steps) - i)))
+        if np.abs(this_z[i]) >= boundary:
+            plt.plot(steps[: i + 1], this_z[: i + 1], color="orange", lw=2.5, alpha=0.6)
+            s_peeked = True
+            break
+    if not s_peeked:
+        plt.plot(steps, this_z, color="teal", lw=2, alpha=0.55)
+    mask_gst.append(s_peeked)
+
+gst_thr = [
+    stats.norm.ppf(1 - alpha / (2 * (len(steps) - i))) for i in range(len(steps))
+]
+plt.plot(steps, gst_thr, ls="--", color="dodgerblue", lw=2, label="GST upper threshold")
+plt.plot(steps, [-t for t in gst_thr], ls="--", color="dodgerblue", lw=2)
+
+plt.xlabel("Number of observations in each group")
+plt.ylabel("Z-statistic")
+plt.legend()
+plt.grid(axis="y")
+plt.tight_layout()
+plt.show()
+```
+
+### 6. What is the problem of multiple testing and how can it be mitigated?
+
+The "multiple testing problem" arises when multiple statistical
+hypotheses are tested simultaneously. If you perform m independent A/B
+tests, each with a Type I error rate (alpha) of, say, 0.05, the
+probability of making at least one false positive (Family-Wise Error
+Rate, FWER) increases significantly with m.
+
+**How FWER grows:** For m independent tests, the probability of *not*
+making a Type I error in any single test is $1 - \alpha$. Therefore, the
+probability of *not* making any Type I error across all $m$ tests is
+$(1 - \alpha)^m$. Consequently, the FWER (probability of at least one
+Type I error) is $1 - (1 - \alpha)^m$. This value quickly exceeds the
+nominal $\alpha$ as $m$ increases.
+
+**Mitigation Strategies:** To control the FWER when performing multiple
+comparisons, adjusted p-value thresholds or methods are used:
+
+-   **Bonferroni Correction:** A very conservative method that divides
+    the original alpha by the number of tests
+    $\alpha_{adjusted} = \alpha/m$. While effective at controlling FWER,
+    it often severely reduces statistical power, making it harder to
+    detect true effects.
+
+-   **Šidák Correction:** A slightly less conservative method than
+    Bonferroni, calculating the adjusted alpha as
+    $\alpha_{adjusted} = 1 - (1 -\alpha)^{\frac{\alpha}{m}}$.
+
+-   **Holm-Bonferroni Method (Holm):** A stepwise procedure that is less
+    conservative than Bonferroni while still controlling FWER. It sorts
+    p-values and adjusts them iteratively.
+
+-   **False Discovery Rate (FDR) Control (e.g., Benjamini-Hochberg):**
+    Instead of controlling FWER (the probability of *any* false
+    positive), FDR methods control the expected proportion of false
+    positives among *all* rejected hypotheses. This approach is less
+    stringent than FWER control, leading to higher statistical power,
+    and is often preferred in exploratory research or when many tests
+    are performed.
+
+Choosing the right correction depends on the specific goals: if avoiding
+*any* false positive is paramount (e.g., clinical trials), FWER control
+is chosen. If a higher number of true positives is desired even with
+some false positives (e.g., feature development), FDR control might be
+more appropriate.
+
+### 7. What is CUPED and how does it improve A/B test sensitivity?
+
+**CUPED (Controlled-experiment Using Pre-Experiment Data)** is a
+technique designed to improve the sensitivity (power) of A/B tests by
+reducing the variance of the metrics being analyzed. It achieves this by
+leveraging pre-experiment data (covariates) for each user.
+
+**How it works:** CUPED works by creating an adjusted metric ($Z_i$) for
+each user ($i$): $Z_i = Y_i - θX_i + θE[X]$, where:
+
+-   $Y_i$ is the observed metric value for user $i$ in the experiment.
+
+-   $X_i$ is a pre-experiment covariate for user $i$ (e.g., the same
+    metric's value during a period *before* the experiment began).
+
+-   $E[X]$ is the expected value of the covariate across the entire
+    population (or both groups combined).
+
+-   $\theta$ is a coefficient calculated as $Cov(X, Y) / Var(X)$, which
+    maximizes variance reduction.
+
+By using this adjusted metric $Z_i$, the variance of the difference
+between the test and control groups $Var(\bar Z)$ can be significantly
+reduced, specifically by a factor of $(1 - r^2)$, where $r$ is the
+Pearson correlation coefficient between $X$ and $Y$. A higher
+correlation between pre-experiment and in-experiment metrics leads to a
+greater reduction in variance.
+
+**Benefits:**
+
+-   **Increased Sensitivity/Power:** By reducing variance, CUPED allows
+    the A/B test to detect smaller effects (lower MDE) with the same
+    sample size, or to achieve the same power with a smaller sample size
+    (thus saving time and resources).
+
+```{python cuped-power}
+# | fig-align: center
+# | fig-cap: "CUPED vs T-test power comparison"
+
+
+def cuped_data(sample_size=10000, effect=0):
+    X_pre = np.random.normal(loc=10, scale=5, size=sample_size)
+
+    treatment = np.random.binomial(1, 0.5, size=sample_size)
+
+    delta = 10 * effect
+
+    cor = 0.6
+    Y = (
+        cor * X_pre
+        + np.random.normal(loc=0, scale=2, size=sample_size)
+        + delta * treatment
+    )
+
+    group_control = treatment == 0
+    group_test = treatment == 1
+    _, pvalue_tt = stats.ttest_ind(Y[group_test], Y[group_control])
+
+    theta = np.cov(Y, X_pre)[0, 1] / np.var(X_pre)
+    Y_cuped = Y - theta * X_pre
+
+    _, pvalue_cuped = stats.ttest_ind(
+        Y_cuped[group_test], Y_cuped[group_control], equal_var=False
+    )
+
+    return pvalue_tt, pvalue_cuped
+
+
+good_cnt_tt = []
+good_cnt_cuped = []
+n_observations = [
+    25,
+    50,
+    100,
+    500,
+    1000,
+    2000,
+    5000,
+    10000,
+    20000,
+    35000,
+    50000,
+    75000,
+    100000,
+]
+
+if os.path.exists("good_cnt_tt.npy") and os.path.exists("good_cnt_cuped.npy"):
+    good_cnt_tt = np.load("good_cnt_tt.npy").tolist()
+    good_cnt_cuped = np.load("good_cnt_cuped.npy").tolist()
+else:
+    for n in n_observations:
+        cnt_tt = 0
+        cnt_cuped = 0
+        for i in range(1000):
+            pvalue_tt, pvalue_cuped = cuped_data(sample_size=n, effect=0.01)
+            if pvalue_tt < 0.05:
+                cnt_tt += 1
+            if pvalue_cuped < 0.05:
+                cnt_cuped += 1
+        good_cnt_tt.append(cnt_tt / 1000)
+        good_cnt_cuped.append(cnt_cuped / 1000)
+
+    np.save("good_cnt_tt.npy", good_cnt_tt)
+    np.save("good_cnt_cuped.npy", good_cnt_cuped)
+
+plt.figure(figsize=(5, 3))
+plt.plot(n_observations, good_cnt_tt, marker="o", label="T-test")
+plt.plot(n_observations, good_cnt_cuped, marker="o", label="CUPED")
+
+plt.xlabel("Number of observations")
+plt.ylabel("Statistical power")
+plt.legend()
+plt.grid(True)
+plt.show()
+plt.close()
+```
+
+-   **Applicability:** It's particularly useful when pre-experiment data
+    is available and correlates well with the outcome metric.
+
+**Limitations/Considerations:**
+
+-   Requires pre-experiment data for all users in both groups.
+
+-   Needs to handle new users or those with no pre-experiment data
+    (e.g., by imputing the mean).
+
+### 8. What are the key differences between frequentist and Bayesian A/B testing approaches?
+
+**Frequentist (Classical) A/B Testing:**
+
+-   **Core Idea:** Focuses on the probability of observing the data
+    given a specific hypothesis (typically the null hypothesis). It uses
+    p-values to determine statistical significance.
+
+-   **Hypothesis:** Formulates a null hypothesis (e.g., no difference
+    between groups) and an alternative hypothesis.
+
+-   **P-value:** The probability of obtaining results as extreme as, or
+    more extreme than, the observed results, assuming the null
+    hypothesis is true.
+
+-   **Decision Rule:** Compare the p-value to a pre-defined significance
+    level (alpha, e.g., 0.05). If p-value \< alpha, reject H0.
+
+-   **Interpretation:** "There is a X% chance of observing this data if
+    there's no effect." Does NOT directly state the probability that H1
+    is true.
+
+-   **Stopping Rules:** Requires pre-defined sample sizes or sequential
+    testing methods to control Type I error. Peeking is a major concern.
+
+**Bayesian A/B Testing:**
+
+-   **Core Idea:** Updates beliefs about parameters (e.g., conversion
+    rates, average revenue) based on observed data. It uses probability
+    distributions to represent knowledge.
+
+-   **Prior Distribution:** Represents initial beliefs about the
+    parameter before the experiment (e.g., prior knowledge that average
+    conversion is around 5%).
+
+-   **Likelihood:** The probability of observing the data given
+    different possible parameter values.
+
+-   **Posterior Distribution:** The updated probability distribution of
+    the parameter after incorporating the observed data. Calculated as
+    $\text{Posterior} \propto \text{Likelihood} \times \text{Prior}$.
+
+-   **Decision Rule:** Directly calculates the probability that one
+    variant is better than another (e.g., P(Variant B \> Variant A)). A
+    common threshold is 95% or 98%.
+
+-   **Interpretation:** "There is a X% probability that Variant B is
+    better than Variant A." This is more intuitive for business
+    stakeholders.
+
+-   **Stopping Rules:** Allows for continuous monitoring and stopping
+    tests early without inflating Type I error rates, as the posterior
+    distribution continuously updates with new data.
+
+```{python bayesian-ab-test}
+# | fig-cap: "Bayesian A/B testing simulation"
+
+
+def bayes_prob_B_superior(xA, xB, prior_mu=0, prior_sigma=1000):
+    # a простейший вариант: берем неинформ. нормальный prior, нормальное апостериор, известная дисперсия в группах
+    nA, nB = len(xA), len(xB)
+    meanA, meanB = np.mean(xA), np.mean(xB)
+    varA, varB = np.var(xA, ddof=1), np.var(xB, ddof=1)
+
+    # Posterior параметры
+    post_varA = 1 / (1 / prior_sigma**2 + nA / varA)
+    post_meanA = post_varA * (prior_mu / prior_sigma**2 + nA * meanA / varA)
+
+    post_varB = 1 / (1 / prior_sigma**2 + nB / varB)
+    post_meanB = post_varB * (prior_mu / prior_sigma**2 + nB * meanB / varB)
+
+    # Разность распределений (разность норма распредел.)
+    diff_mean = post_meanB - post_meanA
+    diff_std = np.sqrt(post_varA + post_varB)
+    # Вероятность P(B > A)
+    prob = 1 - stats.norm.cdf(0, loc=diff_mean, scale=diff_std)
+    return prob
+
+
+def simulate_tests(n_sims=1000, n=50, effect=0.0, alpha=0.05, seed=123):
+    np.random.seed(seed)
+    ttest_signif = 0
+    bayes_high = 0
+    all_pvals = []
+    all_bayesp = []
+    for _ in range(n_sims):
+        xA = np.random.normal(0, 1, n)
+        xB = np.random.normal(effect, 1, n)
+        _, p = stats.ttest_ind(xB, xA, equal_var=False)
+        bayes_p = bayes_prob_B_superior(xA, xB)
+        all_pvals.append(p)
+        all_bayesp.append(bayes_p)
+        if p < alpha:
+            ttest_signif += 1
+        if bayes_p > 0.95:
+            bayes_high += 1
+    return (
+        np.array(all_pvals),
+        np.array(all_bayesp),
+        ttest_signif / n_sims,
+        bayes_high / n_sims,
+    )
+
+
+for effect, title in zip(
+    [0.0, 0.7], ["no effect (H0)", "effect exists (H1, means diff = 0.7)"]
+):
+    pvals, bayesp, ttest_rate, bayes_rate = simulate_tests(effect=effect)
+    plt.figure(figsize=(8, 3))
+    plt.subplot(1, 2, 1)
+    plt.hist(pvals, bins=40, alpha=0.7, label="p-value t-test")
+    plt.axvline(0.05, color="red", linestyle="--", label="threshold 0.05")
+    plt.title(f"T-test, {title}\nShare of significant T-tests: {ttest_rate:.2%}")
+    plt.legend()
+    plt.subplot(1, 2, 2)
+    plt.hist(bayesp, bins=40, alpha=0.7, label="P(B > A) Bayesian")
+    plt.axvline(0.95, color="red", linestyle="--", label="threshold 0.95")
+    plt.title(f"Bayesian, {title}\n Share of P(B > A) > 0.95: {bayes_rate:.2%}")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+    plt.close()
+```
+
+**Key Advantages of Bayesian:**
+
+-   **Intuitive Interpretation:** Directly provides probabilities of
+    hypotheses (e.g., "B is better than A").
+
+-   **Flexibility:** Easily incorporates prior knowledge, handles
+    unequal sample sizes, and can be used for complex models.
+
+-   **No Peeking Problem:** Interim analyses are natural, as beliefs are
+    simply updated.
+
+**Key Disadvantages of Bayesian:**
+
+-   **Computational Cost:** Can be more intensive for complex models
+    (though straightforward for common A/B test scenarios).
+
+-   **Prior Selection:** Requires choosing a prior distribution, which
+    can sometimes be subjective, though with large datasets, the choice
+    of a "non-informative" prior typically has minimal impact.
+
+### References
+
+-   [A/B Week \| Yandex School of Data Analysis](https://shad.yandex.ru/abweek){target="_blank"}
+-   [dakhakimova/YSDA_ABweek](https://github.com/dakhakimova/YSDA_ABweek){target="_blank"}
+
+```{python image-svg}
+def get_critical_threshold(
+    m_metrics=10, n_per_group=50, n_repeat=5000, alpha=0.05, stat_func=np.min, seed=42
+):
+    np.random.seed(seed)
+    T_values = []
+    for _ in range(n_repeat):
+        pvals = []
+        for i in range(m_metrics):
+            control = np.random.normal(0, 1, size=n_per_group)
+            test = np.random.normal(0, 1, size=n_per_group)
+            stat, p = stats.ttest_ind(test, control, equal_var=False)
+            pvals.append(p)
+        T_val = stat_func(pvals)
+        T_values.append(T_val)
+    threshold = np.quantile(T_values, alpha)
+    return threshold, T_values
+
+
+def evaluate_criterion(
+    m_metrics=10,
+    n_per_group=50,
+    n_repeat=2000,
+    alpha=0.05,
+    threshold=None,
+    stat_func=np.min,
+    n_alt=0,
+    effect=0.5,
+    seed=100,
+):
+    np.random.seed(seed)
+    sras = 0
+    T_values = []
+    for _ in range(n_repeat):
+        pvals = []
+        for i in range(m_metrics):
+            mu_control = 0
+            mu_test = (
+                effect if (i < n_alt) else 0
+            )  # Эффект только для первых n_alt метрик
+            control = np.random.normal(mu_control, 1, size=n_per_group)
+            test = np.random.normal(mu_test, 1, size=n_per_group)
+            stat, p = stats.ttest_ind(test, control, equal_var=False)
+            pvals.append(p)
+        T_val = stat_func(pvals)
+        T_values.append(T_val)
+        if T_val < threshold:
+            sras += 1
+    frac = sras / n_repeat
+    return frac, T_values
+
+
+m_metrics = 10
+n_per_group = 50
+alpha = 0.05
+n_repeat = 5000
+effect = 0.5
+n_alt = 2
+
+
+if os.path.exists("threshold.npy") and os.path.exists("null_dist.npy"):
+    threshold = np.load("threshold.npy").item()
+    null_dist = np.load("null_dist.npy").tolist()
+else:
+    threshold, null_dist = get_critical_threshold(
+        m_metrics=m_metrics,
+        n_per_group=n_per_group,
+        n_repeat=n_repeat,
+        alpha=alpha,
+        stat_func=np.mean,
+        seed=42,
+    )
+    np.save("threshold.npy", threshold)
+    np.save("null_dist.npy", null_dist)
+
+if os.path.exists("null_vals.npy"):
+    null_vals = np.load("null_vals.npy").tolist()
+else:
+    null_vals = []
+    _, null_vals = evaluate_criterion(
+        m_metrics=m_metrics,
+        n_per_group=n_per_group,
+        n_repeat=2000,
+        alpha=alpha,
+        threshold=threshold,
+        stat_func=np.mean,
+        n_alt=0,
+        effect=effect,
+        seed=123,
+    )
+    np.save("null_vals.npy", null_vals)
+
+
+if os.path.exists("alt_vals.npy"):
+    alt_vals = np.load("alt_vals.npy").tolist()
+else:
+    _, alt_vals = evaluate_criterion(
+        m_metrics=m_metrics,
+        n_per_group=n_per_group,
+        n_repeat=2000,
+        alpha=alpha,
+        threshold=threshold,
+        stat_func=np.mean,
+        n_alt=n_alt,
+        effect=effect,
+        seed=987,
+    )
+
+    np.save("alt_vals.npy", alt_vals)
+
+plt.figure(figsize=(3, 3))
+plt.hist(null_vals, bins=16, alpha=0.6, label="mean(p) H0")
+plt.hist(alt_vals, bins=16, alpha=0.6, label="mean(p) H1")
+plt.axvline(threshold, color="red", ls="--", label=f"threshold ({threshold:.3f})")
+# plt.xlabel("mean(p) among m metrics")
+# plt.ylabel("Frequency")
+# plt.legend()
+# plt.title("Distribution of mean(p) under H0 and H1")
+# plt.show()
+plt.savefig("image.svg", dpi=300, bbox_inches="tight")
+plt.close()
+```
