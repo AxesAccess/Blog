@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.5">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aleksei">
+<meta name="dcterms.date" content="2025-07-29">
+<meta name="description" content="Key components, metrics, errors, CUPED, multiple testing, peeking, and Bayesian vs frequentist approaches.">
+
+<title>A/B Testing: Concepts and Techniques – Blog</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ff4371ef257df69894857e99c6ad0d06.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-51b590f5d80fba749bfa7070b357c39d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-H2HYLD7LV5"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About Me</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/AxesAccess"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/telecamera/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">A/B Testing: Concepts and Techniques</h1>
+                  <div>
+        <div class="description">
+          Key components, metrics, errors, CUPED, multiple testing, peeking, and Bayesian vs frequentist approaches.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">A/B Testing</div>
+                <div class="quarto-category">Product</div>
+                <div class="quarto-category">Statistics</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aleksei </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 29, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<p>This article is a short recap of intensive course <a href="https://shad.yandex.ru/abweek" target="_blank">A/B Week by YSDA</a>, providing an overview of A/B testing, focusing on its key components, common metrics, types of errors, and advanced techniques like CUPED. It also discusses the challenges of peeking at results, the problem of multiple testing, and how to validate statistical criteria using A/A tests.</p>
+<section id="what-is-ab-testing-and-what-are-its-key-components" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-ab-testing-and-what-are-its-key-components">1. What is A/B testing and what are its key components?</h2>
+<p>A/B testing is a method used to determine the impact of implemented changes on a product by isolating external factors. It involves dividing users into two groups: a control group (A) that experiences no changes, and a test group (B) that is exposed to a new feature.</p>
+<p>The key components of an A/B test include:</p>
+<ul>
+<li><p><strong>Infrastructure:</strong> A robust system is required to conduct and manage experiments.</p></li>
+<li><p><strong>Customer Base:</strong> A large user base is necessary to ensure statistically significant results.</p></li>
+<li><p><strong>Time:</strong> Sufficient time is needed for the experiment to run and for the data to be analyzed.</p></li>
+<li><p><strong>Metrics:</strong> Carefully selected metrics are used to measure the effect of the changes. These can be “value metrics” (e.g., total cost of successful trips, number of unique completed orders) or “ratio metrics” (e.g., acceptance rate, completed rate, tips as a share of GMV).</p></li>
+<li><p><strong>User Aggregation:</strong> Data is typically aggregated per user rather than per event to ensure independent observations, which is crucial for valid statistical analysis. Comparing raw event-level data can introduce dependencies that invalidate standard statistical tests.</p></li>
+</ul>
+<div id="bd83751a" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-4-output-1.svg" class="img-fluid figure-img"></p>
+<figcaption>User aggregation vs Event-level data</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The figures in this article were created using code from the <a href="https://github.com/dakhakimova/YSDA_ABweek" target="_blank">dakhakimova/YSDA_ABweek</a> repository.</p>
+</div>
+</div>
+<section id="what-are-the-common-types-of-metrics-used-in-ab-testing-and-how-are-they-handled" class="level3">
+<h3 class="anchored" data-anchor-id="what-are-the-common-types-of-metrics-used-in-ab-testing-and-how-are-they-handled">2. What are the common types of metrics used in A/B testing and how are they handled?</h3>
+<p>Metrics in A/B testing are broadly categorized into:</p>
+<ul>
+<li><p><strong>Value Metrics:</strong> These represent absolute values or sums, such as Gross Merchandise Value (GMV), total number of impressions, or total dwell time. For these metrics, the average (mean) is commonly compared between test and control groups.</p></li>
+<li><p><strong>Ratio Metrics:</strong> These represent a proportion or ratio, such as Acceptance Rate (accepted offers to seen offers) or CTR (number of clicks to the number of views). These are more complex because they involve both a numerator and a denominator, and the simple t-test for means may not be appropriate due to the inherent correlation between the numerator and denominator within each user.</p></li>
+</ul>
+<p>For ratio metrics, several advanced methods are used:</p>
+<ul>
+<li><p><strong>Delta Method:</strong> This statistical technique estimates the variance of a ratio by using the variances and covariance of its numerator and denominator. It approximates the distribution of the ratio using a <a href="https://en.wikipedia.org/wiki/Taylor_series" target="_blank">Taylor series</a> expansion.</p></li>
+<li><p><strong>Linearization:</strong> This method transforms the ratio into a linear approximation, allowing the use of standard t-tests on the transformed data. There are different types of linearization, typically involving a reference value (e.g., the control group’s ratio) to define the linear terms.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="More information">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+More information
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><a href="https://www.researchgate.net/publication/322969314_Consistent_Transformation_of_Ratio_Metrics_for_Efficient_Online_Controlled_Experiments" target="_blank">Consistent Transformation of Ratio Metrics for Efficient Online Controlled Experiments</a> (<a href="http://dx.doi.org/10.1145/3159652.3159699" target="_blank">DOI:10.1145/3159652.3159699</a>).</p>
+</div>
+</div></li>
+<li><p><strong>Bucketization (Bucketing):</strong> Instead of analyzing individual user data, users (or their aggregated events) are grouped into “buckets”. The ratio is then calculated for each bucket, and a t-test is performed on the bucket-level ratios. This can help normalize the distribution and reduce the impact of outliers but may lead to loss of information or reduced power with too few buckets.</p></li>
+</ul>
+<div id="556b5bf5" class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-5-output-1.svg" class="img-fluid figure-img"></p>
+<figcaption>Bucketing vs Uniform (without effect)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Bootstrap:</strong> A non-parametric resampling technique that involves repeatedly drawing samples with replacement from the observed data to create an empirical distribution of the statistic of interest (e.g., the difference in ratios). This distribution is then used to construct confidence intervals and calculate p-values, making it robust to distributional assumptions. Poisson bootstrap is a variant suitable for large datasets, allowing parallelization.</li>
+</ul>
+</section>
+<section id="what-are-type-i-and-type-ii-errors-in-ab-testing-and-how-do-they-relate-to-mde" class="level3">
+<h3 class="anchored" data-anchor-id="what-are-type-i-and-type-ii-errors-in-ab-testing-and-how-do-they-relate-to-mde">3. What are Type I and Type II errors in A/B testing, and how do they relate to MDE?</h3>
+<p>In hypothesis testing:</p>
+<ul>
+<li><p><strong>Null Hypothesis (H0):</strong> States there is no effect or difference between groups (e.g., the new feature has no impact).</p></li>
+<li><p><strong>Alternative Hypothesis (H1):</strong> States there is an effect or difference.</p></li>
+</ul>
+<p>The two types of errors are:</p>
+<ul>
+<li><p><strong>Type I Error</strong> <span class="math inline">\((\alpha)\)</span>: Rejecting the null hypothesis when it is actually true. This is also known as the “level of significance” and represents the probability of falsely concluding that an effect exists when it doesn’t.</p></li>
+<li><p><strong>Type II Error</strong> <span class="math inline">\((\beta)\)</span>: Failing to reject the null hypothesis when the alternative hypothesis is true. This means failing to detect an effect that actually exists.</p></li>
+</ul>
+<p>There’s an inverse relationship between Type I and Type II errors: decreasing alpha (making it harder to find an effect) will increase beta (making it harder to detect a real effect), and vice-versa.</p>
+<p><strong>Minimal Detectable Effect (MDE)</strong> is the smallest true difference between the control and test groups that an A/B test can reliably detect as statistically significant, given predefined values for:</p>
+<ul>
+<li><p><strong>Sample Size</strong> <span class="math inline">\((n)\)</span>: The number of users in each group.</p></li>
+<li><p><strong>Significance Level</strong> <span class="math inline">\((\alpha)\)</span>: The probability of a Type I error (e.g., 0.05).</p></li>
+<li><p><strong>Statistical Power</strong> <span class="math inline">\((1 - \beta)\)</span>: The probability of correctly detecting a true effect (e.g., 0.8 or 80%).</p></li>
+</ul>
+<p>MDE is crucial for experiment design, helping to estimate the required sample size and understand the sensitivity of the test to detect meaningful changes.</p>
+<div id="75cb48fe" class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-6-output-1.svg" class="img-fluid figure-img"></p>
+<figcaption>Dependency of MDE on <span class="math inline">\(m\)</span></figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="how-can-the-validity-of-a-statistical-criterion-be-checked-using-aa-tests" class="level3">
+<h3 class="anchored" data-anchor-id="how-can-the-validity-of-a-statistical-criterion-be-checked-using-aa-tests">4. How can the validity of a statistical criterion be checked using A/A tests?</h3>
+<p>A/A testing is a method where two identical groups are compared to each other, with no actual changes introduced. Since no effect is expected, an A/A test helps validate the statistical criterion used in A/B tests.</p>
+<p>The primary principle for validation is that if the null hypothesis is true (i.e., there is no actual difference between the groups), the p-values obtained from the statistical tests should be uniformly distributed between 0 and 1.</p>
+<p>Validation steps involve:</p>
+<ol type="1">
+<li><p><strong>Synthetic Data Generation:</strong> Create simulated datasets for test and control groups where no effect is present.</p></li>
+<li><p><strong>Repeated Testing:</strong> Run the statistical criterion (e.g., t-test) many times (e.g., 10,000 times) on these synthetic A/A datasets.</p></li>
+</ol>
+<ul>
+<li><p><strong>P-value Distribution Analysis: Histogram of P-values:</strong> If the p-values are uniformly distributed, the histogram should appear flat. Any peaks or skews indicate issues with the criterion.</p></li>
+<li><p><strong>QQ-plot (Quantile-Quantile Plot):</strong> This plot compares the observed p-values’ quantiles against the theoretical quantiles of a uniform distribution. Points should fall approximately along a 45-degree line. Deviations suggest the p-values are not uniformly distributed.</p></li>
+<li><p><strong>Empirical Cumulative Distribution Function (ECDF):</strong> Plotting the ECDF of the p-values against the theoretical CDF of a uniform distribution (which is a straight line from 0,0 to 1,1). Similar to QQ-plots, a close fit indicates uniformity.</p></li>
+<li><p><a href="https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test" target="_blank"><strong>Kolmogorov-Smirnov (KS) Test</strong></a><strong>:</strong> A non-parametric statistical test that formally assesses whether the observed p-values significantly differ from a uniform distribution. A high p-value from the KS test (e.g., &gt; 0.05) would suggest uniformity.</p></li>
+</ul>
+<ol type="1">
+<li><strong>Confidence Interval for Type I Error:</strong> Calculate a confidence interval for the proportion of times the null hypothesis was incorrectly rejected (Type I error rate). This observed error rate should ideally be close to the chosen alpha level (e.g., 0.05) and fall within its confidence interval.</li>
+</ol>
+<p>If any of these checks fail, it indicates that the chosen statistical criterion is not valid for the given data and experiment setup, even before considering any actual effects.</p>
+<div id="790a6641" class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-7-output-1.svg" class="img-fluid figure-img"></p>
+<figcaption>User aggregation vs Uniform (A/A test without effect)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed" class="level3">
+<h3 class="anchored" data-anchor-id="sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed">5. What are the challenges with “peeking” at A/B test results and how can they be addressed?</h3>
+<p>“Peeking” or “p-hacking” refers to the practice of repeatedly checking the results of an A/B test as data accumulates and stopping the experiment as soon as a statistically significant result is observed.</p>
+<p><strong>Challenges:</strong></p>
+<ul>
+<li><p><strong>Increased Type I Error (False Positives):</strong> Every time you “peek” at the data and run a statistical test, you increase the probability of encountering a false positive (Type I error). If you test multiple times, the cumulative probability of making at least one Type I error across all checks dramatically inflates beyond the chosen alpha level (e.g., 0.05). This leads to unreliable and irreproducible findings.</p></li>
+<li><p><strong>Misinterpretation of P-values:</strong> The p-value’s interpretation relies on the assumption of a single, pre-specified test. Continuous monitoring violates this.</p></li>
+</ul>
+<p><strong>Solutions to Address Peeking:</strong></p>
+<ul>
+<li><p><strong>Group Sequential Testing (GST):</strong> This approach allows for multiple interim analyses (peeks) while controlling the overall Family-Wise Error Rate (FWER). It achieves this by adjusting the significance thresholds for each sequential look. Common methods for setting these boundaries include:</p>
+<ul>
+<li><p><strong>O’Brien-Fleming (OBF) Boundaries:</strong> These set very stringent (hard-to-cross) thresholds at early stages of the experiment, which gradually become less strict as more data accumulates, approaching the traditional alpha level at the final analysis.</p></li>
+<li><p><strong>Pocock Boundaries:</strong> These set constant (but higher than traditional alpha) thresholds for all interim analyses.</p></li>
+<li><p><strong>Fixed Sample Size:</strong> Pre-determining the sample size and running the experiment until that size is reached, then performing a single statistical test. This avoids the temptation to peek and minimizes Type I error inflation.</p></li>
+<li><p><strong>Sequential Testing with Alpha Spending Functions:</strong> More flexible methods that distribute the total Type I error rate across multiple analyses, allowing for adaptive monitoring of experiments.</p></li>
+</ul></li>
+</ul>
+<div id="ee13013b" class="cell" data-execution_count="7">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-8-output-1.svg" class="img-fluid figure-img"></p>
+<figcaption>GST: dynamic thresholds for z-statistic</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="what-is-the-problem-of-multiple-testing-and-how-can-it-be-mitigated" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-the-problem-of-multiple-testing-and-how-can-it-be-mitigated">6. What is the problem of multiple testing and how can it be mitigated?</h3>
+<p>The “multiple testing problem” arises when multiple statistical hypotheses are tested simultaneously. If you perform m independent A/B tests, each with a Type I error rate (alpha) of, say, 0.05, the probability of making at least one false positive (Family-Wise Error Rate, FWER) increases significantly with m.</p>
+<p><strong>How FWER grows:</strong> For m independent tests, the probability of <em>not</em> making a Type I error in any single test is <span class="math inline">\(1 - \alpha\)</span>. Therefore, the probability of <em>not</em> making any Type I error across all <span class="math inline">\(m\)</span> tests is <span class="math inline">\((1 - \alpha)^m\)</span>. Consequently, the FWER (probability of at least one Type I error) is <span class="math inline">\(1 - (1 - \alpha)^m\)</span>. This value quickly exceeds the nominal <span class="math inline">\(\alpha\)</span> as <span class="math inline">\(m\)</span> increases.</p>
+<p><strong>Mitigation Strategies:</strong> To control the FWER when performing multiple comparisons, adjusted p-value thresholds or methods are used:</p>
+<ul>
+<li><p><strong>Bonferroni Correction:</strong> A very conservative method that divides the original alpha by the number of tests <span class="math inline">\(\alpha_{adjusted} = \alpha/m\)</span>. While effective at controlling FWER, it often severely reduces statistical power, making it harder to detect true effects.</p></li>
+<li><p><strong>Šidák Correction:</strong> A slightly less conservative method than Bonferroni, calculating the adjusted alpha as <span class="math inline">\(\alpha_{adjusted} = 1 - (1 -\alpha)^{\frac{\alpha}{m}}\)</span>.</p></li>
+<li><p><strong>Holm-Bonferroni Method (Holm):</strong> A stepwise procedure that is less conservative than Bonferroni while still controlling FWER. It sorts p-values and adjusts them iteratively.</p></li>
+<li><p><strong>False Discovery Rate (FDR) Control (e.g., Benjamini-Hochberg):</strong> Instead of controlling FWER (the probability of <em>any</em> false positive), FDR methods control the expected proportion of false positives among <em>all</em> rejected hypotheses. This approach is less stringent than FWER control, leading to higher statistical power, and is often preferred in exploratory research or when many tests are performed.</p></li>
+</ul>
+<p>Choosing the right correction depends on the specific goals: if avoiding <em>any</em> false positive is paramount (e.g., clinical trials), FWER control is chosen. If a higher number of true positives is desired even with some false positives (e.g., feature development), FDR control might be more appropriate.</p>
+</section>
+<section id="what-is-cuped-and-how-does-it-improve-ab-test-sensitivity" class="level3">
+<h3 class="anchored" data-anchor-id="what-is-cuped-and-how-does-it-improve-ab-test-sensitivity">7. What is CUPED and how does it improve A/B test sensitivity?</h3>
+<p><strong>CUPED (Controlled-experiment Using Pre-Experiment Data)</strong> is a technique designed to improve the sensitivity (power) of A/B tests by reducing the variance of the metrics being analyzed. It achieves this by leveraging pre-experiment data (covariates) for each user.</p>
+<p><strong>How it works:</strong> CUPED works by creating an adjusted metric (<span class="math inline">\(Z_i\)</span>) for each user (<span class="math inline">\(i\)</span>): <span class="math inline">\(Z_i = Y_i - θX_i + θE[X]\)</span>, where:</p>
+<ul>
+<li><p><span class="math inline">\(Y_i\)</span> is the observed metric value for user <span class="math inline">\(i\)</span> in the experiment.</p></li>
+<li><p><span class="math inline">\(X_i\)</span> is a pre-experiment covariate for user <span class="math inline">\(i\)</span> (e.g., the same metric’s value during a period <em>before</em> the experiment began).</p></li>
+<li><p><span class="math inline">\(E[X]\)</span> is the expected value of the covariate across the entire population (or both groups combined).</p></li>
+<li><p><span class="math inline">\(\theta\)</span> is a coefficient calculated as <span class="math inline">\(Cov(X, Y) / Var(X)\)</span>, which maximizes variance reduction.</p></li>
+</ul>
+<p>By using this adjusted metric <span class="math inline">\(Z_i\)</span>, the variance of the difference between the test and control groups <span class="math inline">\(Var(\bar Z)\)</span> can be significantly reduced, specifically by a factor of <span class="math inline">\((1 - r^2)\)</span>, where <span class="math inline">\(r\)</span> is the Pearson correlation coefficient between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. A higher correlation between pre-experiment and in-experiment metrics leads to a greater reduction in variance.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="More information">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+More information
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><a href="https://www.researchgate.net/publication/237838291_Improving_the_Sensitivity_of_Online_Controlled_Experiments_by_Utilizing_Pre-Experiment_Data" target="_blank">Improving the Sensitivity of Online Controlled Experiments by Utilizing Pre-Experiment Data</a> (<a href="http://dx.doi.org/10.1145/2433396.2433413" target="_blank">DOI:10.1145/2433396.2433413</a>).</p>
+</div>
+</div>
+<p><strong>Benefits:</strong></p>
+<ul>
+<li><strong>Increased Sensitivity/Power:</strong> By reducing variance, CUPED allows the A/B test to detect smaller effects (lower MDE) with the same sample size, or to achieve the same power with a smaller sample size (thus saving time and resources).</li>
+</ul>
+<div id="98d50296" class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-9-output-1.svg" class="img-fluid figure-img"></p>
+<figcaption>CUPED vs T-test power comparison</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Applicability:</strong> It’s particularly useful when pre-experiment data is available and correlates well with the outcome metric.</li>
+</ul>
+<p><strong>Limitations/Considerations:</strong></p>
+<ul>
+<li><p>Requires pre-experiment data for all users in both groups.</p></li>
+<li><p>Needs to handle new users or those with no pre-experiment data (e.g., by imputing the mean).</p></li>
+</ul>
+</section>
+<section id="what-are-the-key-differences-between-frequentist-and-bayesian-ab-testing-approaches" class="level3">
+<h3 class="anchored" data-anchor-id="what-are-the-key-differences-between-frequentist-and-bayesian-ab-testing-approaches">8. What are the key differences between frequentist and Bayesian A/B testing approaches?</h3>
+<p><strong>Frequentist (Classical) A/B Testing:</strong></p>
+<ul>
+<li><p><strong>Core Idea:</strong> Focuses on the probability of observing the data given a specific hypothesis (typically the null hypothesis H0). It uses p-values to determine statistical significance.</p></li>
+<li><p><strong>Hypothesis:</strong> Formulates a null hypothesis (e.g., no difference between groups) and an alternative hypothesis H1.</p></li>
+<li><p><strong>P-value:</strong> The probability of obtaining results as extreme as, or more extreme than, the observed results, assuming the null hypothesis is true.</p></li>
+<li><p><strong>Decision Rule:</strong> Compare the p-value to a pre-defined significance level (alpha, e.g., 0.05). If p-value &lt; alpha, reject H0.</p></li>
+<li><p><strong>Interpretation:</strong> “There is a X% chance of observing this data if there’s no effect.” Does NOT directly state the probability that H1 is true.</p></li>
+<li><p><strong>Stopping Rules:</strong> Requires pre-defined sample sizes or sequential testing methods to control Type I error. <a href="#sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed">Peeking</a> is a major concern.</p></li>
+</ul>
+<p><strong>Bayesian A/B Testing:</strong></p>
+<ul>
+<li><p><strong>Core Idea:</strong> Updates beliefs about parameters (e.g., conversion rates, average revenue) based on observed data. It uses probability distributions to represent knowledge.</p></li>
+<li><p><strong>Prior Distribution:</strong> Represents initial beliefs about the parameter before the experiment (e.g., prior knowledge that average conversion is around 5%).</p></li>
+<li><p><strong>Likelihood:</strong> The probability of observing the data given different possible parameter values.</p></li>
+<li><p><strong>Posterior Distribution:</strong> The updated probability distribution of the parameter after incorporating the observed data. Calculated as <span class="math inline">\(\text{Posterior} \propto \text{Likelihood} \times \text{Prior}\)</span>.</p></li>
+<li><p><strong>Decision Rule:</strong> Directly calculates the probability that one variant is better than another (e.g., P(Variant B &gt; Variant A)). A common threshold is 95% or 98%.</p></li>
+<li><p><strong>Interpretation:</strong> “There is a X% probability that Variant B is better than Variant A.” This is more intuitive for business stakeholders.</p></li>
+<li><p><strong>Stopping Rules:</strong> Allows for continuous monitoring and stopping tests early without inflating Type I error rates, as the posterior distribution continuously updates with new data.</p></li>
+</ul>
+<div id="fb4e8ab7" class="cell" data-execution_count="9">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-10-output-1.svg" class="img-fluid figure-img"></p>
+<figcaption>Bayesian A/B testing simulation</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-10-output-2.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Key Advantages of Bayesian:</strong></p>
+<ul>
+<li><p><strong>Intuitive Interpretation:</strong> Directly provides probabilities of hypotheses (e.g., “B is better than A”).</p></li>
+<li><p><strong>Flexibility:</strong> Easily incorporates prior knowledge, handles unequal sample sizes, and can be used for complex models.</p></li>
+<li><p><strong>No Peeking Problem:</strong> Interim analyses are natural, as beliefs are simply updated.</p></li>
+</ul>
+<p><strong>Key Disadvantages of Bayesian:</strong></p>
+<ul>
+<li><p><strong>Computational Cost:</strong> Can be more intensive for complex models (though straightforward for common A/B test scenarios).</p></li>
+<li><p><strong>Prior Selection:</strong> Requires choosing a prior distribution, which can sometimes be subjective, though with large datasets, the choice of a “non-informative” prior typically has minimal impact.</p></li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/AlekseiPrishchepo\.github\.io\/Blog\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
