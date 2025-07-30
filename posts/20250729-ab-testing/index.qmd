@@ -3,7 +3,7 @@ title: "A/B Testing: Concepts and Techniques"
 description: "Key components, metrics, errors, CUPED, multiple testing, peeking, and Bayesian vs frequentist approaches."
 author: "Aleksei"
 date: "2025-07-29"
-categories: ["A/B Testing", Statistics]
+categories: ["A/B Testing", Product, Statistics]
 image: "image.svg"
 fig-format: svg
 execute:
@@ -230,6 +230,13 @@ def indicator_perc(df, percentile=0.99, alpha=0.05):
     return sorted_vector[lower], sorted_vector[upper]
 ```
 
+This article is a short recap of intensive course [A/B Week by
+YSDA](https://shad.yandex.ru/abweek){target="_blank"}, providing an
+overview of A/B testing, focusing on its key components, common metrics,
+types of errors, and advanced techniques like CUPED. It also discusses
+the challenges of peeking at results, the problem of multiple testing,
+and how to validate statistical criteria using A/A tests.
+
 ## 1. What is A/B testing and what are its key components?
 
 A/B testing is a method used to determine the impact of implemented
@@ -332,37 +339,52 @@ plt.grid(True)
 plt.show()
 ```
 
+::: {.callout-note}
+The figures in this article were created using code from the
+[dakhakimova/YSDA_ABweek](https://github.com/dakhakimova/YSDA_ABweek){target="_blank"}
+repository.
+:::
+
 ### 2. What are the common types of metrics used in A/B testing and how are they handled?
 
 Metrics in A/B testing are broadly categorized into:
 
 -   **Value Metrics:** These represent absolute values or sums, such as
-    Gross Merchandise Value (GMV), total number of trips, or total
-    driver hours. For these metrics, the average (mean) is commonly
+    Gross Merchandise Value (GMV), total number of impressions, or total
+    dwell time. For these metrics, the average (mean) is commonly
     compared between test and control groups.
 
 -   **Ratio Metrics:** These represent a proportion or ratio, such as
-    Acceptance Rate (accepted offers to seen offers) or Trips per Hour
-    (completed orders to driver hours). These are more complex because
-    they involve both a numerator and a denominator, and the simple
-    t-test for means may not be appropriate due to the inherent
-    correlation between the numerator and denominator within each user.
+    Acceptance Rate (accepted offers to seen offers) or CTR (number of
+    clicks to the number of views). These are more complex because they
+    involve both a numerator and a denominator, and the simple t-test
+    for means may not be appropriate due to the inherent correlation
+    between the numerator and denominator within each user.
 
 For ratio metrics, several advanced methods are used:
 
 -   **Delta Method:** This statistical technique estimates the variance
     of a ratio by using the variances and covariance of its numerator
     and denominator. It approximates the distribution of the ratio using
-    a Taylor series expansion.
+    a [Taylor
+    series](https://en.wikipedia.org/wiki/Taylor_series){target="_blank"}
+    expansion.
 
 -   **Linearization:** This method transforms the ratio into a linear
     approximation, allowing the use of standard t-tests on the
     transformed data. There are different types of linearization,
     typically involving a reference value (e.g., the control group's
     ratio) to define the linear terms.
+    
+    ::: {.callout-note title="More information"}
+    [Consistent Transformation of
+    Ratio Metrics for Efficient Online Controlled
+    Experiments](https://www.researchgate.net/publication/322969314_Consistent_Transformation_of_Ratio_Metrics_for_Efficient_Online_Controlled_Experiments){target="_blank"}
+    ([DOI:10.1145/3159652.3159699](http://dx.doi.org/10.1145/3159652.3159699){target="_blank"}).
+    :::
 
 -   **Bucketization (Bucketing):** Instead of analyzing individual user
-    data, users (or their aggregated events) are grouped into "buckets."
+    data, users (or their aggregated events) are grouped into "buckets".
     The ratio is then calculated for each bucket, and a t-test is
     performed on the bucket-level ratios. This can help normalize the
     distribution and reduce the impact of outliers but may lead to loss
@@ -516,10 +538,12 @@ Validation steps involve:
     distribution (which is a straight line from 0,0 to 1,1). Similar to
     QQ-plots, a close fit indicates uniformity.
 
--   **Kolmogorov-Smirnov (KS) Test:** A non-parametric statistical test
-    that formally assesses whether the observed p-values significantly
-    differ from a uniform distribution. A high p-value from the KS test
-    (e.g., \> 0.05) would suggest uniformity.
+-   [**Kolmogorov-Smirnov (KS)
+    Test**](https://en.wikipedia.org/wiki/Kolmogorov%E2%80%93Smirnov_test){target="_blank"}**:**
+    A non-parametric statistical test that formally assesses whether the
+    observed p-values significantly differ from a uniform distribution.
+    A high p-value from the KS test (e.g., \> 0.05) would suggest
+    uniformity.
 
 1.  **Confidence Interval for Type I Error:** Calculate a confidence
     interval for the proportion of times the null hypothesis was
@@ -558,7 +582,7 @@ else:
 plot_comparison_with_uniform(pvalue_tt_user, "User aggregation vs Uniform")
 ```
 
-### 5. What are the challenges with "peeking" at A/B test results and how can they be addressed?
+### 5. What are the challenges with "peeking" at A/B test results and how can they be addressed? {#sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed}
 
 "Peeking" or "p-hacking" refers to the practice of repeatedly checking
 the results of an A/B test as data accumulates and stopping the
@@ -586,29 +610,31 @@ experiment as soon as a statistically significant result is observed.
     significance thresholds for each sequential look. Common methods for
     setting these boundaries include:
 
--   **O'Brien-Fleming (OBF) Boundaries:** These set very stringent
-    (hard-to-cross) thresholds at early stages of the experiment, which
-    gradually become less strict as more data accumulates, approaching
-    the traditional alpha level at the final analysis.
+    -   **O'Brien-Fleming (OBF) Boundaries:** These set very stringent
+        (hard-to-cross) thresholds at early stages of the experiment,
+        which gradually become less strict as more data accumulates,
+        approaching the traditional alpha level at the final analysis.
 
--   **Pocock Boundaries:** These set constant (but higher than
-    traditional alpha) thresholds for all interim analyses.
+    -   **Pocock Boundaries:** These set constant (but higher than
+        traditional alpha) thresholds for all interim analyses.
 
--   **Fixed Sample Size:** Pre-determining the sample size and running
-    the experiment until that size is reached, then performing a single
-    statistical test. This avoids the temptation to peek and minimizes
-    Type I error inflation.
+    -   **Fixed Sample Size:** Pre-determining the sample size and
+        running the experiment until that size is reached, then
+        performing a single statistical test. This avoids the temptation
+        to peek and minimizes Type I error inflation.
 
--   **Sequential Testing with Alpha Spending Functions:** More flexible
-    methods that distribute the total Type I error rate across multiple
-    analyses, allowing for adaptive monitoring of experiments.
+    -   **Sequential Testing with Alpha Spending Functions:** More
+        flexible methods that distribute the total Type I error rate
+        across multiple analyses, allowing for adaptive monitoring of
+        experiments.
 
 ```{python peeking}
 # | fig-align: center
 # | fig-cap: "GST: dynamic thresholds for z-statistic"
 
+np.random.seed(123)
 n_iters = 10
-total_n = 450
+total_n = 400
 steps = np.arange(20, total_n + 1, 10)
 alpha = 0.05
 threshold = stats.norm.ppf(1 - alpha / 2)  # 1.96
@@ -733,6 +759,13 @@ Pearson correlation coefficient between $X$ and $Y$. A higher
 correlation between pre-experiment and in-experiment metrics leads to a
 greater reduction in variance.
 
+::: {.callout-note title="More information"}
+[Improving the Sensitivity of Online Controlled Experiments by
+Utilizing Pre-Experiment
+Data](https://www.researchgate.net/publication/237838291_Improving_the_Sensitivity_of_Online_Controlled_Experiments_by_Utilizing_Pre-Experiment_Data){target="_blank"}
+([DOI:10.1145/2433396.2433413](http://dx.doi.org/10.1145/2433396.2433413){target="_blank"}).
+:::
+
 **Benefits:**
 
 -   **Increased Sensitivity/Power:** By reducing variance, CUPED allows
@@ -837,11 +870,11 @@ plt.close()
 **Frequentist (Classical) A/B Testing:**
 
 -   **Core Idea:** Focuses on the probability of observing the data
-    given a specific hypothesis (typically the null hypothesis). It uses
-    p-values to determine statistical significance.
+    given a specific hypothesis (typically the null hypothesis H0). It
+    uses p-values to determine statistical significance.
 
 -   **Hypothesis:** Formulates a null hypothesis (e.g., no difference
-    between groups) and an alternative hypothesis.
+    between groups) and an alternative hypothesis H1.
 
 -   **P-value:** The probability of obtaining results as extreme as, or
     more extreme than, the observed results, assuming the null
@@ -855,7 +888,9 @@ plt.close()
     is true.
 
 -   **Stopping Rules:** Requires pre-defined sample sizes or sequential
-    testing methods to control Type I error. Peeking is a major concern.
+    testing methods to control Type I error.
+    [Peeking](#sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed)
+    is a major concern.
 
 **Bayesian A/B Testing:**
 
@@ -975,11 +1010,6 @@ for effect, title in zip(
 -   **Prior Selection:** Requires choosing a prior distribution, which
     can sometimes be subjective, though with large datasets, the choice
     of a "non-informative" prior typically has minimal impact.
-
-### References
-
--   [A/B Week \| Yandex School of Data Analysis](https://shad.yandex.ru/abweek){target="_blank"}
--   [dakhakimova/YSDA_ABweek](https://github.com/dakhakimova/YSDA_ABweek){target="_blank"}
 
 ```{python image-svg}
 def get_critical_threshold(
