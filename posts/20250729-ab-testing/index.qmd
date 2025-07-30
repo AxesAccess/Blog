@@ -339,13 +339,13 @@ plt.grid(True)
 plt.show()
 ```
 
-::: {.callout-note}
+::: callout-note
 The figures in this article were created using code from the
 [dakhakimova/YSDA_ABweek](https://github.com/dakhakimova/YSDA_ABweek){target="_blank"}
 repository.
 :::
 
-### 2. What are the common types of metrics used in A/B testing and how are they handled?
+## 2. What are the common types of metrics used in A/B testing and how are they handled?
 
 Metrics in A/B testing are broadly categorized into:
 
@@ -375,10 +375,10 @@ For ratio metrics, several advanced methods are used:
     transformed data. There are different types of linearization,
     typically involving a reference value (e.g., the control group's
     ratio) to define the linear terms.
-    
+
     ::: {.callout-note title="More information"}
-    [Consistent Transformation of
-    Ratio Metrics for Efficient Online Controlled
+    [Consistent Transformation of Ratio Metrics for Efficient Online
+    Controlled
     Experiments](https://www.researchgate.net/publication/322969314_Consistent_Transformation_of_Ratio_Metrics_for_Efficient_Online_Controlled_Experiments){target="_blank"}
     ([DOI:10.1145/3159652.3159699](http://dx.doi.org/10.1145/3159652.3159699){target="_blank"}).
     :::
@@ -425,7 +425,7 @@ plot_comparison_with_uniform(pvalue_tt_backet, "Bucketing vs Uniform")
     robust to distributional assumptions. Poisson bootstrap is a variant
     suitable for large datasets, allowing parallelization.
 
-### 3. What are Type I and Type II errors in A/B testing, and how do they relate to MDE?
+## 3. What are Type I and Type II errors in A/B testing, and how do they relate to MDE?
 
 In hypothesis testing:
 
@@ -504,7 +504,7 @@ plt.show()
 plt.close()
 ```
 
-### 4. How can the validity of a statistical criterion be checked using A/A tests?
+## 4. How can the validity of a statistical criterion be checked using A/A tests?
 
 A/A testing is a method where two identical groups are compared to each
 other, with no actual changes introduced. Since no effect is expected,
@@ -582,7 +582,7 @@ else:
 plot_comparison_with_uniform(pvalue_tt_user, "User aggregation vs Uniform")
 ```
 
-### 5. What are the challenges with "peeking" at A/B test results and how can they be addressed? {#sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed}
+## 5. What are the challenges with "peeking" at A/B test results and how can they be addressed? {#sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed}
 
 "Peeking" or "p-hacking" refers to the practice of repeatedly checking
 the results of an A/B test as data accumulates and stopping the
@@ -685,7 +685,7 @@ plt.tight_layout()
 plt.show()
 ```
 
-### 6. What is the problem of multiple testing and how can it be mitigated?
+## 6. What is the problem of multiple testing and how can it be mitigated?
 
 The "multiple testing problem" arises when multiple statistical
 hypotheses are tested simultaneously. If you perform m independent A/B
@@ -731,7 +731,7 @@ is chosen. If a higher number of true positives is desired even with
 some false positives (e.g., feature development), FDR control might be
 more appropriate.
 
-### 7. What is CUPED and how does it improve A/B test sensitivity?
+## 7. What is CUPED and how does it improve A/B test sensitivity?
 
 **CUPED (Controlled-experiment Using Pre-Experiment Data)** is a
 technique designed to improve the sensitivity (power) of A/B tests by
@@ -760,8 +760,8 @@ correlation between pre-experiment and in-experiment metrics leads to a
 greater reduction in variance.
 
 ::: {.callout-note title="More information"}
-[Improving the Sensitivity of Online Controlled Experiments by
-Utilizing Pre-Experiment
+[Improving the Sensitivity of Online Controlled Experiments by Utilizing
+Pre-Experiment
 Data](https://www.researchgate.net/publication/237838291_Improving_the_Sensitivity_of_Online_Controlled_Experiments_by_Utilizing_Pre-Experiment_Data){target="_blank"}
 ([DOI:10.1145/2433396.2433413](http://dx.doi.org/10.1145/2433396.2433413){target="_blank"}).
 :::
@@ -865,7 +865,7 @@ plt.close()
 -   Needs to handle new users or those with no pre-experiment data
     (e.g., by imputing the mean).
 
-### 8. What are the key differences between frequentist and Bayesian A/B testing approaches?
+## 8. What are the key differences between frequentist and Bayesian A/B testing approaches?
 
 **Frequentist (Classical) A/B Testing:**
 
