@@ -62,15 +62,11 @@ shadePower <- rbind(
   c(criticalValues[2], 0),
   subset(testDistribution, x > criticalValues[2])
 )
-shadeNormalTwoTailedRight <- rbind(
-  c(criticalValues[2], 0),
-  subset(controlDistribution, x > criticalValues[2]), c(3, 0)
-)
 
 ggplot(controlDistribution, aes(x, y)) +
-  geom_polygon(data = shadeAlpha, aes(x = x, y = y, fill = "alpha / 2")) +
-  geom_polygon(data = shadeBeta, aes(x = x, y = y, fill = "beta")) +
-  geom_polygon(data = shadePower, aes(x = x, y = y, fill = "power")) +
+  geom_polygon(data = shadeAlpha, aes(x = x, y = y, fill = "alpha / 2", alpha = 0.5)) +
+  geom_polygon(data = shadeBeta, aes(x = x, y = y, fill = "beta", alpha = 0.5)) +
+  geom_polygon(data = shadePower, aes(x = x, y = y, fill = "power", alpha = 0.5)) +
   geom_line(
     color = "blue",
     linewidth = 1
@@ -87,10 +83,11 @@ ggplot(controlDistribution, aes(x, y)) +
     title = TeX("$\\alpha=0.05, \\beta=0.2, {power}=0.8$"),
     x = "",
     y = "Density",
-    fill = "",
+    fill = ""
   ) +
   theme_classic() +
-  theme(panel.border = element_rect(colour = "black", fill = NA, linewidth = 1.5))
+  theme(panel.border = element_rect(colour = "black", fill = NA, linewidth = 1.5)) +
+  guides(alpha = "none")
 ```
 
 ### Find the required sample size for a given MDE
@@ -184,15 +181,11 @@ shadePower <- rbind(
   c(criticalValues[2], 0),
   subset(testDistribution, x > criticalValues[2])
 )
-shadeNormalTwoTailedRight <- rbind(
-  c(criticalValues[2], 0),
-  subset(controlDistribution, x > criticalValues[2]), c(3, 0)
-)
 
 p <- ggplot(controlDistribution, aes(x, y)) +
-  geom_polygon(data = shadeAlpha, aes(x = x, y = y, fill = "alpha / 2")) +
-  geom_polygon(data = shadeBeta, aes(x = x, y = y, fill = "beta")) +
-  geom_polygon(data = shadePower, aes(x = x, y = y, fill = "power")) +
+  geom_polygon(data = shadeAlpha, aes(x = x, y = y, fill = "alpha / 2"), alpha = 0.5) +
+  geom_polygon(data = shadeBeta, aes(x = x, y = y, fill = "beta"), alpha = 0.5) +
+  geom_polygon(data = shadePower, aes(x = x, y = y, fill = "power"), alpha = 0.5) +
   geom_line(
     color = "blue",
     linewidth = 1
@@ -215,7 +208,7 @@ ggsave(
   plot = p,
   units = "px",
   width = 1200,
-  height = 1200,
+  height = 1000,
   dpi = 300
 )
 ```
