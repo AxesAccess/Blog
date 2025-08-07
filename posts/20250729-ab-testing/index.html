@@ -212,7 +212,7 @@ window.Quarto = {
 <li><p><strong>Metrics:</strong> Carefully selected metrics are used to measure the effect of the changes. These can be “value metrics” (e.g., total cost of successful trips, number of unique completed orders) or “ratio metrics” (e.g., acceptance rate, completed rate, tips as a share of GMV).</p></li>
 <li><p><strong>User Aggregation:</strong> Data is typically aggregated per user rather than per event to ensure independent observations, which is crucial for valid statistical analysis. Comparing raw event-level data can introduce dependencies that invalidate standard statistical tests.</p></li>
 </ul>
-<div id="bd83751a" class="cell" data-execution_count="3">
+<div id="5a082831" class="cell" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -235,8 +235,9 @@ Note
 <p>The figures in this article were created using code from the <a href="https://github.com/dakhakimova/YSDA_ABweek" target="_blank">dakhakimova/YSDA_ABweek</a> repository.</p>
 </div>
 </div>
-<section id="what-are-the-common-types-of-metrics-used-in-ab-testing-and-how-are-they-handled" class="level3">
-<h3 class="anchored" data-anchor-id="what-are-the-common-types-of-metrics-used-in-ab-testing-and-how-are-they-handled">2. What are the common types of metrics used in A/B testing and how are they handled?</h3>
+</section>
+<section id="what-are-the-common-types-of-metrics-used-in-ab-testing-and-how-are-they-handled" class="level2">
+<h2 class="anchored" data-anchor-id="what-are-the-common-types-of-metrics-used-in-ab-testing-and-how-are-they-handled">2. What are the common types of metrics used in A/B testing and how are they handled?</h2>
 <p>Metrics in A/B testing are broadly categorized into:</p>
 <ul>
 <li><p><strong>Value Metrics:</strong> These represent absolute values or sums, such as Gross Merchandise Value (GMV), total number of impressions, or total dwell time. For these metrics, the average (mean) is commonly compared between test and control groups.</p></li>
@@ -261,7 +262,7 @@ More information
 </div></li>
 <li><p><strong>Bucketization (Bucketing):</strong> Instead of analyzing individual user data, users (or their aggregated events) are grouped into “buckets”. The ratio is then calculated for each bucket, and a t-test is performed on the bucket-level ratios. This can help normalize the distribution and reduce the impact of outliers but may lead to loss of information or reduced power with too few buckets.</p></li>
 </ul>
-<div id="556b5bf5" class="cell" data-execution_count="4">
+<div id="5deb04e4" class="cell" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -275,8 +276,8 @@ More information
 <li><strong>Bootstrap:</strong> A non-parametric resampling technique that involves repeatedly drawing samples with replacement from the observed data to create an empirical distribution of the statistic of interest (e.g., the difference in ratios). This distribution is then used to construct confidence intervals and calculate p-values, making it robust to distributional assumptions. Poisson bootstrap is a variant suitable for large datasets, allowing parallelization.</li>
 </ul>
 </section>
-<section id="what-are-type-i-and-type-ii-errors-in-ab-testing-and-how-do-they-relate-to-mde" class="level3">
-<h3 class="anchored" data-anchor-id="what-are-type-i-and-type-ii-errors-in-ab-testing-and-how-do-they-relate-to-mde">3. What are Type I and Type II errors in A/B testing, and how do they relate to MDE?</h3>
+<section id="what-are-type-i-and-type-ii-errors-in-ab-testing-and-how-do-they-relate-to-mde" class="level2">
+<h2 class="anchored" data-anchor-id="what-are-type-i-and-type-ii-errors-in-ab-testing-and-how-do-they-relate-to-mde">3. What are Type I and Type II errors in A/B testing, and how do they relate to MDE?</h2>
 <p>In hypothesis testing:</p>
 <ul>
 <li><p><strong>Null Hypothesis (H0):</strong> States there is no effect or difference between groups (e.g., the new feature has no impact).</p></li>
@@ -295,7 +296,7 @@ More information
 <li><p><strong>Statistical Power</strong> <span class="math inline">\((1 - \beta)\)</span>: The probability of correctly detecting a true effect (e.g., 0.8 or 80%).</p></li>
 </ul>
 <p>MDE is crucial for experiment design, helping to estimate the required sample size and understand the sensitivity of the test to detect meaningful changes.</p>
-<div id="75cb48fe" class="cell" data-execution_count="5">
+<div id="f64bc6a8" class="cell" data-execution_count="5">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -306,8 +307,8 @@ More information
 </div>
 </div>
 </section>
-<section id="how-can-the-validity-of-a-statistical-criterion-be-checked-using-aa-tests" class="level3">
-<h3 class="anchored" data-anchor-id="how-can-the-validity-of-a-statistical-criterion-be-checked-using-aa-tests">4. How can the validity of a statistical criterion be checked using A/A tests?</h3>
+<section id="how-can-the-validity-of-a-statistical-criterion-be-checked-using-aa-tests" class="level2">
+<h2 class="anchored" data-anchor-id="how-can-the-validity-of-a-statistical-criterion-be-checked-using-aa-tests">4. How can the validity of a statistical criterion be checked using A/A tests?</h2>
 <p>A/A testing is a method where two identical groups are compared to each other, with no actual changes introduced. Since no effect is expected, an A/A test helps validate the statistical criterion used in A/B tests.</p>
 <p>The primary principle for validation is that if the null hypothesis is true (i.e., there is no actual difference between the groups), the p-values obtained from the statistical tests should be uniformly distributed between 0 and 1.</p>
 <p>Validation steps involve:</p>
@@ -325,7 +326,7 @@ More information
 <li><strong>Confidence Interval for Type I Error:</strong> Calculate a confidence interval for the proportion of times the null hypothesis was incorrectly rejected (Type I error rate). This observed error rate should ideally be close to the chosen alpha level (e.g., 0.05) and fall within its confidence interval.</li>
 </ol>
 <p>If any of these checks fail, it indicates that the chosen statistical criterion is not valid for the given data and experiment setup, even before considering any actual effects.</p>
-<div id="790a6641" class="cell" data-execution_count="6">
+<div id="6b9a35c3" class="cell" data-execution_count="6">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -336,8 +337,8 @@ More information
 </div>
 </div>
 </section>
-<section id="sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed" class="level3">
-<h3 class="anchored" data-anchor-id="sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed">5. What are the challenges with “peeking” at A/B test results and how can they be addressed?</h3>
+<section id="sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed" class="level2">
+<h2 class="anchored" data-anchor-id="sec-5.-what-are-the-challenges-with-peeking-at-ab-test-results-and-how-can-they-be-addressed">5. What are the challenges with “peeking” at A/B test results and how can they be addressed?</h2>
 <p>“Peeking” or “p-hacking” refers to the practice of repeatedly checking the results of an A/B test as data accumulates and stopping the experiment as soon as a statistically significant result is observed.</p>
 <p><strong>Challenges:</strong></p>
 <ul>
@@ -354,7 +355,7 @@ More information
 <li><p><strong>Sequential Testing with Alpha Spending Functions:</strong> More flexible methods that distribute the total Type I error rate across multiple analyses, allowing for adaptive monitoring of experiments.</p></li>
 </ul></li>
 </ul>
-<div id="ee13013b" class="cell" data-execution_count="7">
+<div id="25ea53cc" class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -365,8 +366,8 @@ More information
 </div>
 </div>
 </section>
-<section id="what-is-the-problem-of-multiple-testing-and-how-can-it-be-mitigated" class="level3">
-<h3 class="anchored" data-anchor-id="what-is-the-problem-of-multiple-testing-and-how-can-it-be-mitigated">6. What is the problem of multiple testing and how can it be mitigated?</h3>
+<section id="what-is-the-problem-of-multiple-testing-and-how-can-it-be-mitigated" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-the-problem-of-multiple-testing-and-how-can-it-be-mitigated">6. What is the problem of multiple testing and how can it be mitigated?</h2>
 <p>The “multiple testing problem” arises when multiple statistical hypotheses are tested simultaneously. If you perform m independent A/B tests, each with a Type I error rate (alpha) of, say, 0.05, the probability of making at least one false positive (Family-Wise Error Rate, FWER) increases significantly with m.</p>
 <p><strong>How FWER grows:</strong> For m independent tests, the probability of <em>not</em> making a Type I error in any single test is <span class="math inline">\(1 - \alpha\)</span>. Therefore, the probability of <em>not</em> making any Type I error across all <span class="math inline">\(m\)</span> tests is <span class="math inline">\((1 - \alpha)^m\)</span>. Consequently, the FWER (probability of at least one Type I error) is <span class="math inline">\(1 - (1 - \alpha)^m\)</span>. This value quickly exceeds the nominal <span class="math inline">\(\alpha\)</span> as <span class="math inline">\(m\)</span> increases.</p>
 <p><strong>Mitigation Strategies:</strong> To control the FWER when performing multiple comparisons, adjusted p-value thresholds or methods are used:</p>
@@ -378,8 +379,8 @@ More information
 </ul>
 <p>Choosing the right correction depends on the specific goals: if avoiding <em>any</em> false positive is paramount (e.g., clinical trials), FWER control is chosen. If a higher number of true positives is desired even with some false positives (e.g., feature development), FDR control might be more appropriate.</p>
 </section>
-<section id="what-is-cuped-and-how-does-it-improve-ab-test-sensitivity" class="level3">
-<h3 class="anchored" data-anchor-id="what-is-cuped-and-how-does-it-improve-ab-test-sensitivity">7. What is CUPED and how does it improve A/B test sensitivity?</h3>
+<section id="what-is-cuped-and-how-does-it-improve-ab-test-sensitivity" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-cuped-and-how-does-it-improve-ab-test-sensitivity">7. What is CUPED and how does it improve A/B test sensitivity?</h2>
 <p><strong>CUPED (Controlled-experiment Using Pre-Experiment Data)</strong> is a technique designed to improve the sensitivity (power) of A/B tests by reducing the variance of the metrics being analyzed. It achieves this by leveraging pre-experiment data (covariates) for each user.</p>
 <p><strong>How it works:</strong> CUPED works by creating an adjusted metric (<span class="math inline">\(Z_i\)</span>) for each user (<span class="math inline">\(i\)</span>): <span class="math inline">\(Z_i = Y_i - θX_i + θE[X]\)</span>, where:</p>
 <ul>
@@ -406,7 +407,7 @@ More information
 <ul>
 <li><strong>Increased Sensitivity/Power:</strong> By reducing variance, CUPED allows the A/B test to detect smaller effects (lower MDE) with the same sample size, or to achieve the same power with a smaller sample size (thus saving time and resources).</li>
 </ul>
-<div id="98d50296" class="cell" data-execution_count="8">
+<div id="10c3c234" class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -425,8 +426,8 @@ More information
 <li><p>Needs to handle new users or those with no pre-experiment data (e.g., by imputing the mean).</p></li>
 </ul>
 </section>
-<section id="what-are-the-key-differences-between-frequentist-and-bayesian-ab-testing-approaches" class="level3">
-<h3 class="anchored" data-anchor-id="what-are-the-key-differences-between-frequentist-and-bayesian-ab-testing-approaches">8. What are the key differences between frequentist and Bayesian A/B testing approaches?</h3>
+<section id="what-are-the-key-differences-between-frequentist-and-bayesian-ab-testing-approaches" class="level2">
+<h2 class="anchored" data-anchor-id="what-are-the-key-differences-between-frequentist-and-bayesian-ab-testing-approaches">8. What are the key differences between frequentist and Bayesian A/B testing approaches?</h2>
 <p><strong>Frequentist (Classical) A/B Testing:</strong></p>
 <ul>
 <li><p><strong>Core Idea:</strong> Focuses on the probability of observing the data given a specific hypothesis (typically the null hypothesis H0). It uses p-values to determine statistical significance.</p></li>
@@ -446,7 +447,7 @@ More information
 <li><p><strong>Interpretation:</strong> “There is a X% probability that Variant B is better than Variant A.” This is more intuitive for business stakeholders.</p></li>
 <li><p><strong>Stopping Rules:</strong> Allows for continuous monitoring and stopping tests early without inflating Type I error rates, as the posterior distribution continuously updates with new data.</p></li>
 </ul>
-<div id="fb4e8ab7" class="cell" data-execution_count="9">
+<div id="1297a292" class="cell" data-execution_count="9">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -476,7 +477,6 @@ More information
 </ul>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
