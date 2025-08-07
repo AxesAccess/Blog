@@ -1,0 +1,221 @@
+---
+title: "Minimal Detectable Effect (MDE) Calculation"
+author: "Aleksei"
+date: "2025-08-07"
+categories: ["A/B Testing", Product, Statistics]
+image: "image.svg"
+fig-format: svg
+# execute:
+#   echo: false
+---
+
+Minimal Detectable Effect (MDE) is defined as the smallest difference
+between a control and a test group that your A/B test can reliably
+identify as statistically significant. It's a critical concept because
+it helps in determining the necessary sample size for an experiment and
+in interpreting the results.
+
+## How MDE is calculated in experimental design
+
+The MDE calculation depends on several key parameters:
+
+-   Sample size ($n$ for the test group, $m$ for the control group).
+-   Significance level (alpha, $\alpha$): This is the probability of
+    a Type I error (falsely rejecting the null hypothesis), typically
+    set at 0.05.
+-   Statistical power (1-beta, $1-\beta$): This is the probability of
+    correctly detecting an effect when one truly exists, commonly set at
+    0.8 (or 80%).
+-   Variance ($\sigma^2$) of the metric being measured in the
+    population, often estimated from historical data.
+-   Ratio of control to test group sizes ($k = m/n$).
+
+```{r plot-normal-distribution, echo=FALSE, fig.cap="Control and test distributions with critical values, alpha, beta, and power shaded."}
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 7
+
+library(ggplot2)
+library(dplyr)
+library(latex2exp)
+
+controlDistribution <- data.frame(
+  x = seq(-4, 7, by = 0.01),
+  y = dnorm(seq(-4, 7, by = 0.01))
+)
+testDistribution <- data.frame(
+  x = seq(-4, 7, by = 0.01),
+  y = dnorm(seq(-4, 7, by = 0.01), mean = 3) # Example shift for test group
+)
+criticalValues <- qnorm(c(.025, .975))
+
+shadeAlpha <- rbind(
+  c(criticalValues[1], 0),
+  subset(controlDistribution, x < criticalValues[1])
+)
+shadeBeta <- rbind(
+  c(criticalValues[2], 0),
+  subset(testDistribution, x < criticalValues[2])
+)
+shadePower <- rbind(
+  c(criticalValues[2], 0),
+  subset(testDistribution, x > criticalValues[2])
+)
+shadeNormalTwoTailedRight <- rbind(
+  c(criticalValues[2], 0),
+  subset(controlDistribution, x > criticalValues[2]), c(3, 0)
+)
+
+ggplot(controlDistribution, aes(x, y)) +
+  geom_polygon(data = shadeAlpha, aes(x = x, y = y, fill = "alpha / 2")) +
+  geom_polygon(data = shadeBeta, aes(x = x, y = y, fill = "beta")) +
+  geom_polygon(data = shadePower, aes(x = x, y = y, fill = "power")) +
+  geom_line(
+    color = "blue",
+    linewidth = 1
+  ) +
+  geom_line(
+    data = testDistribution,
+    aes(x, y),
+    color = "red",
+    linewidth = 1
+  ) +
+  geom_vline(xintercept = criticalValues[1], linetype = "dashed", linewidth = 0.75) +
+  geom_vline(xintercept = criticalValues[2], linetype = "dashed", linewidth = 0.75) +
+  labs(
+    title = TeX("$\\alpha=0.05, \\beta=0.2, {power}=0.8$"),
+    x = "",
+    y = "Density",
+    fill = "",
+  ) +
+  theme_classic() +
+  theme(panel.border = element_rect(colour = "black", fill = NA, linewidth = 1.5))
+```
+
+### Find the required sample size for a given MDE
+
+The formula often used to determine the necessary sample size (e.g., for
+the control group, $m$) to detect a specific MDE ($e$) is:
+
+$$m > \dfrac{(z_{1-\alpha/2} + z_{1-\beta})^2 (1 + k)\sigma^2}{e^2}$$
+
+$z_{1-\alpha/2}$ and $z_{1-\beta}$ are the Z-scores corresponding to the
+desired significance level and power, respectively.
+
+$k$ is the ratio of the control group size to the test group size (e.g.,
+$k=1$ for a 1:1 split).
+
+$\sigma^2$ is the estimated variance of the metric.
+
+$e$ is the specific minimal effect you wish to detect.
+
+```{r}
+# Function to calculate required sample size
+calculate_sample_size <- function(e, alpha = 0.05, beta = 0.2, sigma = 1, k = 1) {
+  z_alpha <- qnorm(1 - alpha / 2)
+  z_beta <- qnorm(1 - beta)
+  m <- (z_alpha + z_beta)^2 * (1 + k) * sigma^2 / e^2
+  return(ceiling(m))
+}
+m <- calculate_sample_size(e = 10, alpha = 0.05, beta = 0.2, sigma = 500, k = 2)
+n <- ceiling(m / 2)
+total_users <- m + n
+
+c(m, n, total_users)
+```
+
+Example: If a monetary metric has a mean of 500 and a standard deviation
+(sigma) of 500, and you want to detect a 2% effect (MDE = 10) with alpha
+= 0.05 and beta = 0.2, and a test-to-control ratio of k = 2, the
+required sample size would be approximately 29,434 users in the test
+group and 58,867 users in the control group, totaling 88,301 users.
+
+### Find the MDE for a given sample size
+
+If you have a fixed number of users (n) or a defined sample size (m or
+n), you can determine the smallest effect (e) that your test can
+reliably detect:
+
+$$e > \sqrt{\dfrac{(z_{1-\alpha/2} + z_{1-\beta})^2 (1 + k)\sigma^2}{m}}$$
+For instance, with 100,000 total users, a sigma of 500, a k-ratio of 2,
+alpha = 0.05, and beta = 0.2, the minimum detectable effect would be
+approximately 9.397 units, which translates to a 1.88% change from the
+mean of 500.
+
+```{r}
+# Function to calculate MDE
+calculate_mde <- function(n, alpha = 0.05, beta = 0.2, sigma = 1, k = 1) {
+  z_alpha <- qnorm(1 - alpha / 2)
+  z_beta <- qnorm(1 - beta)
+  m <- n * k / (k + 1)
+  e <- sqrt((z_alpha + z_beta)^2 * (1 + k) * sigma^2 / m)
+  return(e)
+}
+
+calculate_mde(n = 100000, alpha = 0.05, beta = 0.2, sigma = 500, k = 2)
+```
+
+```{r plot-image-svg, echo=FALSE}
+#| message: false
+#| warning: false
+
+library(here)
+
+controlDistribution <- data.frame(
+  x = seq(-4, 7, by = 0.01),
+  y = dnorm(seq(-4, 7, by = 0.01))
+)
+testDistribution <- data.frame(
+  x = seq(-4, 7, by = 0.01),
+  y = dnorm(seq(-4, 7, by = 0.01), mean = 3) # Example shift for test group
+)
+criticalValues <- qnorm(c(.025, .975))
+
+shadeAlpha <- rbind(
+  c(criticalValues[1], 0),
+  subset(controlDistribution, x < criticalValues[1])
+)
+shadeBeta <- rbind(
+  c(criticalValues[2], 0),
+  subset(testDistribution, x < criticalValues[2])
+)
+shadePower <- rbind(
+  c(criticalValues[2], 0),
+  subset(testDistribution, x > criticalValues[2])
+)
+shadeNormalTwoTailedRight <- rbind(
+  c(criticalValues[2], 0),
+  subset(controlDistribution, x > criticalValues[2]), c(3, 0)
+)
+
+p <- ggplot(controlDistribution, aes(x, y)) +
+  geom_polygon(data = shadeAlpha, aes(x = x, y = y, fill = "alpha / 2")) +
+  geom_polygon(data = shadeBeta, aes(x = x, y = y, fill = "beta")) +
+  geom_polygon(data = shadePower, aes(x = x, y = y, fill = "power")) +
+  geom_line(
+    color = "blue",
+    linewidth = 1
+  ) +
+  geom_line(
+    data = testDistribution,
+    aes(x, y),
+    color = "red",
+    linewidth = 1
+  ) +
+  geom_vline(xintercept = criticalValues[1], linetype = "dashed", linewidth = 0.75) +
+  geom_vline(xintercept = criticalValues[2], linetype = "dashed", linewidth = 0.75) +
+  theme_minimal() +
+  theme(legend.position = "none", axis.title = element_blank())
+
+ggsave(
+  here(
+    "posts", "20250807-mde", "image.svg"
+  ),
+  plot = p,
+  units = "px",
+  width = 1200,
+  height = 1200,
+  dpi = 300
+)
+```
