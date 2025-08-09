@@ -9,7 +9,7 @@
 <meta name="author" content="Aleksei">
 <meta name="dcterms.date" content="2025-08-07">
 
-<title>Minimal Detectable Effect (MDE) Calculation – Blog</title>
+<title>Minimum Detectable Effect (MDE) Calculation – Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -187,11 +187,12 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Minimal Detectable Effect (MDE) Calculation</h1>
+      <h1 class="title">Minimum Detectable Effect (MDE) Calculation</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">A/B Testing</div>
                 <div class="quarto-category">Product</div>
                 <div class="quarto-category">Statistics</div>
+                <div class="quarto-category">R</div>
               </div>
                   </div>
   </div>
@@ -228,7 +229,7 @@ window.Quarto = {
 
 
 
-<p>Minimal Detectable Effect (MDE) is defined as the smallest difference between a control and a test group that your A/B test can reliably identify as statistically significant. It’s a critical concept because it helps in determining the necessary sample size for an experiment and in interpreting the results.</p>
+<p>Minimum Detectable Effect (MDE) is defined as the smallest difference between a control and a test group that your A/B test can reliably identify as statistically significant. It’s a critical concept because it helps in determining the necessary sample size for an experiment and in interpreting the results.</p>
 <section id="how-mde-is-calculated-in-experimental-design" class="level2">
 <h2 class="anchored" data-anchor-id="how-mde-is-calculated-in-experimental-design">How MDE is calculated in experimental design</h2>
 <p>The MDE calculation depends on several key parameters:</p>
@@ -249,55 +250,78 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<section id="find-the-required-sample-size-for-a-given-mde" class="level3">
-<h3 class="anchored" data-anchor-id="find-the-required-sample-size-for-a-given-mde">Find the required sample size for a given MDE</h3>
-<p>The formula often used to determine the necessary sample size (e.g., for the control group, <span class="math inline">\(m\)</span>) to detect a&nbsp;specific MDE (<span class="math inline">\(e\)</span>) is:</p>
-<p><span class="math display">\[m &gt; \dfrac{(z_{1-\alpha/2} + z_{1-\beta})^2 (1 + k)\sigma^2}{e^2}\]</span></p>
+</section>
+<section id="calculating-mde-for-a-given-sample-size" class="level2">
+<h2 class="anchored" data-anchor-id="calculating-mde-for-a-given-sample-size">Calculating MDE for a given sample size</h2>
+<p>If you have a fixed number of users (n) or a defined sample size (m or n), you can determine the smallest effect (e) that your test can reliably detect:</p>
+<p><span class="math display">\[e &gt; \sqrt{\dfrac{(z_{1-\alpha/2} + z_{1-\beta})^2 (1 + k)\sigma^2}{m}}\]</span></p>
 <p><span class="math inline">\(z_{1-\alpha/2}\)</span> and <span class="math inline">\(z_{1-\beta}\)</span> are the Z-scores corresponding to the desired significance level and&nbsp;power, respectively.</p>
-<p><span class="math inline">\(k\)</span> is the ratio of the control group size to the test group size (e.g., <span class="math inline">\(k=1\)</span> for a 1:1 split).</p>
+<p><span class="math inline">\(k=\frac{m}{n}\)</span> is the ratio of the control group size to the test group size (e.g., <span class="math inline">\(k=1\)</span> for a 1:1 split).</p>
 <p><span class="math inline">\(\sigma^2\)</span> is the estimated variance of the metric.</p>
-<p><span class="math inline">\(e\)</span> is the specific minimal effect you wish to detect.</p>
+<p><span class="math inline">\(e\)</span> is the minimal effect.</p>
+<section id="how-to-calculate-mde-in-r" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-calculate-mde-in-r">How to calculate MDE in R</h3>
+<p>For instance, with 100,000 total users, a sigma of 500, a k-ratio of 2, alpha = 0.05, and beta = 0.2, the minimum detectable effect would be approximately 9.397 units, which translates to a 1.88% change from the mean of 500.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to calculate required sample size</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>calculate_sample_size <span class="ot">&lt;-</span> <span class="cf">function</span>(e, <span class="at">alpha =</span> <span class="fl">0.05</span>, <span class="at">beta =</span> <span class="fl">0.2</span>, <span class="at">sigma =</span> <span class="dv">1</span>, <span class="at">k =</span> <span class="dv">1</span>) {</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to calculate MDE</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>calculate_mde <span class="ot">&lt;-</span> <span class="cf">function</span>(n, <span class="at">alpha =</span> <span class="fl">0.05</span>, <span class="at">beta =</span> <span class="fl">0.2</span>, <span class="at">sigma =</span> <span class="dv">1</span>, <span class="at">k =</span> <span class="dv">1</span>) {</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  z_alpha <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  z_beta <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> beta)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> (z_alpha <span class="sc">+</span> z_beta)<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> k) <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> e<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">ceiling</span>(m))</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">calculate_sample_size</span>(<span class="at">e =</span> <span class="dv">10</span>, <span class="at">alpha =</span> <span class="fl">0.05</span>, <span class="at">beta =</span> <span class="fl">0.2</span>, <span class="at">sigma =</span> <span class="dv">500</span>, <span class="at">k =</span> <span class="dv">2</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(m <span class="sc">/</span> <span class="dv">2</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>total_users <span class="ot">&lt;-</span> m <span class="sc">+</span> n</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(m, n, total_users)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 58867 29434 88301</code></pre>
-</div>
-</div>
-<p>Example: If a monetary metric has a mean of 500 and a standard deviation (sigma) of 500, and you want to detect a 2% effect (MDE = 10) with alpha = 0.05 and beta = 0.2, and a test-to-control ratio of k = 2, the required sample size would be approximately 29,434 users in the test group and 58,867 users in the control group, totaling 88,301 users.</p>
-</section>
-<section id="find-the-mde-for-a-given-sample-size" class="level3">
-<h3 class="anchored" data-anchor-id="find-the-mde-for-a-given-sample-size">Find the MDE for a given sample size</h3>
-<p>If you have a fixed number of users (n) or a defined sample size (m or n), you can determine the smallest effect (e) that your test can reliably detect:</p>
-<p><span class="math display">\[e &gt; \sqrt{\dfrac{(z_{1-\alpha/2} + z_{1-\beta})^2 (1 + k)\sigma^2}{m}}\]</span> For instance, with 100,000 total users, a sigma of 500, a k-ratio of 2, alpha = 0.05, and beta = 0.2, the minimum detectable effect would be approximately 9.397 units, which translates to a 1.88% change from the mean of 500.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to calculate MDE</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>calculate_mde <span class="ot">&lt;-</span> <span class="cf">function</span>(n, <span class="at">alpha =</span> <span class="fl">0.05</span>, <span class="at">beta =</span> <span class="fl">0.2</span>, <span class="at">sigma =</span> <span class="dv">1</span>, <span class="at">k =</span> <span class="dv">1</span>) {</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  z_alpha <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  z_beta <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> beta)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> n <span class="sc">*</span> k <span class="sc">/</span> (k <span class="sc">+</span> <span class="dv">1</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">sqrt</span>((z_alpha <span class="sc">+</span> z_beta)<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> k) <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> m)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(e)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">calculate_mde</span>(<span class="at">n =</span> <span class="dv">100000</span>, <span class="at">alpha =</span> <span class="fl">0.05</span>, <span class="at">beta =</span> <span class="fl">0.2</span>, <span class="at">sigma =</span> <span class="dv">500</span>, <span class="at">k =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> n <span class="sc">*</span> k <span class="sc">/</span> (k <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">sqrt</span>((z_alpha <span class="sc">+</span> z_beta)<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> k) <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> m)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(e)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">calculate_mde</span>(<span class="at">n =</span> <span class="dv">100000</span>, <span class="at">alpha =</span> <span class="fl">0.05</span>, <span class="at">beta =</span> <span class="fl">0.2</span>, <span class="at">sigma =</span> <span class="dv">500</span>, <span class="at">k =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 9.396802</code></pre>
 </div>
 </div>
-
-
 </section>
+<section id="interactive-mde-calculator" class="level3">
+<h3 class="anchored" data-anchor-id="interactive-mde-calculator">Interactive MDE calculator</h3>
+<p>Below is an interactive calculator for finding the MDE based on your sample size, alpha, beta, sigma, and k-ratio. Adjust the parameters to see how they affect the MDE.</p>
+<iframe src="https://qdupz4-aleksei0prishchepo.shinyapps.io/mde-calculator/" width="100%" height="600" title="MDE Calculator">
+</iframe>
+</section>
+</section>
+<section id="finding-the-required-sample-size-for-a-given-mde" class="level2">
+<h2 class="anchored" data-anchor-id="finding-the-required-sample-size-for-a-given-mde">Finding the required sample size for a given MDE</h2>
+<p>The formula used to determine the necessary sample size (e.g., for the control group, <span class="math inline">\(m\)</span>) to detect a&nbsp;specific MDE (<span class="math inline">\(e\)</span>) is:</p>
+<p><span class="math display">\[m &gt; \dfrac{(z_{1-\alpha/2} + z_{1-\beta})^2 (1 + k)\sigma^2}{e^2}\]</span></p>
+<section id="how-to-calculate-sample-size-in-r" class="level3">
+<h3 class="anchored" data-anchor-id="how-to-calculate-sample-size-in-r">How to calculate sample size in R</h3>
+<p>Example: if a monetary metric has a mean of 500 and a standard deviation (sigma) of 500, and you want to detect a 2% effect (MDE = 10) with alpha = 0.05 and beta = 0.2, and a test-to-control ratio of k = 2, the required sample size would be approximately 29,434 users in the test group and 58,867 users in the control group, totaling 88,301 users.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to calculate required sample size</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>calculate_sample_size <span class="ot">&lt;-</span> <span class="cf">function</span>(e, <span class="at">alpha =</span> <span class="fl">0.05</span>, <span class="at">beta =</span> <span class="fl">0.2</span>, <span class="at">sigma =</span> <span class="dv">1</span>, <span class="at">k =</span> <span class="dv">1</span>) {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  z_alpha <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> alpha <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  z_beta <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="dv">1</span> <span class="sc">-</span> beta)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> (z_alpha <span class="sc">+</span> z_beta)<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> k) <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> e<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">ceiling</span>(m))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">calculate_sample_size</span>(<span class="at">e =</span> <span class="dv">10</span>, <span class="at">alpha =</span> <span class="fl">0.05</span>, <span class="at">beta =</span> <span class="fl">0.2</span>, <span class="at">sigma =</span> <span class="dv">500</span>, <span class="at">k =</span> <span class="dv">2</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(m <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>total_users <span class="ot">&lt;-</span> m <span class="sc">+</span> n</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(m, n, total_users)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 58867 29434 88301</code></pre>
+</div>
+</div>
+</section>
+<section id="interactive-sample-size-calculator" class="level3">
+<h3 class="anchored" data-anchor-id="interactive-sample-size-calculator">Interactive sample size calculator</h3>
+<p>Below is an interactive calculator that allows you to input your desired MDE, alpha, beta, sigma, and k-ratio to compute the required sample size. Adjust the parameters to see how they affect the sample size needed for your A/B test.</p>
+<iframe src="https://qdupz4-aleksei0prishchepo.shinyapps.io/sample-size-calculator/" width="100%" height="600" title="Sample Size Calculator">
+</iframe>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>A/B testing is a powerful tool for product development, and understanding the concept of Minimal Detectable Effect (MDE) is crucial for designing effective experiments. By calculating the required sample size or MDE, you can ensure that your tests are statistically sound and capable of providing meaningful insights into user behavior and product performance.</p>
+
+
 </section>
 
 </main> <!-- /main -->
