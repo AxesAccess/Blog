@@ -1,15 +1,15 @@
 ---
-title: "Minimal Detectable Effect (MDE) Calculation"
+title: "Minimum Detectable Effect (MDE) Calculation"
 author: "Aleksei"
 date: "2025-08-07"
-categories: ["A/B Testing", Product, Statistics]
+categories: ["A/B Testing", Product, Statistics, R]
 image: "image.svg"
 fig-format: svg
 # execute:
 #   echo: false
 ---
 
-Minimal Detectable Effect (MDE) is defined as the smallest difference
+Minimum Detectable Effect (MDE) is defined as the smallest difference
 between a control and a test group that your A/B test can reliably
 identify as statistically significant. It's a critical concept because
 it helps in determining the necessary sample size for an experiment and
@@ -90,51 +90,26 @@ ggplot(controlDistribution, aes(x, y)) +
   guides(alpha = "none")
 ```
 
-### Find the required sample size for a given MDE
-
-The formula often used to determine the necessary sample size (e.g., for
-the control group, $m$) to detect a specific MDE ($e$) is:
-
-$$m > \dfrac{(z_{1-\alpha/2} + z_{1-\beta})^2 (1 + k)\sigma^2}{e^2}$$
-
-$z_{1-\alpha/2}$ and $z_{1-\beta}$ are the Z-scores corresponding to the
-desired significance level and power, respectively.
-
-$k$ is the ratio of the control group size to the test group size (e.g.,
-$k=1$ for a 1:1 split).
-
-$\sigma^2$ is the estimated variance of the metric.
-
-$e$ is the specific minimal effect you wish to detect.
-
-```{r}
-# Function to calculate required sample size
-calculate_sample_size <- function(e, alpha = 0.05, beta = 0.2, sigma = 1, k = 1) {
-  z_alpha <- qnorm(1 - alpha / 2)
-  z_beta <- qnorm(1 - beta)
-  m <- (z_alpha + z_beta)^2 * (1 + k) * sigma^2 / e^2
-  return(ceiling(m))
-}
-m <- calculate_sample_size(e = 10, alpha = 0.05, beta = 0.2, sigma = 500, k = 2)
-n <- ceiling(m / 2)
-total_users <- m + n
-
-c(m, n, total_users)
-```
-
-Example: If a monetary metric has a mean of 500 and a standard deviation
-(sigma) of 500, and you want to detect a 2% effect (MDE = 10) with alpha
-= 0.05 and beta = 0.2, and a test-to-control ratio of k = 2, the
-required sample size would be approximately 29,434 users in the test
-group and 58,867 users in the control group, totaling 88,301 users.
-
-### Find the MDE for a given sample size
+## Calculating MDE for a given sample size
 
 If you have a fixed number of users (n) or a defined sample size (m or
 n), you can determine the smallest effect (e) that your test can
 reliably detect:
 
 $$e > \sqrt{\dfrac{(z_{1-\alpha/2} + z_{1-\beta})^2 (1 + k)\sigma^2}{m}}$$
+
+$z_{1-\alpha/2}$ and $z_{1-\beta}$ are the Z-scores corresponding to the
+desired significance level and power, respectively.
+
+$k=\frac{m}{n}$ is the ratio of the control group size to the test group
+size (e.g., $k=1$ for a 1:1 split).
+
+$\sigma^2$ is the estimated variance of the metric.
+
+$e$ is the minimal effect.
+
+### How to calculate MDE in R
+
 For instance, with 100,000 total users, a sigma of 500, a k-ratio of 2,
 alpha = 0.05, and beta = 0.2, the minimum detectable effect would be
 approximately 9.397 units, which translates to a 1.88% change from the
@@ -152,6 +127,66 @@ calculate_mde <- function(n, alpha = 0.05, beta = 0.2, sigma = 1, k = 1) {
 
 calculate_mde(n = 100000, alpha = 0.05, beta = 0.2, sigma = 500, k = 2)
 ```
+
+### Interactive MDE calculator
+
+Below is an interactive calculator for finding the MDE based on your
+sample size, alpha, beta, sigma, and k-ratio. Adjust the parameters to
+see how they affect the MDE.
+
+<iframe src="https://qdupz4-aleksei0prishchepo.shinyapps.io/mde-calculator/" width="100%" height="600" title="MDE Calculator">
+
+</iframe>
+
+## Finding the required sample size for a given MDE
+
+The formula used to determine the necessary sample size (e.g., for
+the control group, $m$) to detect a specific MDE ($e$) is:
+
+$$m > \dfrac{(z_{1-\alpha/2} + z_{1-\beta})^2 (1 + k)\sigma^2}{e^2}$$
+
+### How to calculate sample size in R
+
+Example: if a monetary metric has a mean of 500 and a standard deviation
+(sigma) of 500, and you want to detect a 2% effect (MDE = 10) with alpha
+= 0.05 and beta = 0.2, and a test-to-control ratio of k = 2, the
+required sample size would be approximately 29,434 users in the test
+group and 58,867 users in the control group, totaling 88,301 users.
+
+```{r}
+# Function to calculate required sample size
+calculate_sample_size <- function(e, alpha = 0.05, beta = 0.2, sigma = 1, k = 1) {
+  z_alpha <- qnorm(1 - alpha / 2)
+  z_beta <- qnorm(1 - beta)
+  m <- (z_alpha + z_beta)^2 * (1 + k) * sigma^2 / e^2
+  return(ceiling(m))
+}
+m <- calculate_sample_size(e = 10, alpha = 0.05, beta = 0.2, sigma = 500, k = 2)
+n <- ceiling(m / 2)
+total_users <- m + n
+
+c(m, n, total_users)
+```
+
+### Interactive sample size calculator
+
+Below is an interactive calculator that allows you to input your desired
+MDE, alpha, beta, sigma, and k-ratio to compute the required sample
+size. Adjust the parameters to see how they affect the sample size
+needed for your A/B test.
+
+<iframe src="https://qdupz4-aleksei0prishchepo.shinyapps.io/sample-size-calculator/" width="100%" height="600" title="Sample Size Calculator">
+
+</iframe>
+
+## Conclusion
+
+A/B testing is a powerful tool for product development, and
+understanding the concept of Minimal Detectable Effect (MDE) is crucial
+for designing effective experiments. By calculating the required sample
+size or MDE, you can ensure that your tests are statistically sound and
+capable of providing meaningful insights into user behavior and product
+performance.
 
 ```{r plot-image-svg, echo=FALSE}
 #| message: false
