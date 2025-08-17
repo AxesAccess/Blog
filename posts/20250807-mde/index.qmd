@@ -134,14 +134,14 @@ Below is an interactive calculator for finding the MDE based on your
 sample size, alpha, beta, sigma, and k-ratio. Adjust the parameters to
 see how they affect the MDE.
 
-<iframe src="https://qdupz4-aleksei0prishchepo.shinyapps.io/mde-calculator/" width="100%" height="600" title="MDE Calculator">
+<iframe src="https://a13ks3i.shinyapps.io/mde-calculator/" width="100%" height="600" title="MDE Calculator">
 
 </iframe>
 
 ## Finding the required sample size for a given MDE
 
-The formula used to determine the necessary sample size (e.g., for
-the control group, $m$) to detect a specific MDE ($e$) is:
+The formula used to determine the necessary sample size (e.g., for the
+control group, $m$) to detect a specific MDE ($e$) is:
 
 $$m > \dfrac{(z_{1-\alpha/2} + z_{1-\beta})^2 (1 + k)\sigma^2}{e^2}$$
 
@@ -175,7 +175,7 @@ MDE, alpha, beta, sigma, and k-ratio to compute the required sample
 size. Adjust the parameters to see how they affect the sample size
 needed for your A/B test.
 
-<iframe src="https://qdupz4-aleksei0prishchepo.shinyapps.io/sample-size-calculator/" width="100%" height="600" title="Sample Size Calculator">
+<iframe src="https://a13ks3i.shinyapps.io/sample-size-calculator/" width="100%" height="600" title="Sample Size Calculator">
 
 </iframe>
 
