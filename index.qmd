@@ -1,5 +1,5 @@
 ---
-title: "Systems, Data, and a Dash of Curiosity"
+title: "Systems, Data, and the Practice of Statistical Thinking"
 listing:
   contents:
     - "posts/*/index.qmd"
