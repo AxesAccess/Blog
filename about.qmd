@@ -6,7 +6,7 @@ about:
   links:
     - icon: linkedin
       text: LinkedIn
-      href: https://www.linkedin.com/in/telecamera
+      href: https://www.linkedin.com/in/aleksei-pr/
     - icon: github
       text: Github
       href: https://github.com/AxesAccess
@@ -56,7 +56,7 @@ analytics from a business-first perspective.
 ## Featured Projects
 
 | Project | Description | Topics |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | **Business in Russia 2011-2024** | Research project in progress | Financial Analysis · Linear Models · Spatialization · Data Visualization |
 | [Business Intelligence System](/posts/20250106-bi-flowchart/) | A comprehensive BI system that consolidates data from multiple sources, including ERP systems, Google Analytics, PBX, Help Desk, task trackers, and e-commerce platform. The system delivers insights through Microsoft Power BI dashboards and reports in four key sections: Finance, Supply, Marketing, Sales. | Key Performance Indicators · Dashboards · Microsoft Fabric · Google BigQuery · Apache Airflow · Web Analytics · KPI Dashboards · Business Intelligence (BI) · Microsoft Power BI · Data Engineering · Business Analytics · ETL Tools |
 | **Forecash** | An application that generates income and expense forecasts using time series analysis in R and a Power BI report for intuitive, interactive exploration of financial trends. The app reduces risks of cash deficiency by providing real-time forecasts. | Time Series Analysis · Time Series Forecasting · Financial Forecasting · R (Programming Language) · Microsoft Power BI · Docker |
