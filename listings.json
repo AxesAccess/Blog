@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/20250827-time-series-clustering/index.html",
       "/posts/20250807-mde/index.html",
       "/posts/20250729-ab-testing/index.html",
       "/posts/20250704-animation/index.html",
