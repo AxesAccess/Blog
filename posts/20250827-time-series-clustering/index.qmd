@@ -1,0 +1,453 @@
+---
+title: "Time-Series Clustering with R's dtwclust Package"
+author: "Aleksei"
+date: "2025-08-27"
+categories: [Time-Series, Clustering, R]
+image: "image.svg"
+fig-format: svg
+number-sections: true
+---
+
+This article is a practical guide for time-series clustering using the
+`dtwclust` package. The `dtwclust` package in R (see
+[vignette](https://cran.r-project.org/web/packages/dtwclust/vignettes/dtwclust.pdf){target="_blank"})
+provides a powerful and flexible framework for time-series clustering,
+allowing you to implement and compare various algorithms, particularly
+those leveraging Dynamic Time Warping (DTW). This showcase will guide
+you through a practical example of time-series clustering using
+`dtwclust`, including data preparation, clustering execution,
+visualization, and evaluation.
+
+## What is Dynamic Time Warping (DTW)
+
+[Dynamic Time Warping
+(DTW)](https://en.wikipedia.org/wiki/Dynamic_time_warping){target="_blank"}
+is a prominent distance measure used in shape-based time-series
+clustering. Unlike Euclidean distance, which compares points at the same
+time index, DTW allows for "warping" or stretching/compressing the time
+axis of one series to find an optimal alignment with another. This
+enables it to accurately measure similarity between time-series that may
+vary in speed, length, or have phase shifts, but exhibit similar overall
+shapes.
+
+![Sample alignment performed by the DTW algorithm between two series.
+The dashed blue lines exemplify how some points are mapped to each
+other, which shows how they can be warped in time. Note that the
+vertical position of each series was artificially altered for
+visualization. Credits: Alexis
+Sardá-Espinosa](dtw-alignment.svg){width="5in"}
+
+## Data Preparation
+
+```{r setup, include=FALSE, eval=FALSE}
+# Install packages if not already installed
+install.packages("bigmemory")
+install.packages("dtwclust")
+install.packages("httr2")
+install.packages("tibble")
+install.packages("doParallel")
+install.packages("dplyr")
+install.packages("tidyr")
+```
+
+We will use daily closing prices of various cryptocurrencies from the
+dYdX exchange. The data will be fetched using the `httr2` package.
+
+::: callout-note
+**dYdX Exchange** is a decentralized finance (DeFi) platform that allows
+users to trade perpetual derivatives, margin, and spot crypto assets
+without a centralized intermediary.
+:::
+
+Let's start by fetching the list of available perpetual markets from the
+dYdX API. We will then filter for popular cryptocurrencies and retrieve
+their daily closing prices.
+
+```{r fetch-markets}
+#| message: false
+#| warning: false
+library(httr2)
+library(tibble)
+library(dplyr)
+library(tidyr)
+
+base_url <- "https://indexer.dydx.trade/v4"
+full_url <- paste0(base_url, "/perpetualMarkets")
+
+req <- request(full_url) |>
+  req_headers(Accept = "application/json")
+
+resp <- req_perform(req)
+body <- resp_body_json(resp, simplifyVector = TRUE)
+
+markets <- bind_rows(body$markets) |> as_tibble()
+markets <- markets |> mutate(volume24H = as.numeric(volume24H))
+markets <- markets |> arrange(desc(volume24H)) 
+
+markets |> select(ticker, oraclePrice, priceChange24H, volume24H) |> head(5)
+```
+
+Let's take 30 the most traded markets.
+
+```{r select-tickers}
+tickers <- lapply(body$markets[1:31], function(market) {
+  market$ticker
+})
+# remove MATIC-USD due to missing data
+tickers <- tickers[!tickers %in% c("MATIC-USD")]
+tickers <- tickers |>
+  unlist() |>
+  array()
+```
+
+Below are are helper functions to convert date-times to the required
+format and to fetch daily candle data from the dYdX API. For some reason
+at the time of writing this, the API ignores the `fromIso` parameter, so
+we will filter the data after fetching it.
+
+```{r}
+to_iso8601_ns_utc <- function(datetime) {
+  datetime_utc <- as.POSIXct(datetime, tz = "UTC")
+  format(datetime_utc, format = "%Y-%m-%dT%H:%M:%OS9Z", usetz = FALSE)
+}
+
+get_dydx_daily_candles <- function(
+    market,
+    from_iso = NULL,
+    to_iso = NULL,
+    limit = NULL) {
+  base_url <- "https://indexer.dydx.trade/v4"
+  full_url <- paste0(base_url, "/candles/perpetualMarkets/", market)
+
+  req <- request(full_url) |>
+    req_headers(Accept = "application/json") |>
+    req_url_query(resolution = "1DAY")
+
+  from_iso <- if (!is.null(from_iso)) to_iso8601_ns_utc(from_iso) else NULL
+  to_iso <- if (!is.null(to_iso)) to_iso8601_ns_utc(to_iso) else NULL
+
+  if (!is.null(from_iso)) req <- req |> req_url_query(fromIso = from_iso)
+  if (!is.null(to_iso)) req <- req |> req_url_query(toIso = to_iso)
+  if (!is.null(limit)) req <- req |> req_url_query(limit = limit)
+
+  resp <- req_perform(req)
+  body <- resp_body_json(resp, simplifyVector = TRUE)
+
+  df <- body$candles
+  df <- df |> mutate(
+    startedAt = as.POSIXct(startedAt,
+      format = "%Y-%m-%dT%H:%M:%OSZ",
+      tz = "UTC"
+    ),
+    open = as.numeric(open),
+    high = as.numeric(high),
+    low = as.numeric(low),
+    close = as.numeric(close)
+  )
+  df |> as_tibble()
+}
+
+get_dydx_daily_candles("BTC-USD",
+  from_iso = "2025-01-01T00:00:00Z",
+  to_iso = "2025-08-26T00:00:00Z"
+) |> head()
+```
+
+Now, we will fetch daily closing prices for our selection of popular
+cryptocurrencies.
+
+```{r fetch-crypto-data}
+cryptos_list <- lapply(tickers, function(coin) {
+  # cat("Fetching data for:", coin, "\n")
+  df <- get_dydx_daily_candles(coin,
+    from_iso = "2025-01-01T00:00:00Z",
+    to_iso = "2025-08-26T00:00:00Z"
+  )
+  df <- df |> filter(startedAt >= as.POSIXct("2025-01-01", tz = "UTC"))
+  df <- df |> select(ds = startedAt, y = close) |> arrange(ds)
+  # z-score normalization
+  df <- df |> mutate(y = (y - mean(y, na.rm = TRUE)) / sd(y, na.rm = TRUE))
+  df$coin <- toupper(coin) %>% gsub("-USD", "", .)
+  return(df)
+})
+
+cryptos_list <- bind_rows(cryptos_list)
+```
+
+Next, we will reshape the data into a wide format suitable for
+clustering, where each row represents a cryptocurrency and each column
+represents a daily closing price.
+
+```{r reshape-data}
+cryptos_list_wide <- cryptos_list  |> 
+  pivot_wider(names_from = coin, values_from = y) |> 
+  arrange(ds) |> 
+  select(-ds) |>  
+  as.list()
+```
+
+## Performing Hierarchical Clustering
+
+We will perform hierarchical clustering using the DTW distance and the
+"ward.D2" agglomeration method. Hierarchical clustering builds a
+hierarchy of groups without requiring a pre-specified number of clusters
+initially, and the process is deterministic.
+
+-   `k = 4` specifies the desired number of clusters.
+
+-   `type = "hierarchical"` sets the clustering algorithm type.
+
+-   `distance = "dtw"` uses Dynamic Time Warping distance.
+
+-   `seed = 42` for reproducibility of random initializations (if
+    applicable).
+
+-   `control = hierarchical_control(method = "ward.D2")` specifies the
+    linkage method.
+
+-   `args = tsclust_args(dist = list(window.size = 7))` sets DTW window
+    constraint.
+
+```{r hierarchical-clustering}
+#| message: false
+#| warning: false
+library(dtwclust)
+
+# Perform hierarchical clustering
+hc_4_ward <- tsclust(cryptos_list_wide,
+  k = 4,
+  type = "hierarchical",
+  distance = "dtw",
+  seed = 42,
+  control = hierarchical_control(method = "ward.D2"),
+  args = tsclust_args(dist = list(window.size = 7))
+)
+
+# View the clustering summary
+hc_4_ward
+```
+
+The output provides details about the clustering, including the distance
+measure, centroid method, linkage method, and cluster sizes with their
+average intra-cluster distances.
+
+## Accessing Clustering Results
+
+The `tsclust()` function returns an S4 object of class `TSClusters`. You
+can access its slots, such as the cluster assignments, using the \@
+operator.
+
+```{r access-cluster-assignments}
+# View cluster assignments for each time series
+hc_4_ward@cluster
+```
+
+## Visualizing Clustering Results
+
+The `plot()` method for `TSClusters` objects offers various
+visualization types.
+
+### Dendrogram
+
+A dendrogram visually represents the hierarchy of clusters.
+
+```{r fig-dendrogram-2}
+#| fig-cap: "Dendrogram of hierarchical clustering using DTW distance and Ward.D2 linkage."
+par(mar = c(0, 4, 2, 2)) # Adjust margins for better plot
+plot(hc_4_ward,
+  xlab = "", ylab = "", sub = "",
+  main = "Hierarchical Clustering Dendrogram (DTW, Ward.D2)"
+)
+```
+
+### Series and Centroids
+
+Visualize the time series grouped by cluster, along with their
+representative prototypes (centroids). By default, prototypes for
+hierarchical clustering with PAM centroids are actual series from the
+data.
+
+```{r fig-series-centroids-2}
+#| fig-cap: "Time series clustered with their centroids using DTW distance and Ward.D2 linkage."
+plot(hc_4_ward, type = "sc") # sc = series + centroids
+```
+
+You can also plot a specific centroid, and even customize its
+appearance.
+
+```{r fig-specific-centroid}
+#| fig-cap: Specific centroid (cluster 1).
+#| fig-height: 3
+#| fig-width: 4
+plot(hc_4_ward,
+  type = "centroids", clus = 1,
+  linetype = 1, size = 1, alpha = 0.8
+)
+```
+
+## Comparing Multiple Clustering Solutions and Evaluation
+
+In practice, choosing the optimal number of clusters (`k`) and other
+parameters is crucial. `dtwclust` allows you to test multiple
+configurations simultaneously and evaluate them using Cluster Validity
+Indices (CVIs).
+
+::: callout-note
+**Cluster Validity Indices** are quantitative metrics used to assess the
+quality and "purity" of clustering results. Since clustering is often an
+unsupervised process, CVIs provide an objective way to evaluate
+performance, especially when comparing different clustering algorithms
+or configurations.
+:::
+
+To accelerate the process, especially when testing many combinations,
+parallelization is highly recommended. `dtwclust` integrates with the
+`foreach` and `doParallel` packages for this purpose.
+
+```{r parallel-clustering-evaluation}
+#| message: false
+#| warning: false
+library(bigmemory)
+library(doParallel)
+
+# Define a range of k values and agglomeration methods to test
+k_values <- 3:6
+linkage_methods <- c("ward.D2", "average", "single", "complete")
+
+# Initialize a parallel backend
+# Use detectCores() - 1 to leave one core free
+num_cores <- detectCores() - 1
+if (num_cores < 1) num_cores <- 1 # Ensure at least one core is used
+
+cl <- makeCluster(num_cores)
+registerDoParallel(cl)
+
+# Perform multiple hierarchical clusterings in parallel
+hc_par <- tsclust(cryptos_list_wide,
+  k = k_values,
+  type = "hierarchical",
+  distance = "dtw",
+  seed = 42,
+  control = hierarchical_control(method = linkage_methods),
+  args = tsclust_args(dist = list(window.size = 7)),
+  trace = TRUE
+)
+
+# Stop the parallel cluster and revert to sequential computation
+stopCluster(cl)
+registerDoSEQ()
+```
+
+### Evaluate the results using internal CVIs
+
+We'll use [Silhouette
+(Sil)](https://en.wikipedia.org/wiki/Silhouette_(clustering)){target="_blank"},
+[Dunn (D)](https://en.wikipedia.org/wiki/Dunn_index){target="_blank"},
+and [Calinski-Harabasz
+(CH)](https://en.wikipedia.org/wiki/Calinski%E2%80%93Harabasz_index){target="_blank"}
+indices. Higher values generally indicate better clustering for these
+indices.
+
+```{r evaluate-clusterings}
+cvi_results <- lapply(hc_par, cvi, type = c("Sil", "D", "CH")) %>%
+  do.call(rbind, .)
+
+# Find the configuration that maximizes each CVI
+optimal_indices <- apply(cvi_results, MARGIN = 2, FUN = which.max)
+```
+
+#### Display CVI results and optimal configurations
+
+```{r display-cvi-results}
+print(cvi_results)
+```
+
+```{r display-optimal-configurations}
+print(optimal_indices)
+```
+
+#### Retrieve the best clustering based on Silhouette index
+
+Let's extract the clustering that achieved the highest Silhouette score.
+
+```{r best-clustering-silhouette}
+best_clustering_sil <- hc_par[[optimal_indices["Sil"]]]
+best_clustering_sil
+```
+
+#### Retrieve the best clustering based on Dunn index
+
+Similarly, we can extract the clustering that achieved the highest Dunn
+score.
+
+```{r best-clustering-dunn}
+best_clustering_dunn <- hc_par[[optimal_indices["D"]]]
+best_clustering_dunn
+```
+
+#### Retrieve the best clustering based on Calinski-Harabasz index
+
+Finally, we can extract the clustering that achieved the highest
+Calinski-Harabasz score.
+
+```{r best-clustering-ch}
+best_clustering_ch <- hc_par[[optimal_indices["CH"]]]
+best_clustering_ch
+```
+
+This output helps you objectively compare different clustering outcomes
+and select the most suitable solution for your data based on various
+validity metrics.
+
+## Performing Clustering with Optimal Configuration
+
+Let's take a look at the clustering configuration that achieved the
+maximum results according to the Calinski-Harabasz index.
+
+```{r additional-hierarchical-clustering}
+hc_3_ward <- tsclust(cryptos_list_wide,
+  k = 3,
+  type = "hierarchical",
+  distance = "dtw",
+  seed = 42,
+  control = hierarchical_control(method = "ward.D2"),
+  args = tsclust_args(dist = list(window.size = 7))
+)
+
+# View the clustering summary
+hc_3_ward
+```
+
+```{r access-cluster-assignments-2}
+# View cluster assignments for each time series
+hc_3_ward@cluster
+```
+
+Plot the dendrogram for this clustering.
+
+```{r plot-dendrogram}
+# Plot the dendrogram
+par(mar = c(0, 4, 2, 2))
+plot(hc_3_ward,
+  xlab = "", ylab = "", sub = "",
+  main = "Hierarchical Clustering Dendrogram (DTW, Ward.D2)"
+)
+```
+
+The line plots of the time series grouped by cluster show very distinct
+patterns.
+
+```{r fig-series-centroids-optimal}
+#| fig-height: 3
+#| fig-width: 8
+#| fig-cap: "Time series clustered using DTW distance and Ward.D2 linkage."
+# Plot time series and their centroids
+plot(hc_3_ward, type = "sc") 
+```
+
+## Conclusion
+
+`dtwclust` provides a modular and efficient framework for time-series
+clustering in R, implementing various algorithms (especially DTW-related
+ones) and allowing for customization and comparison. It serves as a
+strong starting point for time-series clustering tasks.
