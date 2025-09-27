@@ -1,0 +1,263 @@
+---
+title: "Building a Credit Risk Dashboard with Power BI and R"
+author: "Aleksei"
+date: "2025-09-27"
+categories: [BI, Statistics, ML, Visualization, R]
+image: "image.png"
+description: "A detailed walkthrough of creating a financial risk dashboard using Power BI and R, covering data cleaning, model building, and integration."
+---
+
+I recently took part in the Credit Risk Analytics Challenge, where the
+task was to build a dynamic financial risk dashboard using Power BI.
+Seeing the words “Risk” and “Analytics” in the title, I focused on
+modeling reality: building a system that could estimate default
+probabilities, simulate portfolio outcomes, and demonstrate the
+technical side of credit risk analytics.
+
+In this article, I’ll walk through the ideas behind my approach, the
+models I built, and how I translated them into an interactive dashboard.
+
+I chose **R** for data processing and modeling due to its efficient
+handling of statistical modeling for complex datasets with numerous
+categorical variables. Importantly, I created integrated R scripts that
+were directly deployed into Power BI report using Power Query with no
+external data processing — everything in one **.pbix** file which can
+run [in the Power BI
+service](https://app.powerbi.com/view?r=eyJrIjoiNTkzOTc5OTQtYmQxNS00YzlmLWE3OWYtY2JjYWUwNTI3MGEzIiwidCI6ImZmYzg3OTVlLTAxODUtNDg5Yi05ZGE2LTQ5MDI0MTJmMDNhMCIsImMiOjl9){target="_blank"}
+as well.
+
+## Phase 1: Data Cleaning and Engineering
+
+The project began with a Credit Risk Dataset composed of **32,581 rows
+and 29 columns**, split between 12 character (categorical) and 17
+numeric variables. My first step, documented in detail in the
+[Exploratory Data Analysis of Credit Risk
+Dataset](01_eda.html){target="_blank"}, was ensuring the data was
+pristine for modeling.
+
+### 1. Variable Selection and Redundancy
+
+I immediately excluded variables that lacked predictive utility or
+caused issues in regression models. I removed the simple identifier
+**`client_ID`** and the geographical coordinates (**`city_latitude`**
+and **`city_longitude`**).
+
+![The correlation plot shows a strong correlation between some of the
+numerical variables.](fig-corrplot-1.svg){#fig-corrplot
+fig-align="center" width="576"}
+
+A key part of cleaning involved addressing redundancy. A correlation
+check revealed that **`loan_percent_income`** and
+**`loan_to_income_ratio`** were nearly perfectly correlated (0.9989417).
+The decision was made to drop **`loan_percent_income`** to eliminate
+multicollinearity and simplify the feature set.
+
+### 2. Handling Missing Data and Outliers
+
+I identified missing values primarily in **`person_emp_length`** (97%
+complete) and **`loan_int_rate`** (90% complete). Since no obvious
+pattern of missingness was found, I employed a simple and robust
+imputation method: replacing all missing numeric values with the
+**median** of their respective columns.
+
+![The offset plot reveals no noticeable pattern in the missing
+data.](fig-missing-upset-1.svg){#fig-missing-upset fig-align="center"}
+
+Outlier handling required careful judgment. I found extreme values in
+**`person_age`** and **`person_emp_length`** that seemed like data entry
+errors (e.g., ages greater than 100).
+
+![A boxplot displaying numerical variables, with outliers highlighted in
+red.](fig-outliers-zoom-1.svg){#fig-outliers-zoom fig-align="center"
+width="576"}
+
+My logic was to replace these anomalies with the median to normalize the
+distributions without losing valid information. However, extreme values
+in **`other_debt`** and **`person_income`** were retained, as they were
+judged to be genuine, albeit high, observations.
+
+## Phase 2: Building and Optimizing Predictive Models
+
+The core task was to predict the **`loan_status`** variable, where `1`
+signifies default and `0` signifies no default. I explored multiple
+models, prioritizing predictive power (AUC) and, for deployment,
+interpretability (Marginal Effects for the dashboard). The process is
+described in detail in [Building Predictive Models for Credit
+Risk](02_models.html){target="_blank"}.
+
+### 1. Logistic Regression (GLM) for Interpretability
+
+I initially built a Logistic Regression model (GLM), which provides
+highly interpretable coefficient estimates. Due to the nature of the
+model and to avoid singularity issues, I proactively excluded
+**`loan_grade`** and **`loan_int_rate`** (as they are likely set by the
+bank based on pre-assessment).
+
+For categorical features with high cardinality, such as `city` and
+`country`, I used **one-hot encoding**. When running the full encoded
+model, it proved highly complex. I then employed **stepwise selection
+(MASS::stepAIC)**, an optimization technique that systematically adds or
+removes variables to minimize the model’s AIC (Akaike Information
+Criterion), yielding a balance between fit and simplicity.
+
+However, when reviewing the stepwise results, I ensured that if a
+categorical variable (like `person_home_ownership`) was implicitly
+selected via one of its encoded levels (like
+`person_home_ownershipRENT`), all levels were included in the final
+model to maintain structural integrity. The final GLM model using only
+selected, significant variables (**`person_home_ownership`,
+`person_emp_length`, `loan_intent`, `loan_amnt`, `loan_to_income_ratio`,
+`cb_person_default_on_file`**) showed strong performance, achieving a
+**Cross-Validated ROC (AUC) of 0.809076**.
+
+The diagnostics also confirmed that the model was well-behaved, with a
+dispersion parameter less than 1, indicating **no overdispersion**.
+
+### 2. Advanced Modeling: Random Forest and XGBoost
+
+To benchmark and potentially surpass the GLM performance, I implemented
+a **Random Forest** model. Since Random Forests can handle correlated
+features well, I initially trained this model on the full, cleaned
+dataset (excluding only the two variables noted above).
+
+![The variable importance plot from the Random Forest model trained on
+the full dataset helps finding the least significant features based on
+both Accuracy and Gini
+criteria.](rf-variable-importance-1.svg){#fig-variable-importance
+fig-align="center" width="576"}
+
+The initial Random Forest model achieved an AUC of **0.8519**. Using the
+variable importance metrics (Mean Decrease Accuracy and Mean Decrease
+Gini), I identified features contributing little to predictive power,
+such as `gender`, `marital_status`, and `education_level`. After
+dropping these weak predictors, the simplified Random Forest model
+maintained or slightly improved performance, reaching an AUC of
+**0.861**.
+
+Finally, I tested **XGBoost (Extreme Gradient Boosting)**, a powerful
+ensemble technique known for maximizing accuracy. After converting
+categorical variables to numeric matrices (a necessary step for
+XGBoost), this model delivered the best result: an AUC of **0.8963**.
+XGBoost's feature importance analysis indicated that
+**`loan_to_income_ratio`** and **`person_income`** were the most
+influential predictors, followed by **`person_home_ownership`**.
+
+![The ROC plot shows relationship between the true positive rate
+(sensitivity) and the false positive rate (1 – specificity). The higher
+the line, the better the model.](xgboost-1.svg){#fig-roc-plot
+fig-align="center" width="576"}
+
+The superior performance of XGBoost led me to select it as the engine
+for the highly complex portfolio simulation component of the dashboard,
+while the GLM was retained for the more interpretable marginal effects
+calculations.
+
+## Phase 3: Operationalizing Models via Power Query R Scripts
+
+A critical technical challenge was integrating these analytical
+processes so the dashboard could update dynamically. I created R scripts
+to be embedded directly into Power Query, documented in [Scripts for
+Power Query](03_power_query.html){target="_blank"} and [Synthetic Data
+For Simulations](04_synthetic_data.html){target="_blank"}.
+
+### 1. Calculating Marginal Effects
+
+For the **Default Risk Calculator** section of the dashboard, I needed
+to show how a change in an individual factor affects the probability of
+default (PD). For this, I used the interpretable Logistic Regression
+model.
+
+The script calculates **Average Marginal Effects (AMEs)**. The logic
+behind AMEs is that they estimate the change in the probability of
+default ($P$) associated with a unit change in a predictor variable
+($x_j$), calculated as $\beta_j \cdot p \cdot (1-p)$, where $p$ is the
+average predicted probability. This output helps users understand the
+true economic impact of each driver, not just the raw logistic
+coefficient ($\beta_j$). The results showed clear impact; for example,
+Home Ownership (OWN) had a standardized effect of -0.1707.
+
+The GLM used for this analysis achieved a Recall of **0.9572** and a
+Precision of **0.8494**.
+
+## 2. Generating Synthetic Data for Simulation
+
+To power the **Portfolio Simulation** feature, I needed a massive,
+realistic dataset capable of reflecting various scenarios. I generated
+**50,000 synthetic borrowers**.
+
+The generation process involved sampling the original data while
+ensuring that the proportions of categorical features, such as
+`loan_intent` and `person_home_ownership`, were preserved. To simulate
+realistic diversity, I applied **jitter** (random noise) to numeric
+features like `person_age` and `loan_amnt`. Finally, I applied the
+pre-trained XGBoost model to these 50,000 synthetic records to predict a
+**`Predicted_PD`** for each one. This synthetic dataset was also
+enhanced with categorization bins (e.g., `age_bin`, `income_bin`) to
+enable interactive slicing and scenario testing within the dashboard.
+
+## Phase 4: Building Power BI Report
+
+### 1. Power Query Integration
+
+There are two ways to run R scripts in Power BI: through the R visual or
+via Power Query. The R visual is mainly for creating plots and have
+multiple limitations. Power Query is more versatile as it runs to
+preprocess data before loading it into the report.
+
+![An R script can be integrated into a Power BI report using Power
+Query.](screenshot-power-query.png){#fig-power-query fig-align="center"
+width="576"}
+
+### 2. Dashboard Design
+
+The Power Query R scripts only run when the data is refreshed, making it
+impossible to adjust parameters interactively. To address this, I used
+model coefficients in the default risk calculator, and the sum of the
+products was then converted into a predicted probability of default by
+applying the inverse-logit function, $1/(1 + \exp(-\alpha))$.
+
+In the portfolio simulation I created DAX measures and slicers that
+allow users to modify inputs, which then filter the pre-calculated
+synthetic dataset.
+
+The final dashboard was structured into three main sections:
+
+-   **Portfolio Overview:** key statistics such as total borrowers,
+    portfolio value, and overall default rate.
+-   **Default Risk Calculator:** an interactive tool allowing users to
+    input borrower characteristics and see the predicted probability of
+    default along with marginal effects for each factor. For an example
+    borrower profile (e.g., Person income **67,000**, Loan amount
+    **9,500**, **RENT** ownership, **VENTURE** intent), the predicted
+    Probability of Default (PD) was **25.3%**.
+-   **Portfolio Simulation:** a scenario analysis tool where users can
+    modify variables, such as the proportions of loans by intent or
+    thresholds based on borrower data like loan-to-income (LTI) ratio,
+    to observe the projected effects on portfolio default rates, losses,
+    and profits. The underlying XGBoost model metrics demonstrated
+    exceptional classification ability, with a Sensitivity of **0.9831**
+    and a Specificity of **0.7012**.
+
+::: {layout="[[1,1,1], [1]]"}
+![Credit Portfolio
+Overview](September-2025-DataDNA-Credit-Risk-Analytics-Challenge-1.png){.lightbox}
+
+![Default Risk
+Calculator](September-2025-DataDNA-Credit-Risk-Analytics-Challenge-2.png){.lightbox}
+
+![Portfolio
+Simulation](September-2025-DataDNA-Credit-Risk-Analytics-Challenge-3.png){.lightbox}
+:::
+
+## References
+
+-   [September 2025 DataDNA - Credit Risk Analytics Challenge - Onyx
+    Data](https://datadna.onyxdata.co.uk/challenges/september-2025-datadna-credit-risk-analytics-challenge/){target="_blank"}
+    — challenge web-page.
+
+-   [DataDNA Challenge Credit Risk Analytics September
+    2025](https://github.com/AxesAccess/DataDNA-Challenge-Credit-Risk-Analytics-September-2025){target="_blank"}
+    — GitHub repository.
+
+-   [Interactive dashboard running in Power BI
+    service](https://app.powerbi.com/view?r=eyJrIjoiNTkzOTc5OTQtYmQxNS00YzlmLWE3OWYtY2JjYWUwNTI3MGEzIiwidCI6ImZmYzg3OTVlLTAxODUtNDg5Yi05ZGE2LTQ5MDI0MTJmMDNhMCIsImMiOjl9){target="_blank"}.

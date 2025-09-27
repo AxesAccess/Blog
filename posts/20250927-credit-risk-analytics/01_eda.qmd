@@ -1,0 +1,495 @@
+---
+title: "Exploratory Data Analysis of Credit Risk Dataset"
+author: "Aleksei Prishchepo"
+date: "2025-09-15"
+fig-format: svg
+number-sections: true
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-location: left
+    highlight-style: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(dpi = 300, fig.width = 8)
+
+library(tidyverse)
+library(janitor)
+library(skimr)
+library(GGally)
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(tidyr)
+```
+
+## Load Data
+
+```{r load_data}
+dataset <- readxl::read_excel("Credit_Risk_Dataset_Onyx_Data_September_25.xlsx")
+```
+
+## Basic Descriptives
+
+```{r skim_data}
+dataset |> skim()
+```
+
+```{r glimpse_data}
+dataset |> glimpse()
+```
+
+Using latitude and longitude variables for predictions doesn't make much
+sense, so we should remove them, along with `client_ID`, which serves
+only as an identifier.
+
+```{r}
+dataset <- dataset |>
+  select(-city_latitude, -city_longitude, -client_ID)
+```
+
+## Univariate Distributions
+
+```{r }
+#| fig-height: 6
+#| fig-width: 6
+# Numeric distributions
+dataset |>
+  select(where(is.numeric)) |>
+  pivot_longer(everything()) |>
+  ggplot(aes(x = value)) +
+  facet_wrap(~name, scales = "free", ncol = 3) +
+  geom_histogram(bins = 30, fill = "steelblue", color = "white") + 
+  theme(axis.title = element_blank())
+```
+
+## Correlations
+
+```{r fig-corrplot}
+library(corrplot)
+
+cor_data <- dataset |>
+  select_if(is.numeric) |>
+  cor(use = "pairwise.complete.obs")
+
+cor_data |>
+  corrplot(
+    type = "upper", order = "hclust",
+    tl.col = "black", tl.srt = 45
+  )
+```
+
+There are three pairs of highly correlated variables. Let's check them
+and drop redundant ones.
+
+```{r}
+cor(dataset$loan_percent_income, dataset$loan_to_income_ratio,
+    use = "pairwise.complete.obs")
+```
+
+```{r}
+cor(dataset$person_age, dataset$cb_person_cred_hist_length,
+    use = "pairwise.complete.obs")
+```
+
+```{r}
+cor(dataset$person_income, dataset$other_debt, use = "pairwise.complete.obs")
+```
+
+Obviously, `loan_percent_income` is in fact `loan_to_income_ratio`, so
+let's drop it. Other two correlations are not perfect, so we keep them.
+
+```{r}
+dataset <- dataset |>
+  select(-loan_percent_income)
+```
+
+## Missing Values
+
+```{r fig-missing-upset}
+#| fig-height: 3
+#| fig-width: 4
+library(naniar)
+
+dataset |>
+  select(person_emp_length, loan_int_rate) |>
+  gg_miss_upset(
+    sets.bar.color = "#56B4E9", point.size = 3,
+    main.bar.color = "grey39", matrix.color = "grey39"
+  )
+```
+
+There is no obvious pattern in missingness. We're going to impute
+missing values using median.
+
+```{r impute_missing}
+dataset <- dataset |>
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.),
+    median(., na.rm = TRUE), .
+  )))
+```
+
+## Outliers
+
+```{r fig-outliers}
+#| fig-height: 6
+#| fig-width: 6
+
+dataset |>
+  select(where(is.numeric)) |>
+  pivot_longer(everything()) |>
+  ggplot(aes(x = name, y = log(value))) +
+  geom_boxplot(fill = "steelblue", 
+               outlier.color = "red", outlier.size = 1) +
+  theme(axis.title = element_blank(), 
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+There are outliers in `person_age` and `person_emp_length` that seem to
+be dataset errors. There are also extreme values in `other_debt` and
+`person_income`. We'll zoom in to see them better.
+
+```{r fig-outliers-zoom}
+require(gridExtra)
+library(scales)
+
+plot1 <- dataset |>
+  select(where(is.numeric)) |>
+  select(person_age, person_emp_length) |>
+  pivot_longer(everything()) |>
+  ggplot(aes(x = name, y = value)) +
+  geom_boxplot(
+    fill = "steelblue",
+    outlier.color = "red", outlier.size = 1
+  ) +
+  theme(
+    axis.title = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+plot2 <- dataset |>
+  select(where(is.numeric)) |>
+  select(other_debt, person_income) |>
+  pivot_longer(everything()) |>
+  ggplot(aes(x = name, y = log10(value))) +
+  geom_boxplot(
+    fill = "steelblue",
+    outlier.color = "red", outlier.size = 1
+  ) +
+  scale_y_continuous(labels = trans_format(
+    function(x) round(10^x, -1),
+    label_number_auto()
+  )) +
+  theme(
+    axis.title = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+grid.arrange(plot1, plot2, ncol = 2)
+
+```
+
+Let's correct `person_age` and `person_emp_length` by replacing outliers
+with median. Other щutliers seem to be valid values. We're not going to
+remove them.
+
+```{r correct_outliers}
+dataset <- dataset |>
+  mutate(
+    person_age = ifelse(person_age > 100,
+      median(person_age, na.rm = TRUE),
+      person_age
+    ),
+    person_emp_length = ifelse(person_emp_length > 70,
+      median(person_emp_length, na.rm = TRUE),
+      person_emp_length
+    )
+  )
+```
+
+Let's save the cleaned dataset for modelling.
+
+```{r save_cleaned}
+write_csv(dataset, "data_cleaned.csv")
+```
+
+## Selecting Predictors
+
+We're going to build a logistic regression fit to predict loan default
+(`loan_status` variable). `0` means no default, `1` means default.
+
+We should exclude `loan_grade` variable as it is not independent. Also
+`loan_int_rate` is likely to be set based on bank assumptions about
+client, so we should exclude it as well.
+
+```{r select_predictors}
+dataset <- dataset |> select(-c("loan_grade", "loan_int_rate"))
+```
+
+Let's convert categorical variables to factors.
+
+```{r convert_factors}
+dataset <- dataset |>
+  mutate(across(where(is.character), as.factor))
+```
+
+```{r linear-fit}
+dataset <- dataset |> mutate(loan_status = (loan_status == 1))
+
+fit <- glm(loan_status ~ .,
+  family = binomial(link = "logit"),
+  x = TRUE, data = dataset |> select(-city, -state)
+)
+summary(fit)
+```
+
+## Model Diagnostics
+
+### Likelihood Ratio Test
+
+```{r}
+anova(fit, test="Chisq")
+```
+
+### Pseudo R-squared
+
+```{r}
+library(pscl)
+pR2(fit)
+```
+
+```{r}
+library(performance)
+r2(fit)
+```
+
+### Overdispersion
+
+Check for overdispersion:
+
+```{r}
+dispersion <- summary(fit)$deviance / summary(fit)$df.residual
+dispersion
+```
+
+Dispersion is less than 1, so no overdispersion.
+
+## Marginal Effects
+
+```{r}
+library(erer)
+
+ma <- maBina(fit)$out
+
+ma <- ma |>
+  rownames_to_column("variable")
+ma
+```
+
+## Updated Model with Encoded Categorical Variables
+
+We need to deal with `city` and `country` variables as they cause
+singularity in the model matrix. Let's encode them.
+
+```{r encode-categorical}
+one_hot_encoded <- model.matrix(~ city - 1, data = dataset)
+data_encoded <- cbind(dataset, one_hot_encoded) 
+one_hot_encoded <- model.matrix(~ country - 1, data = dataset)
+data_encoded <- cbind(data_encoded, one_hot_encoded) |> select(-city, -country)
+data_encoded |> glimpse()
+```
+
+```{r encoded-fit}
+fit_encoded <- glm(loan_status ~ .,
+  family = binomial(link = "logit"),
+  x = TRUE, data = data_encoded
+)
+summary(fit_encoded)
+```
+
+## Encoded Model Diagnostics
+
+### Likelihood Ratio Test
+
+```{r}
+anova(fit_encoded, test="Chisq")
+```
+
+### Pseudo R-squared
+
+```{r}
+library(pscl)
+pR2(fit_encoded)
+```
+
+```{r}
+library(performance)
+r2(fit_encoded)
+```
+
+## AIC Optimization
+
+Let's use stepwise selection to find an optimal set of predictors.
+
+```{r stepwise-selection}
+
+step_fit <- MASS::stepAIC(fit_encoded, direction = "both", trace = FALSE)
+summary(step_fit)
+step_fit$call
+optimal_variables <- names(coef(step_fit))[-1]
+optimal_variables
+```
+
+As soon as factor variables were encoded into multiple columns, we need
+to make sure that all of them are included in the final model.
+
+```{r}
+final_variables <- c("loan_status")
+
+for (var in optimal_variables) {
+  if (var %in% (data_encoded |> colnames())) {
+    final_variables <- c(final_variables, var)
+  } else {
+    cat(var, "is NOT in the dataset\n")
+  }
+}
+```
+
+Add back encoded categorical variables.
+
+```{r}
+final_variables |>
+  c(final_variables, "person_home_ownership", "loan_intent", "cb_person_default_on_file")
+```
+
+```{r optimal-fit}
+data_optimal <- data_encoded |> select(all_of(c("loan_status", final_variables)))
+fit_optimal <- glm(loan_status ~ .,
+  family = binomial(link = "logit"),
+  x = TRUE, data = data_optimal
+)
+summary(fit_optimal)
+```
+
+### Pseudo R-squared
+
+```{r}
+pR2(fit_optimal)
+```
+
+```{r}
+r2(fit_optimal)
+```
+
+## Selected Variables
+
+```{r selected-variables}
+selected_variables <- c(
+  "loan_status", "person_home_ownership", "person_emp_length", "loan_intent", 
+  "loan_amnt", "loan_to_income_ratio", "cb_person_default_on_file"
+)
+
+data_selected <- data_encoded |> select(all_of(selected_variables))
+
+fit_selected <- glm(loan_status ~ .,
+  family = binomial(link = "logit"),
+  x = TRUE, data = data_selected
+)
+summary(fit_selected)
+
+```
+
+### Pseudo R-squared
+
+```{r}
+pR2(fit_optimal)
+```
+
+```{r}
+r2(fit_optimal)
+```
+
+Let's compare all three models.
+
+```{r model-comparison}
+
+library(caret)   # for train, resampling
+library(pROC)    # for AUC
+
+set.seed(123)
+
+
+data_encoded <- data_encoded |>
+  mutate(loan_status = ifelse(loan_status == TRUE, "Yes", "No") |>
+    as.factor())
+
+data_optimal <- data_optimal |>
+  mutate(loan_status = ifelse(loan_status == TRUE, "Yes", "No") |>
+    as.factor())
+
+data_selected <- data_selected |>
+  mutate(loan_status = ifelse(loan_status == TRUE, "Yes", "No") |>
+    as.factor())
+
+colnames(data_encoded) <- make.names(colnames(data_encoded), unique = TRUE)
+colnames(data_optimal) <- make.names(colnames(data_optimal), unique = TRUE)
+colnames(data_selected) <- make.names(colnames(data_selected), unique = TRUE)
+
+
+# Define cross-validation folds
+ctrl <- trainControl(
+  method = "cv",
+  number = 5,              # 5-fold CV (use 10 for more stable estimates)
+  classProbs = TRUE,       # needed for AUC
+  summaryFunction = twoClassSummary
+)
+
+# Train full model
+cv_full <- train(
+  loan_status ~ ., 
+  data = data_encoded,
+  method = "glm",
+  family = binomial,
+  metric = "ROC",          # optimize on AUC
+  trControl = ctrl
+)
+
+# Train stepAIC model (use the reduced dataset)
+cv_step <- train(
+  loan_status ~ ., 
+  data = data_optimal,
+  method = "glm",
+  family = binomial,
+  metric = "ROC",
+  trControl = ctrl
+)
+
+# Train significant-only model
+cv_sig <- train(
+  loan_status ~ ., 
+  data = data_selected,
+  method = "glm",
+  family = binomial,
+  metric = "ROC",
+  trControl = ctrl
+)
+
+# Compare CV AUC
+cv_full
+cv_step
+cv_sig
+```
+
+Both the full model and the model using only significant variables show
+very similar results. We'll use the model with selected variables as it
+is more interpretable.
+
+## Save Processed Data
+
+```{r save-data}
+write_csv(data_selected, "data_selected.csv")
+```
