@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.5">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aleksei Prishchepo">
+<meta name="dcterms.date" content="2025-09-15">
+
+<title>Exploratory Data Analysis of Credit Risk Dataset</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="01_eda_files/libs/clipboard/clipboard.min.js"></script>
+<script src="01_eda_files/libs/quarto-html/quarto.js"></script>
+<script src="01_eda_files/libs/quarto-html/popper.min.js"></script>
+<script src="01_eda_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="01_eda_files/libs/quarto-html/anchor.min.js"></script>
+<link href="01_eda_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="01_eda_files/libs/quarto-html/quarto-syntax-highlighting-6a4f9bc36a591c00df21b7b852dc23e5.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="01_eda_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="01_eda_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="01_eda_files/libs/bootstrap/bootstrap-30fbeacc5a9e39ba66bef5b637c9cbfe.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#load-data" id="toc-load-data" class="nav-link active" data-scroll-target="#load-data"><span class="header-section-number">1</span> Load Data</a></li>
+  <li><a href="#basic-descriptives" id="toc-basic-descriptives" class="nav-link" data-scroll-target="#basic-descriptives"><span class="header-section-number">2</span> Basic Descriptives</a></li>
+  <li><a href="#univariate-distributions" id="toc-univariate-distributions" class="nav-link" data-scroll-target="#univariate-distributions"><span class="header-section-number">3</span> Univariate Distributions</a></li>
+  <li><a href="#correlations" id="toc-correlations" class="nav-link" data-scroll-target="#correlations"><span class="header-section-number">4</span> Correlations</a></li>
+  <li><a href="#missing-values" id="toc-missing-values" class="nav-link" data-scroll-target="#missing-values"><span class="header-section-number">5</span> Missing Values</a></li>
+  <li><a href="#outliers" id="toc-outliers" class="nav-link" data-scroll-target="#outliers"><span class="header-section-number">6</span> Outliers</a></li>
+  <li><a href="#selecting-predictors" id="toc-selecting-predictors" class="nav-link" data-scroll-target="#selecting-predictors"><span class="header-section-number">7</span> Selecting Predictors</a></li>
+  <li><a href="#model-diagnostics" id="toc-model-diagnostics" class="nav-link" data-scroll-target="#model-diagnostics"><span class="header-section-number">8</span> Model Diagnostics</a></li>
+  <li><a href="#marginal-effects" id="toc-marginal-effects" class="nav-link" data-scroll-target="#marginal-effects"><span class="header-section-number">9</span> Marginal Effects</a></li>
+  <li><a href="#updated-model-with-encoded-categorical-variables" id="toc-updated-model-with-encoded-categorical-variables" class="nav-link" data-scroll-target="#updated-model-with-encoded-categorical-variables"><span class="header-section-number">10</span> Updated Model with Encoded Categorical Variables</a></li>
+  <li><a href="#encoded-model-diagnostics" id="toc-encoded-model-diagnostics" class="nav-link" data-scroll-target="#encoded-model-diagnostics"><span class="header-section-number">11</span> Encoded Model Diagnostics</a></li>
+  <li><a href="#aic-optimization" id="toc-aic-optimization" class="nav-link" data-scroll-target="#aic-optimization"><span class="header-section-number">12</span> AIC Optimization</a></li>
+  <li><a href="#selected-variables" id="toc-selected-variables" class="nav-link" data-scroll-target="#selected-variables"><span class="header-section-number">13</span> Selected Variables</a></li>
+  <li><a href="#save-processed-data" id="toc-save-processed-data" class="nav-link" data-scroll-target="#save-processed-data"><span class="header-section-number">14</span> Save Processed Data</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Exploratory Data Analysis of Credit Risk Dataset</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aleksei Prishchepo </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 15, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="load-data" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="load-data"><span class="header-section-number">1</span> Load Data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> readxl<span class="sc">::</span><span class="fu">read_excel</span>(<span class="st">"Credit_Risk_Dataset_Onyx_Data_September_25.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="basic-descriptives" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="basic-descriptives"><span class="header-section-number">2</span> Basic Descriptives</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="sc">|&gt;</span> <span class="fu">skim</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">dataset</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">32581</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">29</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">character</td>
+<td style="text-align: left;">12</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">17</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 11%">
+<col style="width: 16%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 7%">
+<col style="width: 10%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+<th style="text-align: right;">empty</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: right;">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">client_ID</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">32581</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">person_home_ownership</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">loan_intent</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">loan_grade</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">cb_person_default_on_file</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gender</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">marital_status</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">education_level</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">country</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">state</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">city</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">employment_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 8%">
+<col style="width: 11%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 9%">
+<col style="width: 4%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p25</th>
+<th style="text-align: right;">p50</th>
+<th style="text-align: right;">p75</th>
+<th style="text-align: right;">p100</th>
+<th style="text-align: left;">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">person_age</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">27.73</td>
+<td style="text-align: right;">6.35</td>
+<td style="text-align: right;">20.00</td>
+<td style="text-align: right;">23.00</td>
+<td style="text-align: right;">26.00</td>
+<td style="text-align: right;">30.00</td>
+<td style="text-align: right;">144.00</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">person_income</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">66074.85</td>
+<td style="text-align: right;">61983.12</td>
+<td style="text-align: right;">4000.00</td>
+<td style="text-align: right;">38500.00</td>
+<td style="text-align: right;">55000.00</td>
+<td style="text-align: right;">79200.00</td>
+<td style="text-align: right;">6000000.00</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">person_emp_length</td>
+<td style="text-align: right;">895</td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">4.79</td>
+<td style="text-align: right;">4.14</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">4.00</td>
+<td style="text-align: right;">7.00</td>
+<td style="text-align: right;">123.00</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">loan_amnt</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">9589.37</td>
+<td style="text-align: right;">6322.09</td>
+<td style="text-align: right;">500.00</td>
+<td style="text-align: right;">5000.00</td>
+<td style="text-align: right;">8000.00</td>
+<td style="text-align: right;">12200.00</td>
+<td style="text-align: right;">35000.00</td>
+<td style="text-align: left;">▇▆▂▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">loan_int_rate</td>
+<td style="text-align: right;">3116</td>
+<td style="text-align: right;">0.90</td>
+<td style="text-align: right;">11.01</td>
+<td style="text-align: right;">3.24</td>
+<td style="text-align: right;">5.42</td>
+<td style="text-align: right;">7.90</td>
+<td style="text-align: right;">10.99</td>
+<td style="text-align: right;">13.47</td>
+<td style="text-align: right;">23.22</td>
+<td style="text-align: left;">▇▇▆▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">loan_status</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">0.41</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">▇▁▁▁▂</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">loan_percent_income</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.17</td>
+<td style="text-align: right;">0.11</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.83</td>
+<td style="text-align: left;">▇▅▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">cb_person_cred_hist_length</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">5.80</td>
+<td style="text-align: right;">4.06</td>
+<td style="text-align: right;">2.00</td>
+<td style="text-align: right;">3.00</td>
+<td style="text-align: right;">4.00</td>
+<td style="text-align: right;">8.00</td>
+<td style="text-align: right;">30.00</td>
+<td style="text-align: left;">▇▂▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">city_latitude</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">45.41</td>
+<td style="text-align: right;">7.64</td>
+<td style="text-align: right;">29.76</td>
+<td style="text-align: right;">40.71</td>
+<td style="text-align: right;">46.81</td>
+<td style="text-align: right;">51.51</td>
+<td style="text-align: right;">55.95</td>
+<td style="text-align: left;">▃▂▅▅▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">city_longitude</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">-63.81</td>
+<td style="text-align: right;">46.62</td>
+<td style="text-align: right;">-123.37</td>
+<td style="text-align: right;">-96.80</td>
+<td style="text-align: right;">-75.70</td>
+<td style="text-align: right;">-3.94</td>
+<td style="text-align: right;">-0.13</td>
+<td style="text-align: left;">▆▆▃▁▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">loan_term_months</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">38.50</td>
+<td style="text-align: right;">16.01</td>
+<td style="text-align: right;">12.00</td>
+<td style="text-align: right;">24.00</td>
+<td style="text-align: right;">36.00</td>
+<td style="text-align: right;">60.00</td>
+<td style="text-align: right;">60.00</td>
+<td style="text-align: left;">▂▃▇▁▆</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">loan_to_income_ratio</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.17</td>
+<td style="text-align: right;">0.11</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.09</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.83</td>
+<td style="text-align: left;">▇▅▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">other_debt</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">11567.96</td>
+<td style="text-align: right;">13060.93</td>
+<td style="text-align: right;">225.21</td>
+<td style="text-align: right;">5387.17</td>
+<td style="text-align: right;">8995.07</td>
+<td style="text-align: right;">14562.93</td>
+<td style="text-align: right;">1187998.91</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">debt_to_income_ratio</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0.33</td>
+<td style="text-align: right;">0.42</td>
+<td style="text-align: right;">1.05</td>
+<td style="text-align: left;">▅▇▂▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">open_accounts</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">8.04</td>
+<td style="text-align: right;">4.33</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">4.00</td>
+<td style="text-align: right;">8.00</td>
+<td style="text-align: right;">12.00</td>
+<td style="text-align: right;">15.00</td>
+<td style="text-align: left;">▇▇▇▇▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">credit_utilization_ratio</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0.26</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">0.28</td>
+<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">0.73</td>
+<td style="text-align: right;">0.95</td>
+<td style="text-align: left;">▇▇▇▇▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">past_delinquencies</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.51</td>
+<td style="text-align: right;">0.71</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">6.00</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 32,581
+Columns: 29
+$ client_ID                  &lt;chr&gt; "CUST_00001", "CUST_00002", "CUST_00003", "…
+$ person_age                 &lt;dbl&gt; 22, 21, 25, 23, 24, 21, 26, 24, 24, 21, 22,…
+$ person_income              &lt;dbl&gt; 59000, 9600, 9600, 65500, 54400, 9900, 7710…
+$ person_home_ownership      &lt;chr&gt; "RENT", "OWN", "MORTGAGE", "RENT", "RENT", …
+$ person_emp_length          &lt;dbl&gt; 123, 5, 1, 4, 8, 2, 8, 5, 8, 6, 6, 2, 2, 4,…
+$ loan_intent                &lt;chr&gt; "PERSONAL", "EDUCATION", "MEDICAL", "MEDICA…
+$ loan_grade                 &lt;chr&gt; "D", "B", "C", "C", "C", "A", "B", "B", "A"…
+$ loan_amnt                  &lt;dbl&gt; 35000, 1000, 5500, 35000, 35000, 2500, 3500…
+$ loan_int_rate              &lt;dbl&gt; 16.02, 11.14, 12.87, 15.23, 14.27, 7.14, 12…
+$ loan_status                &lt;dbl&gt; 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0…
+$ loan_percent_income        &lt;dbl&gt; 0.59, 0.10, 0.57, 0.53, 0.55, 0.25, 0.45, 0…
+$ cb_person_default_on_file  &lt;chr&gt; "Y", "N", "N", "N", "Y", "N", "N", "N", "N"…
+$ cb_person_cred_hist_length &lt;dbl&gt; 3, 2, 3, 2, 4, 2, 3, 4, 2, 3, 4, 2, 2, 4, 4…
+$ gender                     &lt;chr&gt; "Male", "Female", "Female", "Male", "Female…
+$ marital_status             &lt;chr&gt; "Married", "Divorced", "Married", "Married"…
+$ education_level            &lt;chr&gt; "High School", "Master", "Master", "Bachelo…
+$ country                    &lt;chr&gt; "Canada", "Canada", "UK", "Canada", "USA", …
+$ state                      &lt;chr&gt; "Ontario", "Ontario", "Wales", "BC", "New Y…
+$ city                       &lt;chr&gt; "Toronto", "Toronto", "Swansea", "Vancouver…
+$ city_latitude              &lt;dbl&gt; 43.6532, 43.6532, 51.6214, 49.2827, 42.8864…
+$ city_longitude             &lt;dbl&gt; -79.3832, -79.3832, -3.9436, -123.1207, -78…
+$ employment_type            &lt;chr&gt; "Self-employed", "Full-time", "Full-time", …
+$ loan_term_months           &lt;dbl&gt; 36, 36, 36, 12, 36, 36, 36, 36, 24, 24, 60,…
+$ loan_to_income_ratio       &lt;dbl&gt; 0.5932203, 0.1041667, 0.5729167, 0.5343511,…
+$ other_debt                 &lt;dbl&gt; 8402.454, 1607.803, 2760.506, 7155.286, 156…
+$ debt_to_income_ratio       &lt;dbl&gt; 0.7356348, 0.2716461, 0.8604693, 0.6435922,…
+$ open_accounts              &lt;dbl&gt; 14, 10, 14, 15, 4, 10, 15, 6, 10, 11, 15, 1…
+$ credit_utilization_ratio   &lt;dbl&gt; 0.49555669, 0.58543602, 0.75073184, 0.37933…
+$ past_delinquencies         &lt;dbl&gt; 0, 3, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 2, 1, 0…</code></pre>
+</div>
+</div>
+<p>Using latitude and longitude variables for predictions doesn’t make much sense, so we should remove them, along with <code>client_ID</code>, which serves only as an identifier.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>city_latitude, <span class="sc">-</span>city_longitude, <span class="sc">-</span>client_ID)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="univariate-distributions" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="univariate-distributions"><span class="header-section-number">3</span> Univariate Distributions</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Numeric distributions</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> value)) <span class="sc">+</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>name, <span class="at">scales =</span> <span class="st">"free"</span>, <span class="at">ncol =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">30</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span> </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_eda_files/figure-html/unnamed-chunk-2-1.svg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="correlations" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="correlations"><span class="header-section-number">4</span> Correlations</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(corrplot)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>cor_data <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select_if</span>(is.numeric) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor</span>(<span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>cor_data <span class="sc">|&gt;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">corrplot</span>(</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">type =</span> <span class="st">"upper"</span>, <span class="at">order =</span> <span class="st">"hclust"</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">tl.col =</span> <span class="st">"black"</span>, <span class="at">tl.srt =</span> <span class="dv">45</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-corrplot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-corrplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01_eda_files/figure-html/fig-corrplot-1.svg" id="fig-corrplot" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-corrplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>There are three pairs of highly correlated variables. Let’s check them and drop redundant ones.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(dataset<span class="sc">$</span>loan_percent_income, dataset<span class="sc">$</span>loan_to_income_ratio,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.9989417</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(dataset<span class="sc">$</span>person_age, dataset<span class="sc">$</span>cb_person_cred_hist_length,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8591332</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(dataset<span class="sc">$</span>person_income, dataset<span class="sc">$</span>other_debt, <span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8867628</code></pre>
+</div>
+</div>
+<p>Obviously, <code>loan_percent_income</code> is in fact <code>loan_to_income_ratio</code>, so let’s drop it. Other two correlations are not perfect, so we keep them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>loan_percent_income)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="missing-values" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="missing-values"><span class="header-section-number">5</span> Missing Values</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(naniar)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>dataset <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(person_emp_length, loan_int_rate) <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gg_miss_upset</span>(</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">sets.bar.color =</span> <span class="st">"#56B4E9"</span>, <span class="at">point.size =</span> <span class="dv">3</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">main.bar.color =</span> <span class="st">"grey39"</span>, <span class="at">matrix.color =</span> <span class="st">"grey39"</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-missing-upset" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-missing-upset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01_eda_files/figure-html/fig-missing-upset-1.svg" id="fig-missing-upset" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-missing-upset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>There is no obvious pattern in missingness. We’re going to impute missing values using median.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric), <span class="sc">~</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(.),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">median</span>(., <span class="at">na.rm =</span> <span class="cn">TRUE</span>), .</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  )))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="outliers" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="outliers"><span class="header-section-number">6</span> Outliers</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> name, <span class="at">y =</span> <span class="fu">log</span>(value))) <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"steelblue"</span>, </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">outlier.color =</span> <span class="st">"red"</span>, <span class="at">outlier.size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title =</span> <span class="fu">element_blank</span>(), </span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-outliers" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-outliers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01_eda_files/figure-html/fig-outliers-1.svg" id="fig-outliers" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-outliers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>There are outliers in <code>person_age</code> and <code>person_emp_length</code> that seem to be dataset errors. There are also extreme values in <code>other_debt</code> and <code>person_income</code>. We’ll zoom in to see them better.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(gridExtra)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scales)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>plot1 <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">|&gt;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(person_age, person_emp_length) <span class="sc">|&gt;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> name, <span class="at">y =</span> value)) <span class="sc">+</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"steelblue"</span>,</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">outlier.color =</span> <span class="st">"red"</span>, <span class="at">outlier.size =</span> <span class="dv">1</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>plot2 <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">|&gt;</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(other_debt, person_income) <span class="sc">|&gt;</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> name, <span class="at">y =</span> <span class="fu">log10</span>(value))) <span class="sc">+</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"steelblue"</span>,</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">outlier.color =</span> <span class="st">"red"</span>, <span class="at">outlier.size =</span> <span class="dv">1</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">trans_format</span>(</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(x) <span class="fu">round</span>(<span class="dv">10</span><span class="sc">^</span>x, <span class="sc">-</span><span class="dv">1</span>),</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">label_number_auto</span>()</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">+</span></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>)</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a><span class="fu">grid.arrange</span>(plot1, plot2, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-outliers-zoom" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-outliers-zoom-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01_eda_files/figure-html/fig-outliers-zoom-1.svg" id="fig-outliers-zoom" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-outliers-zoom-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s correct <code>person_age</code> and <code>person_emp_length</code> by replacing outliers with median. Other щutliers seem to be valid values. We’re not going to remove them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">person_age =</span> <span class="fu">ifelse</span>(person_age <span class="sc">&gt;</span> <span class="dv">100</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">median</span>(person_age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>      person_age</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">person_emp_length =</span> <span class="fu">ifelse</span>(person_emp_length <span class="sc">&gt;</span> <span class="dv">70</span>,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">median</span>(person_emp_length, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>      person_emp_length</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s save the cleaned dataset for modelling.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(dataset, <span class="st">"data_cleaned.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="selecting-predictors" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="selecting-predictors"><span class="header-section-number">7</span> Selecting Predictors</h2>
+<p>We’re going to build a logistic regression fit to predict loan default (<code>loan_status</code> variable). <code>0</code> means no default, <code>1</code> means default.</p>
+<p>We should exclude <code>loan_grade</code> variable as it is not independent. Also <code>loan_int_rate</code> is likely to be set based on bank assumptions about client, so we should exclude it as well.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="st">"loan_grade"</span>, <span class="st">"loan_int_rate"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s convert categorical variables to factors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), as.factor))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> dataset <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">loan_status =</span> (loan_status <span class="sc">==</span> <span class="dv">1</span>))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(loan_status <span class="sc">~</span> .,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="cn">TRUE</span>, <span class="at">data =</span> dataset <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>city, <span class="sc">-</span>state)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = loan_status ~ ., family = binomial(link = "logit"), 
+    data = select(dataset, -city, -state), x = TRUE)
+
+Coefficients:
+                               Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                  -3.163e+00  1.673e-01 -18.906  &lt; 2e-16 ***
+person_age                   -2.776e-03  5.313e-03  -0.522 0.601410    
+person_income                -6.403e-07  1.253e-06  -0.511 0.609232    
+person_home_ownershipOTHER    6.886e-01  2.538e-01   2.713 0.006663 ** 
+person_home_ownershipOWN     -1.362e+00  9.149e-02 -14.892  &lt; 2e-16 ***
+person_home_ownershipRENT     8.502e-01  3.627e-02  23.440  &lt; 2e-16 ***
+person_emp_length            -1.320e-02  4.402e-03  -2.999 0.002708 ** 
+loan_intentEDUCATION         -7.527e-01  5.218e-02 -14.424  &lt; 2e-16 ***
+loan_intentHOMEIMPROVEMENT    1.400e-01  5.710e-02   2.451 0.014239 *  
+loan_intentMEDICAL           -1.789e-01  4.931e-02  -3.628 0.000285 ***
+loan_intentPERSONAL          -5.204e-01  5.305e-02  -9.810  &lt; 2e-16 ***
+loan_intentVENTURE           -9.272e-01  5.625e-02 -16.484  &lt; 2e-16 ***
+loan_amnt                    -6.973e-05  3.715e-06 -18.769  &lt; 2e-16 ***
+cb_person_default_on_fileY    1.134e+00  3.682e-02  30.800  &lt; 2e-16 ***
+cb_person_cred_hist_length    2.267e-03  8.110e-03   0.280 0.779857    
+genderMale                    2.118e-02  3.134e-02   0.676 0.499191    
+marital_statusMarried         1.266e-02  5.650e-02   0.224 0.822741    
+marital_statusSingle          5.294e-03  5.460e-02   0.097 0.922763    
+marital_statusWidowed        -3.190e-02  8.581e-02  -0.372 0.710037    
+education_levelHigh School    1.917e-02  3.622e-02   0.529 0.596664    
+education_levelMaster         4.972e-02  4.386e-02   1.133 0.257044    
+education_levelPhD           -1.498e-02  7.865e-02  -0.190 0.848957    
+countryUK                     1.691e-03  3.846e-02   0.044 0.964928    
+countryUSA                    1.060e-02  3.840e-02   0.276 0.782417    
+employment_typePart-time      3.870e-03  4.070e-02   0.095 0.924238    
+employment_typeSelf-employed  2.497e-02  4.468e-02   0.559 0.576279    
+employment_typeUnemployed    -1.706e-02  7.174e-02  -0.238 0.812076    
+loan_term_months              2.188e-03  9.786e-04   2.236 0.025362 *  
+loan_to_income_ratio          1.180e+01  4.330e-01  27.264  &lt; 2e-16 ***
+other_debt                    6.313e-06  6.206e-06   1.017 0.309007    
+debt_to_income_ratio         -1.806e-01  4.022e-01  -0.449 0.653340    
+open_accounts                -1.345e-03  3.608e-03  -0.373 0.709291    
+credit_utilization_ratio      1.068e-01  6.028e-02   1.771 0.076544 .  
+past_delinquencies            6.671e-03  2.192e-02   0.304 0.760926    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 34182  on 32580  degrees of freedom
+Residual deviance: 25955  on 32547  degrees of freedom
+AIC: 26023
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+</section>
+<section id="model-diagnostics" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="model-diagnostics"><span class="header-section-number">8</span> Model Diagnostics</h2>
+<section id="likelihood-ratio-test" class="level3" data-number="8.1">
+<h3 data-number="8.1" class="anchored" data-anchor-id="likelihood-ratio-test"><span class="header-section-number">8.1</span> Likelihood Ratio Test</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit, <span class="at">test=</span><span class="st">"Chisq"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: loan_status
+
+Terms added sequentially (first to last)
+
+                           Df Deviance Resid. Df Resid. Dev  Pr(&gt;Chi)    
+NULL                                       32580      34182              
+person_age                  1    14.23     32579      34168  0.000162 ***
+person_income               1  1877.23     32578      32291 &lt; 2.2e-16 ***
+person_home_ownership       3  1314.01     32575      30977 &lt; 2.2e-16 ***
+person_emp_length           1     3.00     32574      30974  0.083469 .  
+loan_intent                 5   512.56     32569      30461 &lt; 2.2e-16 ***
+loan_amnt                   1  2067.48     32568      28394 &lt; 2.2e-16 ***
+cb_person_default_on_file   1   813.84     32567      27580 &lt; 2.2e-16 ***
+cb_person_cred_hist_length  1     0.82     32566      27579  0.366157    
+gender                      1     0.40     32565      27579  0.529656    
+marital_status              3     0.36     32562      27578  0.948053    
+education_level             3     1.27     32559      27577  0.736541    
+country                     2     0.03     32557      27577  0.986537    
+employment_type             3     0.62     32554      27576  0.891814    
+loan_term_months            1     4.76     32553      27572  0.029138 *  
+loan_to_income_ratio        1  1611.48     32552      25960 &lt; 2.2e-16 ***
+other_debt                  1     1.43     32551      25959  0.230951    
+debt_to_income_ratio        1     0.21     32550      25959  0.649182    
+open_accounts               1     0.14     32549      25958  0.704476    
+credit_utilization_ratio    1     3.14     32548      25955  0.076305 .  
+past_delinquencies          1     0.09     32547      25955  0.761023    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+</section>
+<section id="pseudo-r-squared" class="level3" data-number="8.2">
+<h3 data-number="8.2" class="anchored" data-anchor-id="pseudo-r-squared"><span class="header-section-number">8.2</span> Pseudo R-squared</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pscl)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pR2</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>fitting null model for pseudo-r2</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          llh       llhNull            G2      McFadden          r2ML 
+-1.297761e+04 -1.709116e+04  8.227083e+03  2.406825e-01  2.231529e-01 
+         r2CU 
+ 3.434367e-01 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(performance)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">r2</span>(fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># R2 for Logistic Regression
+  Tjur's R2: 0.272</code></pre>
+</div>
+</div>
+</section>
+<section id="overdispersion" class="level3" data-number="8.3">
+<h3 data-number="8.3" class="anchored" data-anchor-id="overdispersion"><span class="header-section-number">8.3</span> Overdispersion</h3>
+<p>Check for overdispersion:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>dispersion <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)<span class="sc">$</span>deviance <span class="sc">/</span> <span class="fu">summary</span>(fit)<span class="sc">$</span>df.residual</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>dispersion</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.7974691</code></pre>
+</div>
+</div>
+<p>Dispersion is less than 1, so no overdispersion.</p>
+</section>
+</section>
+<section id="marginal-effects" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="marginal-effects"><span class="header-section-number">9</span> Marginal Effects</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(erer)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>ma <span class="ot">&lt;-</span> <span class="fu">maBina</span>(fit)<span class="sc">$</span>out</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>ma <span class="ot">&lt;-</span> ma <span class="sc">|&gt;</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"variable"</span>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>ma</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                       variable effect error t.value p.value
+1                   (Intercept) -0.413 0.022 -18.955   0.000
+2                    person_age  0.000 0.001  -0.522   0.601
+3                 person_income  0.000 0.000  -0.511   0.609
+4    person_home_ownershipOTHER  0.112 0.050   2.264   0.024
+5      person_home_ownershipOWN -0.120 0.005 -24.171   0.000
+6     person_home_ownershipRENT  0.111 0.005  23.662   0.000
+7             person_emp_length -0.002 0.001  -3.002   0.003
+8          loan_intentEDUCATION -0.084 0.005 -16.979   0.000
+9    loan_intentHOMEIMPROVEMENT  0.019 0.008   2.364   0.018
+10           loan_intentMEDICAL -0.022 0.006  -3.775   0.000
+11          loan_intentPERSONAL -0.060 0.005 -11.126   0.000
+12           loan_intentVENTURE -0.099 0.005 -20.596   0.000
+13                    loan_amnt  0.000 0.000 -18.567   0.000
+14   cb_person_default_on_fileY  0.187 0.007  26.085   0.000
+15   cb_person_cred_hist_length  0.000 0.001   0.280   0.780
+16                   genderMale  0.003 0.004   0.676   0.499
+17        marital_statusMarried  0.002 0.007   0.224   0.823
+18         marital_statusSingle  0.001 0.007   0.097   0.923
+19        marital_statusWidowed -0.004 0.011  -0.376   0.707
+20   education_levelHigh School  0.003 0.005   0.529   0.597
+21        education_levelMaster  0.007 0.006   1.122   0.262
+22           education_levelPhD -0.002 0.010  -0.191   0.848
+23                    countryUK  0.000 0.005   0.044   0.965
+24                   countryUSA  0.001 0.005   0.276   0.783
+25     employment_typePart-time  0.001 0.005   0.095   0.924
+26 employment_typeSelf-employed  0.003 0.006   0.555   0.579
+27    employment_typeUnemployed -0.002 0.009  -0.239   0.811
+28             loan_term_months  0.000 0.000   2.236   0.025
+29         loan_to_income_ratio  1.541 0.057  27.227   0.000
+30                   other_debt  0.000 0.000   1.018   0.309
+31         debt_to_income_ratio -0.024 0.053  -0.449   0.653
+32                open_accounts  0.000 0.000  -0.373   0.709
+33     credit_utilization_ratio  0.014 0.008   1.771   0.077
+34           past_delinquencies  0.001 0.003   0.304   0.761</code></pre>
+</div>
+</div>
+</section>
+<section id="updated-model-with-encoded-categorical-variables" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="updated-model-with-encoded-categorical-variables"><span class="header-section-number">10</span> Updated Model with Encoded Categorical Variables</h2>
+<p>We need to deal with <code>city</code> and <code>country</code> variables as they cause singularity in the model matrix. Let’s encode them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>one_hot_encoded <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> city <span class="sc">-</span> <span class="dv">1</span>, <span class="at">data =</span> dataset)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>data_encoded <span class="ot">&lt;-</span> <span class="fu">cbind</span>(dataset, one_hot_encoded) </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>one_hot_encoded <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> country <span class="sc">-</span> <span class="dv">1</span>, <span class="at">data =</span> dataset)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>data_encoded <span class="ot">&lt;-</span> <span class="fu">cbind</span>(data_encoded, one_hot_encoded) <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>city, <span class="sc">-</span>country)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>data_encoded <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 32,581
+Columns: 42
+$ person_age                 &lt;dbl&gt; 22, 21, 25, 23, 24, 21, 26, 24, 24, 21, 22,…
+$ person_income              &lt;dbl&gt; 59000, 9600, 9600, 65500, 54400, 9900, 7710…
+$ person_home_ownership      &lt;fct&gt; RENT, OWN, MORTGAGE, RENT, RENT, OWN, RENT,…
+$ person_emp_length          &lt;dbl&gt; 4, 5, 1, 4, 8, 2, 8, 5, 8, 6, 6, 2, 2, 4, 2…
+$ loan_intent                &lt;fct&gt; PERSONAL, EDUCATION, MEDICAL, MEDICAL, MEDI…
+$ loan_amnt                  &lt;dbl&gt; 35000, 1000, 5500, 35000, 35000, 2500, 3500…
+$ loan_status                &lt;lgl&gt; TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, …
+$ cb_person_default_on_file  &lt;fct&gt; Y, N, N, N, Y, N, N, N, N, N, N, N, N, N, N…
+$ cb_person_cred_hist_length &lt;dbl&gt; 3, 2, 3, 2, 4, 2, 3, 4, 2, 3, 4, 2, 2, 4, 4…
+$ gender                     &lt;fct&gt; Male, Female, Female, Male, Female, Male, F…
+$ marital_status             &lt;fct&gt; Married, Divorced, Married, Married, Single…
+$ education_level            &lt;fct&gt; High School, Master, Master, Bachelor, Bach…
+$ state                      &lt;fct&gt; Ontario, Ontario, Wales, BC, New York, Cali…
+$ employment_type            &lt;fct&gt; Self-employed, Full-time, Full-time, Part-t…
+$ loan_term_months           &lt;dbl&gt; 36, 36, 36, 12, 36, 36, 36, 36, 24, 24, 60,…
+$ loan_to_income_ratio       &lt;dbl&gt; 0.5932203, 0.1041667, 0.5729167, 0.5343511,…
+$ other_debt                 &lt;dbl&gt; 8402.454, 1607.803, 2760.506, 7155.286, 156…
+$ debt_to_income_ratio       &lt;dbl&gt; 0.7356348, 0.2716461, 0.8604693, 0.6435922,…
+$ open_accounts              &lt;dbl&gt; 14, 10, 14, 15, 4, 10, 15, 6, 10, 11, 15, 1…
+$ credit_utilization_ratio   &lt;dbl&gt; 0.49555669, 0.58543602, 0.75073184, 0.37933…
+$ past_delinquencies         &lt;dbl&gt; 0, 3, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 2, 1, 0…
+$ cityBuffalo                &lt;dbl&gt; 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ cityCardiff                &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ cityDallas                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0…
+$ cityEdinburgh              &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ cityGlasgow                &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0…
+$ cityHouston                &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ cityLondon                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0…
+$ `cityLos Angeles`          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0…
+$ cityManchester             &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ cityMontreal               &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0…
+$ `cityNew York City`        &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ cityOttawa                 &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ `cityQuebec City`          &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0…
+$ `citySan Francisco`        &lt;dbl&gt; 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1…
+$ citySwansea                &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ cityToronto                &lt;dbl&gt; 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0…
+$ cityVancouver              &lt;dbl&gt; 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ cityVictoria               &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0…
+$ countryCanada              &lt;dbl&gt; 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0…
+$ countryUK                  &lt;dbl&gt; 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0…
+$ countryUSA                 &lt;dbl&gt; 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1…</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>fit_encoded <span class="ot">&lt;-</span> <span class="fu">glm</span>(loan_status <span class="sc">~</span> .,</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="cn">TRUE</span>, <span class="at">data =</span> data_encoded</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_encoded)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = loan_status ~ ., family = binomial(link = "logit"), 
+    data = data_encoded, x = TRUE)
+
+Coefficients: (12 not defined because of singularities)
+                               Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                  -3.258e+00  1.779e-01 -18.319  &lt; 2e-16 ***
+person_age                   -2.770e-03  5.317e-03  -0.521 0.602449    
+person_income                -6.536e-07  1.252e-06  -0.522 0.601482    
+person_home_ownershipOTHER    6.859e-01  2.540e-01   2.701 0.006923 ** 
+person_home_ownershipOWN     -1.361e+00  9.148e-02 -14.873  &lt; 2e-16 ***
+person_home_ownershipRENT     8.505e-01  3.630e-02  23.429  &lt; 2e-16 ***
+person_emp_length            -1.321e-02  4.404e-03  -3.000 0.002699 ** 
+loan_intentEDUCATION         -7.554e-01  5.225e-02 -14.458  &lt; 2e-16 ***
+loan_intentHOMEIMPROVEMENT    1.381e-01  5.714e-02   2.417 0.015632 *  
+loan_intentMEDICAL           -1.782e-01  4.934e-02  -3.611 0.000305 ***
+loan_intentPERSONAL          -5.209e-01  5.309e-02  -9.810  &lt; 2e-16 ***
+loan_intentVENTURE           -9.308e-01  5.631e-02 -16.528  &lt; 2e-16 ***
+loan_amnt                    -6.978e-05  3.718e-06 -18.767  &lt; 2e-16 ***
+cb_person_default_on_fileY    1.136e+00  3.685e-02  30.833  &lt; 2e-16 ***
+cb_person_cred_hist_length    2.248e-03  8.119e-03   0.277 0.781837    
+genderMale                    1.922e-02  3.137e-02   0.613 0.540011    
+marital_statusMarried         1.309e-02  5.656e-02   0.231 0.817004    
+marital_statusSingle          7.429e-03  5.467e-02   0.136 0.891904    
+marital_statusWidowed        -3.007e-02  8.590e-02  -0.350 0.726329    
+education_levelHigh School    1.958e-02  3.624e-02   0.540 0.589112    
+education_levelMaster         5.047e-02  4.390e-02   1.150 0.250344    
+education_levelPhD           -1.232e-02  7.866e-02  -0.157 0.875504    
+stateCalifornia               9.586e-02  9.361e-02   1.024 0.305771    
+stateEngland                  5.362e-02  9.453e-02   0.567 0.570552    
+stateNew York                 8.480e-02  9.502e-02   0.892 0.372129    
+stateOntario                  9.283e-02  9.566e-02   0.970 0.331834    
+stateQuebec                  -3.107e-02  9.626e-02  -0.323 0.746836    
+stateScotland                 1.272e-01  9.404e-02   1.352 0.176343    
+stateTexas                    5.643e-02  9.483e-02   0.595 0.551825    
+stateWales                    3.957e-02  9.540e-02   0.415 0.678264    
+employment_typePart-time      5.494e-03  4.073e-02   0.135 0.892709    
+employment_typeSelf-employed  2.642e-02  4.472e-02   0.591 0.554621    
+employment_typeUnemployed    -1.806e-02  7.178e-02  -0.252 0.801398    
+loan_term_months              2.153e-03  9.795e-04   2.198 0.027915 *  
+loan_to_income_ratio          1.183e+01  4.332e-01  27.295  &lt; 2e-16 ***
+other_debt                    6.414e-06  6.203e-06   1.034 0.301078    
+debt_to_income_ratio         -1.911e-01  4.022e-01  -0.475 0.634688    
+open_accounts                -1.500e-03  3.611e-03  -0.415 0.677814    
+credit_utilization_ratio      1.046e-01  6.032e-02   1.735 0.082768 .  
+past_delinquencies            6.771e-03  2.195e-02   0.309 0.757680    
+cityBuffalo                  -8.683e-02  9.562e-02  -0.908 0.363825    
+cityCardiff                   6.621e-02  9.499e-02   0.697 0.485831    
+cityDallas                    1.447e-01  9.375e-02   1.544 0.122694    
+cityEdinburgh                 2.764e-02  9.302e-02   0.297 0.766319    
+cityGlasgow                          NA         NA      NA       NA    
+cityHouston                          NA         NA      NA       NA    
+cityLondon                    5.741e-02  9.392e-02   0.611 0.541033    
+`cityLos Angeles`             1.090e-01  9.193e-02   1.185 0.235946    
+cityManchester                       NA         NA      NA       NA    
+cityMontreal                  1.584e-01  9.606e-02   1.649 0.099176 .  
+`cityNew York City`                  NA         NA      NA       NA    
+cityOttawa                    1.662e-03  9.522e-02   0.017 0.986072    
+`cityQuebec City`                    NA         NA      NA       NA    
+`citySan Francisco`                  NA         NA      NA       NA    
+citySwansea                          NA         NA      NA       NA    
+cityToronto                          NA         NA      NA       NA    
+cityVancouver                 2.865e-01  9.259e-02   3.095 0.001971 ** 
+cityVictoria                         NA         NA      NA       NA    
+countryCanada                        NA         NA      NA       NA    
+countryUK                            NA         NA      NA       NA    
+countryUSA                           NA         NA      NA       NA    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 34182  on 32580  degrees of freedom
+Residual deviance: 25931  on 32532  degrees of freedom
+AIC: 26029
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+</section>
+<section id="encoded-model-diagnostics" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="encoded-model-diagnostics"><span class="header-section-number">11</span> Encoded Model Diagnostics</h2>
+<section id="likelihood-ratio-test-1" class="level3" data-number="11.1">
+<h3 data-number="11.1" class="anchored" data-anchor-id="likelihood-ratio-test-1"><span class="header-section-number">11.1</span> Likelihood Ratio Test</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(fit_encoded, <span class="at">test=</span><span class="st">"Chisq"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Deviance Table
+
+Model: binomial, link: logit
+
+Response: loan_status
+
+Terms added sequentially (first to last)
+
+                           Df Deviance Resid. Df Resid. Dev  Pr(&gt;Chi)    
+NULL                                       32580      34182              
+person_age                  1    14.23     32579      34168  0.000162 ***
+person_income               1  1877.23     32578      32291 &lt; 2.2e-16 ***
+person_home_ownership       3  1314.01     32575      30977 &lt; 2.2e-16 ***
+person_emp_length           1     3.00     32574      30974  0.083469 .  
+loan_intent                 5   512.56     32569      30461 &lt; 2.2e-16 ***
+loan_amnt                   1  2067.48     32568      28394 &lt; 2.2e-16 ***
+cb_person_default_on_file   1   813.84     32567      27580 &lt; 2.2e-16 ***
+cb_person_cred_hist_length  1     0.82     32566      27579  0.366157    
+gender                      1     0.40     32565      27579  0.529656    
+marital_status              3     0.36     32562      27578  0.948053    
+education_level             3     1.27     32559      27577  0.736541    
+state                       8     6.44     32551      27571  0.598580    
+employment_type             3     0.70     32548      27570  0.873333    
+loan_term_months            1     4.79     32547      27565  0.028678 *  
+loan_to_income_ratio        1  1611.37     32546      25954 &lt; 2.2e-16 ***
+other_debt                  1     1.43     32545      25952  0.231924    
+debt_to_income_ratio        1     0.23     32544      25952  0.631383    
+open_accounts               1     0.15     32543      25952  0.702822    
+credit_utilization_ratio    1     3.08     32542      25949  0.079411 .  
+past_delinquencies          1     0.11     32541      25949  0.743667    
+cityBuffalo                 1     0.83     32540      25948  0.363349    
+cityCardiff                 1     0.49     32539      25948  0.485797    
+cityDallas                  1     2.38     32538      25945  0.122606    
+cityEdinburgh               1     0.09     32537      25945  0.766775    
+cityGlasgow                 0     0.00     32537      25945              
+cityHouston                 0     0.00     32537      25945              
+cityLondon                  1     0.37     32536      25945  0.540909    
+`cityLos Angeles`           1     1.40     32535      25943  0.235973    
+cityManchester              0     0.00     32535      25943              
+cityMontreal                1     2.72     32534      25941  0.099145 .  
+`cityNew York City`         0     0.00     32534      25941              
+cityOttawa                  1     0.00     32533      25941  0.985983    
+`cityQuebec City`           0     0.00     32533      25941              
+`citySan Francisco`         0     0.00     32533      25941              
+citySwansea                 0     0.00     32533      25941              
+cityToronto                 0     0.00     32533      25941              
+cityVancouver               1     9.60     32532      25931  0.001947 ** 
+cityVictoria                0     0.00     32532      25931              
+countryCanada               0     0.00     32532      25931              
+countryUK                   0     0.00     32532      25931              
+countryUSA                  0     0.00     32532      25931              
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+</section>
+<section id="pseudo-r-squared-1" class="level3" data-number="11.2">
+<h3 data-number="11.2" class="anchored" data-anchor-id="pseudo-r-squared-1"><span class="header-section-number">11.2</span> Pseudo R-squared</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pscl)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pR2</span>(fit_encoded)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>fitting null model for pseudo-r2</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          llh       llhNull            G2      McFadden          r2ML 
+-1.296549e+04 -1.709116e+04  8.251328e+03  2.413918e-01  2.237307e-01 
+         r2CU 
+ 3.443260e-01 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(performance)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">r2</span>(fit_encoded)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># R2 for Logistic Regression
+  Tjur's R2: 0.273</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="aic-optimization" class="level2" data-number="12">
+<h2 data-number="12" class="anchored" data-anchor-id="aic-optimization"><span class="header-section-number">12</span> AIC Optimization</h2>
+<p>Let’s use stepwise selection to find an optimal set of predictors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>step_fit <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">stepAIC</span>(fit_encoded, <span class="at">direction =</span> <span class="st">"both"</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(step_fit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = loan_status ~ person_home_ownership + person_emp_length + 
+    loan_intent + loan_amnt + cb_person_default_on_file + loan_term_months + 
+    loan_to_income_ratio + other_debt + credit_utilization_ratio + 
+    cityDallas + `cityLos Angeles` + cityVancouver + `cityQuebec City`, 
+    family = binomial(link = "logit"), data = data_encoded, x = TRUE)
+
+Coefficients:
+                             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                -3.248e+00  7.871e-02 -41.268  &lt; 2e-16 ***
+person_home_ownershipOTHER  6.886e-01  2.538e-01   2.713 0.006672 ** 
+person_home_ownershipOWN   -1.363e+00  9.148e-02 -14.894  &lt; 2e-16 ***
+person_home_ownershipRENT   8.505e-01  3.627e-02  23.451  &lt; 2e-16 ***
+person_emp_length          -1.351e-02  4.363e-03  -3.097 0.001955 ** 
+loan_intentEDUCATION       -7.519e-01  5.213e-02 -14.423  &lt; 2e-16 ***
+loan_intentHOMEIMPROVEMENT  1.361e-01  5.698e-02   2.388 0.016925 *  
+loan_intentMEDICAL         -1.794e-01  4.930e-02  -3.638 0.000275 ***
+loan_intentPERSONAL        -5.213e-01  5.304e-02  -9.829  &lt; 2e-16 ***
+loan_intentVENTURE         -9.299e-01  5.628e-02 -16.524  &lt; 2e-16 ***
+loan_amnt                  -7.028e-05  3.582e-06 -19.621  &lt; 2e-16 ***
+cb_person_default_on_fileY  1.135e+00  3.681e-02  30.840  &lt; 2e-16 ***
+loan_term_months            2.175e-03  9.790e-04   2.222 0.026297 *  
+loan_to_income_ratio        1.166e+01  2.099e-01  55.549  &lt; 2e-16 ***
+other_debt                  3.217e-06  1.383e-06   2.326 0.020039 *  
+credit_utilization_ratio    1.048e-01  6.028e-02   1.739 0.081969 .  
+cityDallas                  1.189e-01  6.785e-02   1.752 0.079846 .  
+`cityLos Angeles`           1.233e-01  6.703e-02   1.839 0.065932 .  
+cityVancouver               2.034e-01  6.630e-02   3.067 0.002161 ** 
+`cityQuebec City`          -1.138e-01  7.135e-02  -1.596 0.110561    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 34182  on 32580  degrees of freedom
+Residual deviance: 25941  on 32561  degrees of freedom
+AIC: 25981
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>step_fit<span class="sc">$</span>call</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>glm(formula = loan_status ~ person_home_ownership + person_emp_length + 
+    loan_intent + loan_amnt + cb_person_default_on_file + loan_term_months + 
+    loan_to_income_ratio + other_debt + credit_utilization_ratio + 
+    cityDallas + `cityLos Angeles` + cityVancouver + `cityQuebec City`, 
+    family = binomial(link = "logit"), data = data_encoded, x = TRUE)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>optimal_variables <span class="ot">&lt;-</span> <span class="fu">names</span>(<span class="fu">coef</span>(step_fit))[<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>optimal_variables</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "person_home_ownershipOTHER" "person_home_ownershipOWN"  
+ [3] "person_home_ownershipRENT"  "person_emp_length"         
+ [5] "loan_intentEDUCATION"       "loan_intentHOMEIMPROVEMENT"
+ [7] "loan_intentMEDICAL"         "loan_intentPERSONAL"       
+ [9] "loan_intentVENTURE"         "loan_amnt"                 
+[11] "cb_person_default_on_fileY" "loan_term_months"          
+[13] "loan_to_income_ratio"       "other_debt"                
+[15] "credit_utilization_ratio"   "cityDallas"                
+[17] "`cityLos Angeles`"          "cityVancouver"             
+[19] "`cityQuebec City`"         </code></pre>
+</div>
+</div>
+<p>As soon as factor variables were encoded into multiple columns, we need to make sure that all of them are included in the final model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>final_variables <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"loan_status"</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (var <span class="cf">in</span> optimal_variables) {</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (var <span class="sc">%in%</span> (data_encoded <span class="sc">|&gt;</span> <span class="fu">colnames</span>())) {</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>    final_variables <span class="ot">&lt;-</span> <span class="fu">c</span>(final_variables, var)</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(var, <span class="st">"is NOT in the dataset</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>person_home_ownershipOTHER is NOT in the dataset
+person_home_ownershipOWN is NOT in the dataset
+person_home_ownershipRENT is NOT in the dataset
+loan_intentEDUCATION is NOT in the dataset
+loan_intentHOMEIMPROVEMENT is NOT in the dataset
+loan_intentMEDICAL is NOT in the dataset
+loan_intentPERSONAL is NOT in the dataset
+loan_intentVENTURE is NOT in the dataset
+cb_person_default_on_fileY is NOT in the dataset
+`cityLos Angeles` is NOT in the dataset
+`cityQuebec City` is NOT in the dataset</code></pre>
+</div>
+</div>
+<p>Add back encoded categorical variables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>final_variables <span class="sc">|&gt;</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(final_variables, <span class="st">"person_home_ownership"</span>, <span class="st">"loan_intent"</span>, <span class="st">"cb_person_default_on_file"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "loan_status"               "person_emp_length"        
+ [3] "loan_amnt"                 "loan_term_months"         
+ [5] "loan_to_income_ratio"      "other_debt"               
+ [7] "credit_utilization_ratio"  "cityDallas"               
+ [9] "cityVancouver"             "loan_status"              
+[11] "person_emp_length"         "loan_amnt"                
+[13] "loan_term_months"          "loan_to_income_ratio"     
+[15] "other_debt"                "credit_utilization_ratio" 
+[17] "cityDallas"                "cityVancouver"            
+[19] "person_home_ownership"     "loan_intent"              
+[21] "cb_person_default_on_file"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>data_optimal <span class="ot">&lt;-</span> data_encoded <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">all_of</span>(<span class="fu">c</span>(<span class="st">"loan_status"</span>, final_variables)))</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>fit_optimal <span class="ot">&lt;-</span> <span class="fu">glm</span>(loan_status <span class="sc">~</span> .,</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="cn">TRUE</span>, <span class="at">data =</span> data_optimal</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_optimal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = loan_status ~ ., family = binomial(link = "logit"), 
+    data = data_optimal, x = TRUE)
+
+Coefficients:
+                           Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)              -2.665e+00  6.248e-02 -42.662   &lt;2e-16 ***
+person_emp_length        -3.632e-02  4.107e-03  -8.844   &lt;2e-16 ***
+loan_amnt                -6.720e-05  3.465e-06 -19.392   &lt;2e-16 ***
+loan_term_months          2.320e-03  9.245e-04   2.510   0.0121 *  
+loan_to_income_ratio      1.082e+01  1.989e-01  54.392   &lt;2e-16 ***
+other_debt                6.773e-07  1.870e-06   0.362   0.7172    
+credit_utilization_ratio  6.755e-02  5.699e-02   1.185   0.2359    
+cityDallas                8.590e-02  6.378e-02   1.347   0.1781    
+cityVancouver             1.778e-01  6.242e-02   2.848   0.0044 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 34182  on 32580  degrees of freedom
+Residual deviance: 28884  on 32572  degrees of freedom
+AIC: 28902
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+<section id="pseudo-r-squared-2" class="level3" data-number="12.1">
+<h3 data-number="12.1" class="anchored" data-anchor-id="pseudo-r-squared-2"><span class="header-section-number">12.1</span> Pseudo R-squared</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pR2</span>(fit_optimal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>fitting null model for pseudo-r2</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          llh       llhNull            G2      McFadden          r2ML 
+-1.444195e+04 -1.709116e+04  5.298404e+03  1.550043e-01  1.500880e-01 
+         r2CU 
+ 2.309885e-01 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">r2</span>(fit_optimal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># R2 for Logistic Regression
+  Tjur's R2: 0.185</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="selected-variables" class="level2" data-number="13">
+<h2 data-number="13" class="anchored" data-anchor-id="selected-variables"><span class="header-section-number">13</span> Selected Variables</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>selected_variables <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"loan_status"</span>, <span class="st">"person_home_ownership"</span>, <span class="st">"person_emp_length"</span>, <span class="st">"loan_intent"</span>, </span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"loan_amnt"</span>, <span class="st">"loan_to_income_ratio"</span>, <span class="st">"cb_person_default_on_file"</span></span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>data_selected <span class="ot">&lt;-</span> data_encoded <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="fu">all_of</span>(selected_variables))</span>
+<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>fit_selected <span class="ot">&lt;-</span> <span class="fu">glm</span>(loan_status <span class="sc">~</span> .,</span>
+<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="cn">TRUE</span>, <span class="at">data =</span> data_selected</span>
+<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_selected)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = loan_status ~ ., family = binomial(link = "logit"), 
+    data = data_selected, x = TRUE)
+
+Coefficients:
+                             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                -3.054e+00  5.880e-02 -51.937  &lt; 2e-16 ***
+person_home_ownershipOTHER  6.885e-01  2.542e-01   2.709 0.006757 ** 
+person_home_ownershipOWN   -1.363e+00  9.139e-02 -14.908  &lt; 2e-16 ***
+person_home_ownershipRENT   8.479e-01  3.622e-02  23.409  &lt; 2e-16 ***
+person_emp_length          -1.338e-02  4.360e-03  -3.067 0.002159 ** 
+loan_intentEDUCATION       -7.526e-01  5.209e-02 -14.449  &lt; 2e-16 ***
+loan_intentHOMEIMPROVEMENT  1.378e-01  5.695e-02   2.419 0.015551 *  
+loan_intentMEDICAL         -1.812e-01  4.927e-02  -3.678 0.000235 ***
+loan_intentPERSONAL        -5.202e-01  5.301e-02  -9.813  &lt; 2e-16 ***
+loan_intentVENTURE         -9.274e-01  5.620e-02 -16.503  &lt; 2e-16 ***
+loan_amnt                  -6.745e-05  3.374e-06 -19.991  &lt; 2e-16 ***
+loan_to_income_ratio        1.149e+01  1.981e-01  58.001  &lt; 2e-16 ***
+cb_person_default_on_fileY  1.131e+00  3.677e-02  30.756  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 34182  on 32580  degrees of freedom
+Residual deviance: 25971  on 32568  degrees of freedom
+AIC: 25997
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<section id="pseudo-r-squared-3" class="level3" data-number="13.1">
+<h3 data-number="13.1" class="anchored" data-anchor-id="pseudo-r-squared-3"><span class="header-section-number">13.1</span> Pseudo R-squared</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pR2</span>(fit_optimal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>fitting null model for pseudo-r2</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          llh       llhNull            G2      McFadden          r2ML 
+-1.444195e+04 -1.709116e+04  5.298404e+03  1.550043e-01  1.500880e-01 
+         r2CU 
+ 2.309885e-01 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">r2</span>(fit_optimal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># R2 for Logistic Regression
+  Tjur's R2: 0.185</code></pre>
+</div>
+</div>
+<p>Let’s compare all three models.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)   <span class="co"># for train, resampling</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pROC)    <span class="co"># for AUC</span></span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>data_encoded <span class="ot">&lt;-</span> data_encoded <span class="sc">|&gt;</span></span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">loan_status =</span> <span class="fu">ifelse</span>(loan_status <span class="sc">==</span> <span class="cn">TRUE</span>, <span class="st">"Yes"</span>, <span class="st">"No"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb71-9"><a href="#cb71-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.factor</span>())</span>
+<span id="cb71-10"><a href="#cb71-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-11"><a href="#cb71-11" aria-hidden="true" tabindex="-1"></a>data_optimal <span class="ot">&lt;-</span> data_optimal <span class="sc">|&gt;</span></span>
+<span id="cb71-12"><a href="#cb71-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">loan_status =</span> <span class="fu">ifelse</span>(loan_status <span class="sc">==</span> <span class="cn">TRUE</span>, <span class="st">"Yes"</span>, <span class="st">"No"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb71-13"><a href="#cb71-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.factor</span>())</span>
+<span id="cb71-14"><a href="#cb71-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-15"><a href="#cb71-15" aria-hidden="true" tabindex="-1"></a>data_selected <span class="ot">&lt;-</span> data_selected <span class="sc">|&gt;</span></span>
+<span id="cb71-16"><a href="#cb71-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">loan_status =</span> <span class="fu">ifelse</span>(loan_status <span class="sc">==</span> <span class="cn">TRUE</span>, <span class="st">"Yes"</span>, <span class="st">"No"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb71-17"><a href="#cb71-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.factor</span>())</span>
+<span id="cb71-18"><a href="#cb71-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-19"><a href="#cb71-19" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(data_encoded) <span class="ot">&lt;-</span> <span class="fu">make.names</span>(<span class="fu">colnames</span>(data_encoded), <span class="at">unique =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb71-20"><a href="#cb71-20" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(data_optimal) <span class="ot">&lt;-</span> <span class="fu">make.names</span>(<span class="fu">colnames</span>(data_optimal), <span class="at">unique =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb71-21"><a href="#cb71-21" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(data_selected) <span class="ot">&lt;-</span> <span class="fu">make.names</span>(<span class="fu">colnames</span>(data_selected), <span class="at">unique =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb71-22"><a href="#cb71-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-23"><a href="#cb71-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-24"><a href="#cb71-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Define cross-validation folds</span></span>
+<span id="cb71-25"><a href="#cb71-25" aria-hidden="true" tabindex="-1"></a>ctrl <span class="ot">&lt;-</span> <span class="fu">trainControl</span>(</span>
+<span id="cb71-26"><a href="#cb71-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"cv"</span>,</span>
+<span id="cb71-27"><a href="#cb71-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">number =</span> <span class="dv">5</span>,              <span class="co"># 5-fold CV (use 10 for more stable estimates)</span></span>
+<span id="cb71-28"><a href="#cb71-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">classProbs =</span> <span class="cn">TRUE</span>,       <span class="co"># needed for AUC</span></span>
+<span id="cb71-29"><a href="#cb71-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">summaryFunction =</span> twoClassSummary</span>
+<span id="cb71-30"><a href="#cb71-30" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb71-31"><a href="#cb71-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-32"><a href="#cb71-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Train full model</span></span>
+<span id="cb71-33"><a href="#cb71-33" aria-hidden="true" tabindex="-1"></a>cv_full <span class="ot">&lt;-</span> <span class="fu">train</span>(</span>
+<span id="cb71-34"><a href="#cb71-34" aria-hidden="true" tabindex="-1"></a>  loan_status <span class="sc">~</span> ., </span>
+<span id="cb71-35"><a href="#cb71-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> data_encoded,</span>
+<span id="cb71-36"><a href="#cb71-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"glm"</span>,</span>
+<span id="cb71-37"><a href="#cb71-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial,</span>
+<span id="cb71-38"><a href="#cb71-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">metric =</span> <span class="st">"ROC"</span>,          <span class="co"># optimize on AUC</span></span>
+<span id="cb71-39"><a href="#cb71-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">trControl =</span> ctrl</span>
+<span id="cb71-40"><a href="#cb71-40" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb71-41"><a href="#cb71-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-42"><a href="#cb71-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Train stepAIC model (use the reduced dataset)</span></span>
+<span id="cb71-43"><a href="#cb71-43" aria-hidden="true" tabindex="-1"></a>cv_step <span class="ot">&lt;-</span> <span class="fu">train</span>(</span>
+<span id="cb71-44"><a href="#cb71-44" aria-hidden="true" tabindex="-1"></a>  loan_status <span class="sc">~</span> ., </span>
+<span id="cb71-45"><a href="#cb71-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> data_optimal,</span>
+<span id="cb71-46"><a href="#cb71-46" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"glm"</span>,</span>
+<span id="cb71-47"><a href="#cb71-47" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial,</span>
+<span id="cb71-48"><a href="#cb71-48" aria-hidden="true" tabindex="-1"></a>  <span class="at">metric =</span> <span class="st">"ROC"</span>,</span>
+<span id="cb71-49"><a href="#cb71-49" aria-hidden="true" tabindex="-1"></a>  <span class="at">trControl =</span> ctrl</span>
+<span id="cb71-50"><a href="#cb71-50" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb71-51"><a href="#cb71-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-52"><a href="#cb71-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Train significant-only model</span></span>
+<span id="cb71-53"><a href="#cb71-53" aria-hidden="true" tabindex="-1"></a>cv_sig <span class="ot">&lt;-</span> <span class="fu">train</span>(</span>
+<span id="cb71-54"><a href="#cb71-54" aria-hidden="true" tabindex="-1"></a>  loan_status <span class="sc">~</span> ., </span>
+<span id="cb71-55"><a href="#cb71-55" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> data_selected,</span>
+<span id="cb71-56"><a href="#cb71-56" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"glm"</span>,</span>
+<span id="cb71-57"><a href="#cb71-57" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial,</span>
+<span id="cb71-58"><a href="#cb71-58" aria-hidden="true" tabindex="-1"></a>  <span class="at">metric =</span> <span class="st">"ROC"</span>,</span>
+<span id="cb71-59"><a href="#cb71-59" aria-hidden="true" tabindex="-1"></a>  <span class="at">trControl =</span> ctrl</span>
+<span id="cb71-60"><a href="#cb71-60" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb71-61"><a href="#cb71-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-62"><a href="#cb71-62" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare CV AUC</span></span>
+<span id="cb71-63"><a href="#cb71-63" aria-hidden="true" tabindex="-1"></a>cv_full</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generalized Linear Model 
+
+32581 samples
+   41 predictor
+    2 classes: 'No', 'Yes' 
+
+No pre-processing
+Resampling: Cross-Validated (5 fold) 
+Summary of sample sizes: 26065, 26065, 26064, 26066, 26064 
+Resampling results:
+
+  ROC        Sens       Spec    
+  0.8084115  0.9594473  0.404194</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>cv_step</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generalized Linear Model 
+
+32581 samples
+    8 predictor
+    2 classes: 'No', 'Yes' 
+
+No pre-processing
+Resampling: Cross-Validated (5 fold) 
+Summary of sample sizes: 26065, 26064, 26066, 26064, 26065 
+Resampling results:
+
+  ROC        Sens       Spec     
+  0.7457408  0.9704786  0.2999432</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>cv_sig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generalized Linear Model 
+
+32581 samples
+    6 predictor
+    2 classes: 'No', 'Yes' 
+
+No pre-processing
+Resampling: Cross-Validated (5 fold) 
+Summary of sample sizes: 26066, 26064, 26066, 26064, 26064 
+Resampling results:
+
+  ROC       Sens     Spec    
+  0.809076  0.95878  0.405459</code></pre>
+</div>
+</div>
+<p>Both the full model and the model using only significant variables show very similar results. We’ll use the model with selected variables as it is more interpretable.</p>
+</section>
+</section>
+<section id="save-processed-data" class="level2" data-number="14">
+<h2 data-number="14" class="anchored" data-anchor-id="save-processed-data"><span class="header-section-number">14</span> Save Processed Data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv</span>(data_selected, <span class="st">"data_selected.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
