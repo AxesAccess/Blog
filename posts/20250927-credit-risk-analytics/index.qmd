@@ -83,7 +83,7 @@ signifies default and `0` signifies no default. I explored multiple
 models, prioritizing predictive power (AUC) and, for deployment,
 interpretability (Marginal Effects for the dashboard). The process is
 described in detail in [Building Predictive Models for Credit
-Risk](02_models.html){target="_blank"}.
+Risk](02_modelling.html){target="_blank"}.
 
 ### 1. Logistic Regression (GLM) for Interpretability
 
