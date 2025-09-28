@@ -250,7 +250,7 @@ Figure&nbsp;3: A boxplot displaying numerical variables, with outliers highlight
 </figcaption>
 </figure>
 </div>
-<p>My logic was to replace these anomalies with the median to normalize the distributions without losing valid information. However, extreme values in <strong><code>other_debt</code></strong> and <strong><code>person_income</code></strong> were retained, as they were judged to be genuine, albeit high, observations.</p>
+<p>My logic was to replace these anomalies with the median to normalize the distributions without losing valid information. However, extreme values in <strong><code>other_debt</code></strong> and <strong><code>person_income</code></strong> were retained, as they were judged to be genuine observations.</p>
 </section>
 </section>
 <section id="phase-2-building-and-optimizing-predictive-models" class="level2">
@@ -258,14 +258,14 @@ Figure&nbsp;3: A boxplot displaying numerical variables, with outliers highlight
 <p>The core task was to predict the <strong><code>loan_status</code></strong> variable, where <code>1</code> signifies default and <code>0</code> signifies no default. I explored multiple models, prioritizing predictive power (AUC) and, for deployment, interpretability (Marginal Effects for the dashboard). The process is described in detail in <a href="02_modelling.html" target="_blank">Building Predictive Models for Credit Risk</a>.</p>
 <section id="logistic-regression-glm-for-interpretability" class="level3">
 <h3 class="anchored" data-anchor-id="logistic-regression-glm-for-interpretability">1. Logistic Regression (GLM) for Interpretability</h3>
-<p>I initially built a Logistic Regression model (GLM), which provides highly interpretable coefficient estimates. Due to the nature of the model and to avoid singularity issues, I proactively excluded <strong><code>loan_grade</code></strong> and <strong><code>loan_int_rate</code></strong> (as they are likely set by the bank based on pre-assessment).</p>
-<p>For categorical features with high cardinality, such as <code>city</code> and <code>country</code>, I used <strong>one-hot encoding</strong>. When running the full encoded model, it proved highly complex. I then employed <strong>stepwise selection (MASS::stepAIC)</strong>, an optimization technique that systematically adds or removes variables to minimize the model’s AIC (Akaike Information Criterion), yielding a balance between fit and simplicity.</p>
+<p>I initially built a Logistic Regression model (GLM), which provides easily interpretable coefficient estimates. Due to the nature of the model and to avoid singularity issues, I excluded <strong><code>loan_grade</code></strong> and <strong><code>loan_int_rate</code></strong> (as they are likely set by the bank based on pre-assessment).</p>
+<p>For categorical features with high cardinality, such as <code>city</code> and <code>country</code>, I used <strong>one-hot encoding</strong>. I then employed <strong>stepwise selection (MASS::stepAIC)</strong>, an optimization technique that systematically adds or removes variables to minimize the model’s AIC (Akaike Information Criterion), yielding a balance between fit and simplicity.</p>
 <p>However, when reviewing the stepwise results, I ensured that if a categorical variable (like <code>person_home_ownership</code>) was implicitly selected via one of its encoded levels (like <code>person_home_ownershipRENT</code>), all levels were included in the final model to maintain structural integrity. The final GLM model using only selected, significant variables (<strong><code>person_home_ownership</code>, <code>person_emp_length</code>, <code>loan_intent</code>, <code>loan_amnt</code>, <code>loan_to_income_ratio</code>, <code>cb_person_default_on_file</code></strong>) showed strong performance, achieving a <strong>Cross-Validated ROC (AUC) of 0.809076</strong>.</p>
 <p>The diagnostics also confirmed that the model was well-behaved, with a dispersion parameter less than 1, indicating <strong>no overdispersion</strong>.</p>
 </section>
 <section id="advanced-modeling-random-forest-and-xgboost" class="level3">
 <h3 class="anchored" data-anchor-id="advanced-modeling-random-forest-and-xgboost">2. Advanced Modeling: Random Forest and XGBoost</h3>
-<p>To benchmark and potentially surpass the GLM performance, I implemented a <strong>Random Forest</strong> model. Since Random Forests can handle correlated features well, I initially trained this model on the full, cleaned dataset (excluding only the two variables noted above).</p>
+<p>To benchmark and potentially surpass the GLM performance, I implemented a <strong>Random Forest</strong> model. Since Random Forests can handle correlated features well, I initially trained this model on the full dataset (excluding only the two variables noted above).</p>
 <div id="fig-variable-importance" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-variable-importance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -276,7 +276,7 @@ Figure&nbsp;4: The variable importance plot from the Random Forest model trained
 </figcaption>
 </figure>
 </div>
-<p>The initial Random Forest model achieved an AUC of <strong>0.8519</strong>. Using the variable importance metrics (Mean Decrease Accuracy and Mean Decrease Gini), I identified features contributing little to predictive power, such as <code>gender</code>, <code>marital_status</code>, and <code>education_level</code>. After dropping these weak predictors, the simplified Random Forest model maintained or slightly improved performance, reaching an AUC of <strong>0.861</strong>.</p>
+<p>The initial Random Forest model achieved an AUC of <strong>0.8519</strong>. Using the variable importance metrics (Mean Decrease Accuracy and Mean Decrease Gini), I identified features contributing little to predictive power, such as <code>gender</code>, <code>marital_status</code>, and <code>education_level</code>. After dropping these weak predictors, the simplified Random Forest model improved performance, reaching an AUC of <strong>0.861</strong>.</p>
 <p>Finally, I tested <strong>XGBoost (Extreme Gradient Boosting)</strong>, a powerful ensemble technique known for maximizing accuracy. After converting categorical variables to numeric matrices (a necessary step for XGBoost), this model delivered the best result: an AUC of <strong>0.8963</strong>. XGBoost’s feature importance analysis indicated that <strong><code>loan_to_income_ratio</code></strong> and <strong><code>person_income</code></strong> were the most influential predictors, followed by <strong><code>person_home_ownership</code></strong>.</p>
 <div id="fig-roc-plot" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
@@ -288,7 +288,7 @@ Figure&nbsp;5: The ROC plot shows relationship between the true positive rate (s
 </figcaption>
 </figure>
 </div>
-<p>The superior performance of XGBoost led me to select it as the engine for the highly complex portfolio simulation component of the dashboard, while the GLM was retained for the more interpretable marginal effects calculations.</p>
+<p>The superior performance of XGBoost led me to select it as the engine for the portfolio simulation component of the dashboard, while the GLM was retained for the interpretable marginal effects calculations.</p>
 </section>
 </section>
 <section id="phase-3-operationalizing-models-via-power-query-r-scripts" class="level2">
@@ -297,20 +297,20 @@ Figure&nbsp;5: The ROC plot shows relationship between the true positive rate (s
 <section id="calculating-marginal-effects" class="level3">
 <h3 class="anchored" data-anchor-id="calculating-marginal-effects">1. Calculating Marginal Effects</h3>
 <p>For the <strong>Default Risk Calculator</strong> section of the dashboard, I needed to show how a change in an individual factor affects the probability of default (PD). For this, I used the interpretable Logistic Regression model.</p>
-<p>The script calculates <strong>Average Marginal Effects (AMEs)</strong>. The logic behind AMEs is that they estimate the change in the probability of default (<span class="math inline">\(P\)</span>) associated with a unit change in a predictor variable (<span class="math inline">\(x_j\)</span>), calculated as <span class="math inline">\(\beta_j \cdot p \cdot (1-p)\)</span>, where <span class="math inline">\(p\)</span> is the average predicted probability. This output helps users understand the true economic impact of each driver, not just the raw logistic coefficient (<span class="math inline">\(\beta_j\)</span>). The results showed clear impact; for example, Home Ownership (OWN) had a standardized effect of -0.1707.</p>
+<p>The script calculates <strong>Average Marginal Effects (AMEs)</strong> for standardized (to compare effects) and raw values (for PD calculation). The logic behind AMEs is that they estimate the change in the probability of default (<span class="math inline">\(P\)</span>) associated with a unit change in a predictor variable (<span class="math inline">\(x_j\)</span>), calculated as <span class="math inline">\(\beta_j \cdot p \cdot (1-p)\)</span>, where <span class="math inline">\(p\)</span> is the average predicted probability. This output helps users understand the true impact of each driver, not just the raw logistic coefficient (<span class="math inline">\(\beta_j\)</span>).</p>
 <p>The GLM used for this analysis achieved a Recall of <strong>0.9572</strong> and a Precision of <strong>0.8494</strong>.</p>
 </section>
+<section id="generating-synthetic-data-for-simulation" class="level3">
+<h3 class="anchored" data-anchor-id="generating-synthetic-data-for-simulation">2. Generating Synthetic Data for Simulation</h3>
+<p>To implement the <strong>Portfolio Simulation</strong> feature, I needed a massive, realistic dataset capable of reflecting various scenarios. I generated <strong>50,000 synthetic borrowers</strong>.</p>
+<p>The generation process involved sampling the original data while ensuring that the proportions of categorical features, such as <code>loan_intent</code> and <code>person_home_ownership</code>, were preserved. To simulate realistic diversity, I added <strong>jitter</strong> (random noise) to numeric features like <code>person_age</code> and <code>loan_amnt</code>. Finally, I applied the pre-trained on the original data XGBoost model to these 50,000 synthetic records to predict a <strong><code>Predicted_PD</code></strong> for each one. This synthetic dataset was also enhanced with categorization bins (e.g., <code>age_bin</code>, <code>income_bin</code>) to enable interactive slicing and scenario testing within the dashboard.</p>
 </section>
-<section id="generating-synthetic-data-for-simulation" class="level2">
-<h2 class="anchored" data-anchor-id="generating-synthetic-data-for-simulation">2. Generating Synthetic Data for Simulation</h2>
-<p>To power the <strong>Portfolio Simulation</strong> feature, I needed a massive, realistic dataset capable of reflecting various scenarios. I generated <strong>50,000 synthetic borrowers</strong>.</p>
-<p>The generation process involved sampling the original data while ensuring that the proportions of categorical features, such as <code>loan_intent</code> and <code>person_home_ownership</code>, were preserved. To simulate realistic diversity, I applied <strong>jitter</strong> (random noise) to numeric features like <code>person_age</code> and <code>loan_amnt</code>. Finally, I applied the pre-trained XGBoost model to these 50,000 synthetic records to predict a <strong><code>Predicted_PD</code></strong> for each one. This synthetic dataset was also enhanced with categorization bins (e.g., <code>age_bin</code>, <code>income_bin</code>) to enable interactive slicing and scenario testing within the dashboard.</p>
 </section>
 <section id="phase-4-building-power-bi-report" class="level2">
 <h2 class="anchored" data-anchor-id="phase-4-building-power-bi-report">Phase 4: Building Power BI Report</h2>
 <section id="power-query-integration" class="level3">
 <h3 class="anchored" data-anchor-id="power-query-integration">1. Power Query Integration</h3>
-<p>There are two ways to run R scripts in Power BI: through the R visual or via Power Query. The R visual is mainly for creating plots and have multiple limitations. Power Query is more versatile as it runs to preprocess data before loading it into the report.</p>
+<p>There are two ways to run R scripts in Power BI: through the R visual or via Power Query. The R visuals are mainly for creating plots and have multiple limitations. Power Query is more versatile as it runs to preprocess data before loading it into the report.</p>
 <div id="fig-power-query" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-power-query-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -324,13 +324,13 @@ Figure&nbsp;6: An R script can be integrated into a Power BI report using Power 
 </section>
 <section id="dashboard-design" class="level3">
 <h3 class="anchored" data-anchor-id="dashboard-design">2. Dashboard Design</h3>
-<p>The Power Query R scripts only run when the data is refreshed, making it impossible to adjust parameters interactively. To address this, I used model coefficients in the default risk calculator, and the sum of the products was then converted into a predicted probability of default by applying the inverse-logit function, <span class="math inline">\(1/(1 + \exp(-\alpha))\)</span>.</p>
-<p>In the portfolio simulation I created DAX measures and slicers that allow users to modify inputs, which then filter the pre-calculated synthetic dataset.</p>
+<p>The Power Query R scripts only run when the data is refreshed, making it impossible to adjust parameters interactively. As soon as I couldn’t utilize advanced models such as Gradient Boosting for interactive calculations, in the <strong>Default Risk Calculator</strong> I used coefficients from GLM model trained on the non-standardized data, and converted the sum of the products to a predicted probability of default by applying the inverse-logit function <span class="math inline">\(1/(1 + \exp(-(\beta_0 + \beta_1x_1 +...+\beta_kx_k)))\)</span> in the DAX measure.</p>
+<p>In the <strong>Portfolio Simulation</strong> there was no need to interactively calculate PDs, so I created DAX measures and slicers which filter the pre-calculated synthetic dataset, effectively allowing users to simulate different portfolio compositions and see the impact on overall default rates and losses. The underlying XGBoost model metrics demonstrated exceptional classification ability, with a Sensitivity of <strong>0.9831</strong> and a Specificity of <strong>0.7012</strong>.</p>
 <p>The final dashboard was structured into three main sections:</p>
 <ul>
-<li><strong>Portfolio Overview:</strong> key statistics such as total borrowers, portfolio value, and overall default rate.</li>
-<li><strong>Default Risk Calculator:</strong> an interactive tool allowing users to input borrower characteristics and see the predicted probability of default along with marginal effects for each factor. For an example borrower profile (e.g., Person income <strong>67,000</strong>, Loan amount <strong>9,500</strong>, <strong>RENT</strong> ownership, <strong>VENTURE</strong> intent), the predicted Probability of Default (PD) was <strong>25.3%</strong>.</li>
-<li><strong>Portfolio Simulation:</strong> a scenario analysis tool where users can modify variables, such as the proportions of loans by intent or thresholds based on borrower data like loan-to-income (LTI) ratio, to observe the projected effects on portfolio default rates, losses, and profits. The underlying XGBoost model metrics demonstrated exceptional classification ability, with a Sensitivity of <strong>0.9831</strong> and a Specificity of <strong>0.7012</strong>.</li>
+<li><p><strong>Portfolio Overview:</strong> key statistics such as total borrowers, portfolio value, and overall default rate. The users can use cross-filtering to explore how different segments (e.g., by loan intent) perform.</p></li>
+<li><p><strong>Default Risk Calculator:</strong> an interactive tool allowing users to input borrower characteristics and see the predicted probability of default along with marginal effects for each factor.</p></li>
+<li><p><strong>Portfolio Simulation:</strong> a scenario analysis tool where users can modify variables, such as the proportions of loans by intent or thresholds based on borrower data like loan-to-income (LTI) ratio, to observe the projected effects on portfolio default rates, losses, and profits.</p></li>
 </ul>
 <div>
 
@@ -363,6 +363,18 @@ Figure&nbsp;6: An R script can be integrated into a Power BI report using Power 
 </div>
 </div>
 </div>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>This project was a comprehensive exercise in data science, statistical modeling, and business intelligence. By employing R for data processing and modeling, and Power BI for reporting, I created a powerful tool for credit risk analysis.</p>
+<section id="key-features" class="level3">
+<h3 class="anchored" data-anchor-id="key-features">Key Features</h3>
+<ul>
+<li><p>All data processing and modeling are done <strong>within Power BI</strong> using embedded R scripts, ensuring a single, portable .pbix file.</p></li>
+<li><p>The <strong>Default Risk Calculator</strong> uses a Logistic Regression model for interpretability, allowing users to understand the impact of various factors on default probability.</p></li>
+<li><p>The <strong>Portfolio Simulation</strong> utilizes a high-performing XGBoost model to provide realistic scenario analysis based on synthetic data.</p></li>
+</ul>
 </section>
 </section>
 <section id="references" class="level2">
