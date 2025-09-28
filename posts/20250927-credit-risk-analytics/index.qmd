@@ -74,7 +74,7 @@ width="576"}
 My logic was to replace these anomalies with the median to normalize the
 distributions without losing valid information. However, extreme values
 in **`other_debt`** and **`person_income`** were retained, as they were
-judged to be genuine, albeit high, observations.
+judged to be genuine observations.
 
 ## Phase 2: Building and Optimizing Predictive Models
 
@@ -88,17 +88,17 @@ Risk](02_modelling.html){target="_blank"}.
 ### 1. Logistic Regression (GLM) for Interpretability
 
 I initially built a Logistic Regression model (GLM), which provides
-highly interpretable coefficient estimates. Due to the nature of the
-model and to avoid singularity issues, I proactively excluded
-**`loan_grade`** and **`loan_int_rate`** (as they are likely set by the
-bank based on pre-assessment).
+easily interpretable coefficient estimates. Due to the nature of the
+model and to avoid singularity issues, I excluded **`loan_grade`** and
+**`loan_int_rate`** (as they are likely set by the bank based on
+pre-assessment).
 
 For categorical features with high cardinality, such as `city` and
-`country`, I used **one-hot encoding**. When running the full encoded
-model, it proved highly complex. I then employed **stepwise selection
-(MASS::stepAIC)**, an optimization technique that systematically adds or
-removes variables to minimize the model’s AIC (Akaike Information
-Criterion), yielding a balance between fit and simplicity.
+`country`, I used **one-hot encoding**. I then employed **stepwise
+selection (MASS::stepAIC)**, an optimization technique that
+systematically adds or removes variables to minimize the model’s AIC
+(Akaike Information Criterion), yielding a balance between fit and
+simplicity.
 
 However, when reviewing the stepwise results, I ensured that if a
 categorical variable (like `person_home_ownership`) was implicitly
@@ -117,8 +117,8 @@ dispersion parameter less than 1, indicating **no overdispersion**.
 
 To benchmark and potentially surpass the GLM performance, I implemented
 a **Random Forest** model. Since Random Forests can handle correlated
-features well, I initially trained this model on the full, cleaned
-dataset (excluding only the two variables noted above).
+features well, I initially trained this model on the full dataset
+(excluding only the two variables noted above).
 
 ![The variable importance plot from the Random Forest model trained on
 the full dataset helps finding the least significant features based on
@@ -131,8 +131,7 @@ variable importance metrics (Mean Decrease Accuracy and Mean Decrease
 Gini), I identified features contributing little to predictive power,
 such as `gender`, `marital_status`, and `education_level`. After
 dropping these weak predictors, the simplified Random Forest model
-maintained or slightly improved performance, reaching an AUC of
-**0.861**.
+improved performance, reaching an AUC of **0.861**.
 
 Finally, I tested **XGBoost (Extreme Gradient Boosting)**, a powerful
 ensemble technique known for maximizing accuracy. After converting
@@ -148,9 +147,8 @@ the line, the better the model.](xgboost-1.svg){#fig-roc-plot
 fig-align="center" width="576"}
 
 The superior performance of XGBoost led me to select it as the engine
-for the highly complex portfolio simulation component of the dashboard,
-while the GLM was retained for the more interpretable marginal effects
-calculations.
+for the portfolio simulation component of the dashboard, while the GLM
+was retained for the interpretable marginal effects calculations.
 
 ## Phase 3: Operationalizing Models via Power Query R Scripts
 
@@ -167,40 +165,41 @@ to show how a change in an individual factor affects the probability of
 default (PD). For this, I used the interpretable Logistic Regression
 model.
 
-The script calculates **Average Marginal Effects (AMEs)**. The logic
-behind AMEs is that they estimate the change in the probability of
-default ($P$) associated with a unit change in a predictor variable
-($x_j$), calculated as $\beta_j \cdot p \cdot (1-p)$, where $p$ is the
-average predicted probability. This output helps users understand the
-true economic impact of each driver, not just the raw logistic
-coefficient ($\beta_j$). The results showed clear impact; for example,
-Home Ownership (OWN) had a standardized effect of -0.1707.
+The script calculates **Average Marginal Effects (AMEs)** for
+standardized (to compare effects) and raw values (for PD calculation).
+The logic behind AMEs is that they estimate the change in the
+probability of default ($P$) associated with a unit change in a
+predictor variable ($x_j$), calculated as $\beta_j \cdot p \cdot (1-p)$,
+where $p$ is the average predicted probability. This output helps users
+understand the true impact of each driver, not just the raw logistic
+coefficient ($\beta_j$).
 
 The GLM used for this analysis achieved a Recall of **0.9572** and a
 Precision of **0.8494**.
 
-## 2. Generating Synthetic Data for Simulation
+### 2. Generating Synthetic Data for Simulation
 
-To power the **Portfolio Simulation** feature, I needed a massive,
+To implement the **Portfolio Simulation** feature, I needed a massive,
 realistic dataset capable of reflecting various scenarios. I generated
 **50,000 synthetic borrowers**.
 
 The generation process involved sampling the original data while
 ensuring that the proportions of categorical features, such as
 `loan_intent` and `person_home_ownership`, were preserved. To simulate
-realistic diversity, I applied **jitter** (random noise) to numeric
+realistic diversity, I added **jitter** (random noise) to numeric
 features like `person_age` and `loan_amnt`. Finally, I applied the
-pre-trained XGBoost model to these 50,000 synthetic records to predict a
-**`Predicted_PD`** for each one. This synthetic dataset was also
-enhanced with categorization bins (e.g., `age_bin`, `income_bin`) to
-enable interactive slicing and scenario testing within the dashboard.
+pre-trained on the original data XGBoost model to these 50,000 synthetic
+records to predict a **`Predicted_PD`** for each one. This synthetic
+dataset was also enhanced with categorization bins (e.g., `age_bin`,
+`income_bin`) to enable interactive slicing and scenario testing within
+the dashboard.
 
 ## Phase 4: Building Power BI Report
 
 ### 1. Power Query Integration
 
 There are two ways to run R scripts in Power BI: through the R visual or
-via Power Query. The R visual is mainly for creating plots and have
+via Power Query. The R visuals are mainly for creating plots and have
 multiple limitations. Power Query is more versatile as it runs to
 preprocess data before loading it into the report.
 
@@ -211,32 +210,39 @@ width="576"}
 ### 2. Dashboard Design
 
 The Power Query R scripts only run when the data is refreshed, making it
-impossible to adjust parameters interactively. To address this, I used
-model coefficients in the default risk calculator, and the sum of the
-products was then converted into a predicted probability of default by
-applying the inverse-logit function, $1/(1 + \exp(-\alpha))$.
+impossible to adjust parameters interactively. As soon as I couldn't
+utilize advanced models such as Gradient Boosting for interactive
+calculations, in the **Default Risk Calculator** I used coefficients
+from GLM model trained on the non-standardized data, and converted the
+sum of the products to a predicted probability of default by applying
+the inverse-logit function
+$1/(1 + \exp(-(\beta_0 + \beta_1x_1 +...+\beta_kx_k)))$ in the DAX
+measure.
 
-In the portfolio simulation I created DAX measures and slicers that
-allow users to modify inputs, which then filter the pre-calculated
-synthetic dataset.
+In the **Portfolio Simulation** there was no need to interactively
+calculate PDs, so I created DAX measures and slicers which filter the
+pre-calculated synthetic dataset, effectively allowing users to simulate
+different portfolio compositions and see the impact on overall default
+rates and losses. The underlying XGBoost model metrics demonstrated
+exceptional classification ability, with a Sensitivity of **0.9831** and
+a Specificity of **0.7012**.
 
 The final dashboard was structured into three main sections:
 
 -   **Portfolio Overview:** key statistics such as total borrowers,
-    portfolio value, and overall default rate.
+    portfolio value, and overall default rate. The users can use
+    cross-filtering to explore how different segments (e.g., by loan
+    intent) perform.
+
 -   **Default Risk Calculator:** an interactive tool allowing users to
     input borrower characteristics and see the predicted probability of
-    default along with marginal effects for each factor. For an example
-    borrower profile (e.g., Person income **67,000**, Loan amount
-    **9,500**, **RENT** ownership, **VENTURE** intent), the predicted
-    Probability of Default (PD) was **25.3%**.
+    default along with marginal effects for each factor.
+
 -   **Portfolio Simulation:** a scenario analysis tool where users can
     modify variables, such as the proportions of loans by intent or
     thresholds based on borrower data like loan-to-income (LTI) ratio,
     to observe the projected effects on portfolio default rates, losses,
-    and profits. The underlying XGBoost model metrics demonstrated
-    exceptional classification ability, with a Sensitivity of **0.9831**
-    and a Specificity of **0.7012**.
+    and profits.
 
 ::: {layout="[[1,1,1], [1]]"}
 ![Credit Portfolio
@@ -248,6 +254,26 @@ Calculator](September-2025-DataDNA-Credit-Risk-Analytics-Challenge-2.png){.light
 ![Portfolio
 Simulation](September-2025-DataDNA-Credit-Risk-Analytics-Challenge-3.png){.lightbox}
 :::
+
+## Conclusion
+
+This project was a comprehensive exercise in data science, statistical
+modeling, and business intelligence. By employing R for data processing
+and modeling, and Power BI for reporting, I created a powerful tool for
+credit risk analysis.
+
+### Key Features
+
+-   All data processing and modeling are done **within Power BI** using
+    embedded R scripts, ensuring a single, portable .pbix file.
+
+-   The **Default Risk Calculator** uses a Logistic Regression model for
+    interpretability, allowing users to understand the impact of various
+    factors on default probability.
+
+-   The **Portfolio Simulation** utilizes a high-performing XGBoost
+    model to provide realistic scenario analysis based on synthetic
+    data.
 
 ## References
 
