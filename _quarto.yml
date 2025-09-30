@@ -3,13 +3,14 @@ project:
 
 website:
   title: "Blog"
+  site-url: "https://blog.frequentist.org"
   navbar:
     right:
       - about.qmd
       - icon: github
         href: https://github.com/AxesAccess
       - icon: linkedin
-        href: https://www.linkedin.com/in/aleksei-pr/
+        href: https://www.linkedin.com/in/aleksei-pr
   google-analytics: "G-H2HYLD7LV5"
 format:
   html:

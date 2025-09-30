@@ -1,5 +1,6 @@
 ---
 title: "Systems, Data, and the Practice of Statistical Thinking"
+site-url: "https://blog.frequentist.org"
 listing:
   contents:
     - "posts/*/index.qmd"
@@ -8,6 +9,8 @@ listing:
   categories: true
   sort-ui: false
   filter-ui: false
+  feed:
+    categories: [R]
 page-layout: full
 title-block-banner: true
 ---
