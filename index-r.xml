@@ -13,7 +13,7 @@
 <lastBuildDate>Sat, 27 Sep 2025 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Building a Credit Risk Dashboard with Power BI and R</title>
-  <dc:creator>Aleksei </dc:creator>
+  <dc:creator>Aleksei Prishchepo</dc:creator>
   <link>https://blog.frequentist.org/posts/20250927-credit-risk-analytics/</link>
   <description><![CDATA[ 
 
@@ -216,7 +216,7 @@ Figure&nbsp;6: An R script can be integrated into a Power BI report using Power 
 </item>
 <item>
   <title>Time-Series Clustering with R’s dtwclust Package</title>
-  <dc:creator>Aleksei </dc:creator>
+  <dc:creator>Aleksei Prishchepo</dc:creator>
   <link>https://blog.frequentist.org/posts/20250827-time-series-clustering/</link>
   <description><![CDATA[ 
 
@@ -1590,7 +1590,7 @@ Figure&nbsp;4: Time series clustered using DTW distance and Ward.D2 linkage.
 </item>
 <item>
   <title>Minimum Detectable Effect (MDE) Calculation</title>
-  <dc:creator>Aleksei </dc:creator>
+  <dc:creator>Aleksei Prishchepo</dc:creator>
   <link>https://blog.frequentist.org/posts/20250807-mde/</link>
   <description><![CDATA[ 
 
@@ -1916,7 +1916,7 @@ font-style: inherit;">c</span>(m, n, total_users)</span></code></pre></div>
 </item>
 <item>
   <title>Animation of Spatial Data</title>
-  <dc:creator>Aleksei </dc:creator>
+  <dc:creator>Aleksei Prishchepo</dc:creator>
   <link>https://blog.frequentist.org/posts/20250704-animation/</link>
   <description><![CDATA[ 
 
@@ -1979,16 +1979,18 @@ font-style: inherit;">download.file</span>(<span class="fu" style="color: #4758A
 background-color: null;
 font-style: inherit;">paste0</span>(url, stations_file), <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">here</span>(</span>
-<span id="cb1-8">    <span class="st" style="color: #20794D;
+font-style: inherit;">here</span>(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"data"</span>, stations_file</span>
-<span id="cb1-9">  ), <span class="at" style="color: #657422;
+font-style: inherit;">"posts"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"20250704-animation"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data"</span>, stations_file), <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">mode =</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"wb"</span>)</span>
-<span id="cb1-10">}</span></code></pre></div>
+<span id="cb1-8">}</span></code></pre></div>
 </div>
 <p>Let’s read the stations data.</p>
 <div class="cell">
