@@ -16,6 +16,9 @@ about:
     - icon: instagram
       text: Instagram
       href: https://www.instagram.com/tele.camera
+    - icon: r-circle-fill
+      text: R-bloggers
+      href: https://www.r-bloggers.com
 
 format:
   html:
