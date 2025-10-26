@@ -11,6 +11,8 @@ website:
         href: https://github.com/AxesAccess
       - icon: linkedin
         href: https://www.linkedin.com/in/aleksei-pr
+      - icon: rss
+        href: https://blog.frequentist.org/index.xml
   google-analytics: "G-H2HYLD7LV5"
 format:
   html:
@@ -39,3 +41,8 @@ resources:
   - "posts/20250927-credit-risk-analytics/04_synthetic_data_files/libs/clipboard/*"
   - "posts/20250927-credit-risk-analytics/04_synthetic_data_files/libs/quarto-html/*"
   - "posts/20250927-credit-risk-analytics/04_synthetic_data_files/figure-html/*"
+  - "posts/20251026-cfpb-dashboard/*.html"
+  - "posts/20251026-cfpb-dashboard/*/libs/bootstrap/*"
+  - "posts/20251026-cfpb-dashboard/*/libs/clipboard/*"
+  - "posts/20251026-cfpb-dashboard/*/libs/quarto-html/*"
+  - "posts/20251026-cfpb-dashboard/*/figure-html/*"
