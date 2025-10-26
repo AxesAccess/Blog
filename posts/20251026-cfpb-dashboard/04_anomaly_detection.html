@@ -81,9 +81,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul class="collapse">
-  <li><a href="#anomaly-detection" id="toc-anomaly-detection" class="nav-link active" data-scroll-target="#anomaly-detection"><span class="header-section-number">1</span> Anomaly Detection</a></li>
-  <li><a href="#evaluation" id="toc-evaluation" class="nav-link" data-scroll-target="#evaluation"><span class="header-section-number">2</span> Evaluation</a></li>
-  <li><a href="#further-steps" id="toc-further-steps" class="nav-link" data-scroll-target="#further-steps"><span class="header-section-number">3</span> Further Steps</a></li>
+  <li><a href="#load-data" id="toc-load-data" class="nav-link active" data-scroll-target="#load-data"><span class="header-section-number">1</span> Load data</a></li>
+  <li><a href="#anomaly-detection" id="toc-anomaly-detection" class="nav-link" data-scroll-target="#anomaly-detection"><span class="header-section-number">2</span> Anomaly Detection</a></li>
+  <li><a href="#evaluation" id="toc-evaluation" class="nav-link" data-scroll-target="#evaluation"><span class="header-section-number">3</span> Evaluation</a></li>
+  <li><a href="#further-steps" id="toc-further-steps" class="nav-link" data-scroll-target="#further-steps"><span class="header-section-number">4</span> Further Steps</a></li>
   </ul>
 </nav>
 </div>
@@ -123,16 +124,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>In this document, we will perform anomaly detection on the time series of monthly complaint volumes using STL decomposition and z-score method.</p>
-<section id="load-data" class="level3" data-number="0.1">
-<h3 data-number="0.1" class="anchored" data-anchor-id="load-data"><span class="header-section-number">0.1</span> Load data</h3>
+<section id="load-data" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="load-data"><span class="header-section-number">1</span> Load data</h2>
 <p>For each model we create a new query in PowerQuery that use original dataset as a source. So we repeat the data loading step here.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="st">"DataDNA Dataset Challenge - Consumer Financial Complaints Dataset - October 2025.xlsx"</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="ot">&lt;-</span> readxl<span class="sc">::</span><span class="fu">read_excel</span>(file_path, <span class="at">sheet =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="anomaly-detection" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="anomaly-detection"><span class="header-section-number">1</span> Anomaly Detection</h2>
+<section id="anomaly-detection" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="anomaly-detection"><span class="header-section-number">2</span> Anomaly Detection</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
@@ -204,8 +205,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="evaluation" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="evaluation"><span class="header-section-number">2</span> Evaluation</h2>
+<section id="evaluation" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="evaluation"><span class="header-section-number">3</span> Evaluation</h2>
 <p>Let’s see how many anomalies were detected.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>result <span class="sc">|&gt;</span></span>
@@ -244,8 +245,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>We only detected a couple of anomalies, which doesn’t add up much to the report. We’re going to skip this part of the analysis in the Power BI report for brevity.</p>
 </section>
-<section id="further-steps" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="further-steps"><span class="header-section-number">3</span> Further Steps</h2>
+<section id="further-steps" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="further-steps"><span class="header-section-number">4</span> Further Steps</h2>
 <p>We could explore more advanced anomaly detection methods, such as deep learning techniques like autoencoders and long short-term memory (LSTM) networks, or use ensemble methods combining multiple algorithms for improved accuracy. Additionally, incorporating external factors (e.g., economic indicators, regulatory changes) could enhance the detection of anomalies related to specific events. But for now, it’s not in the scope of this challenge.</p>
 </section>
 
