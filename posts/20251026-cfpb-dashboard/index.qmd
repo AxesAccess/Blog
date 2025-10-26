@@ -1,0 +1,260 @@
+---
+title: "Building the Analytical Dashboard with Power BI and R"
+author: "Aleksei Prishchepo"
+date: "2025-10-26"
+categories: [BI, Statistics, ML, Visualization, R]
+image: "0001.svg"
+---
+
+In this article I'm going to share the process I followed in developing
+this analytical dashboard. My goal was to take the Consumer Financial
+Complaints Dataset and distill it into a set of visualizations,
+integrating statistical modeling and time series analysis.
+
+For those who enjoy the technical deep dives, the repository containing
+Exploratory Data Analysis, Time Series Forecasting, and Causal Analysis
+documents is linked at the end of this post. Here is an overview of how
+the dashboard came together.
+
+## Data Preparation and Exploratory Data Analysis (EDA)
+
+The entire project started with ensuring the data was robust and ready
+for analysis. I performed Exploratory Data Analysis (EDA) to check the
+data structure, look at distributions, and establish correlations.
+
+-   **Loading and Cleaning:** I loaded two main sheets from the Excel
+    file: the `complaints` data, which contained 62,516 rows and 19
+    columns, and the `companies` data, which contained 1,081 rows and 9
+    columns.
+
+-   **Joining Tables:** to create a single comprehensive analytical
+    dataset, I joined the `complaints` data and the `companies` data.
+    This resulted in a dataset comprising 62,516 rows and 27 variables.
+
+### Visualizing Distributions and Relationships
+
+During EDA, I needed to check the univariate distributions of the
+numeric variables ([Figure 1](#fig-numeric-distributions-1)) and examine
+correlations between them to identify relationships and potential
+multicollinearity ([Figure 2](#fig-corrplot-1)).
+
+![Distributions of Numeric
+Variables](01_eda_files/figure-html/fig-numeric-distributions-1.svg){#fig-numeric-distributions-1
+fig-alt="Distributions of Numeric Variables"}
+
+![Correlation Matrix of Numeric
+Variables](01_eda_files/figure-html/fig-corrplot-1.svg){#fig-corrplot-1
+fig-alt="Distributions of Numeric Variables"}
+
+::: callout-tip
+See the document [Exploratory Data
+Analysis](/posts/20251026-cfpb-dashboard/01_eda.html){target="_blank"}
+for the detailed description of the EDA process.
+:::
+
+## Forecasting Complaint Trends (Time Series Analysis)
+
+My next step was to create time series forecasts of complaint volumes
+segmented by state, which is essential for identifying upcoming trends.
+
+### Granularity Adjustment
+
+My initial approach using daily granularity proved to be **too slow**
+for the necessary integration within the Power BI environment using
+PowerQuery. To achieve faster processing, I switched the analysis to
+**monthly granularity**.
+
+### Modeling Approach
+
+I aggregated the data by state and month. The modeling function I used
+relied on the `auto.arima` approach for time series analysis, with a
+fallback to ETS if ARIMA failed, and the forecast horizon was set to 6
+months. This produced actual complaint counts, forecasts, and confidence
+intervals that could be successfully integrated into Power BI.
+
+I aggregated the data to the monthly level before running the forecast
+models:
+
+``` r
+monthly <- dataset |> 
+    mutate(month = floor_date(as.Date(date_received), "month")) |>
+    group_by(state, month) |>   
+    summarise(complaints = n(), .groups = "drop") |>   
+    arrange(state, month) 
+```
+
+Using `floor_date` from the `lubridate` package allowed me to create a
+"many-to-one" relationship between the resulting table and the
+`Calendar` table in Power BI using `month` column as the key.
+
+::: callout-tip
+See the full Time Series Analysis document
+[here](/posts/20251026-cfpb-dashboard/02_time_series_forecast.html){target="_blank"} for details.
+:::
+
+### Dashboard Visual: Complaints Over Time
+
+The resulting forecast is presented visually in the dashboard's
+"Overview" and "Geography" sections, showing the actual and forecasted
+complaint volumes over time.
+
+![Time series by census
+division](time-series-by-census-division.svg){#fig-time-series-by-census-division
+fig-alt="Time series by census division"}
+
+## Factor Analysis (Causal Modeling)
+
+I performed causal analysis to estimate the effect of different company
+characteristics, such as enforcement history and size, on critical
+performance metrics like the complaint rate.
+
+### Full Linear Model
+
+I built a linear regression model that included multiple covariates:
+enforcement status, company size tier, reputation score, and timely
+response rate, targeting the log of `complaints_per_1pct_share`.
+
+-   **Key Finding:** After running the full model, I determined that
+    **company size** was the only variable that was statistically
+    significant.
+
+### Reduced Model
+
+I then created a simplified, reduced model using only company size as a
+predictor. This model exhibited strong quality metrics: adjusted R² of
+0.548, and a highly significant p-value of 1.143e-188. This suggested
+that company size alone explains a significant portion of the variance
+in the complaint rate, generally indicating that **larger companies tend
+to experience lower complaint rates** compared to smaller ones.
+
+The model metrics confirmed the quality of the reduced regression model:
+
+| r_squared | adj_r_squared | f_statistic | p_value       |
+|-----------|---------------|-------------|---------------|
+| 0.5487796 | 0.5483614     | 1312.292    | 1.142991e-188 |
+
+: Reduced Model Quality Metrics
+
+::: callout-tip
+See the full [Causal
+Analysis](/posts/20251026-cfpb-dashboard/03_causal_inference.html){target="_blank"}
+document for details.
+:::
+
+### Dashboard Visuals: Model Comparison
+
+The dashboard's "Factor Analysis" tab transparently presents the
+modeling results, comparing the full and reduced models and highlighting
+the significant variable.
+
+| **Variable** | Full       | Reduced    |
+|--------------|------------|------------|
+| F statistic  | 3.286E+002 | 1.312E+003 |
+| p value      | 9.721E-185 | 1.143E-188 |
+| R²           | 5.498E-001 | 5.488E-001 |
+| R² adj.      | 5.482E-001 | 5.484E-001 |
+
+: Models Comparison Table
+
+## Advanced Techniques (Anomaly Detection and Clustering)
+
+I also explored advanced techniques, though I ultimately chose to
+exclude their visuals from the final report to maintain focus and
+brevity.
+
+### **Anomaly Detection**
+
+I used STL decomposition and z-score methods to identify anomalies in
+the monthly complaint volumes. This approach helped to detect only a
+couple of anomalies (one spike and one drop). I decided to **skip
+including this visual in the final Power BI report** because the low
+number of detected anomalies didn't add substantial new information to
+the report at this stage.
+
+![Time Series with Anomalies
+Highlighted](04_anomaly_detection_files/figure-html/anomaly_plot-1.svg){#fig-anomaly-plot
+fig-alt="Time Series with Anomalies Highlighted"}
+
+::: callout-tip
+See [Anomaly
+Detection](/posts/20251026-cfpb-dashboard/04_anomaly_detection.html){target="_blank"}
+for full details.
+:::
+
+### **Clustering Analysis**
+
+I performed K-means clustering on various company features (like
+enforcement history, size, and complaint rate). I found that the optimal
+number of clusters was **3**, based on the silhouette scores. These
+clusters effectively separated companies:
+
+-   Cluster 1 (Large/Medium, low complaints, near-zero enforcement),
+
+-   Cluster 2 (Small, high complaints, zero enforcement), and
+
+-   Cluster 3 (Medium/Small, high complaints, some enforcement history).
+
+However, since visualizing these clusters simply reinforced the patterns
+already established by the causal analysis (the importance of size), I
+chose to **skip the clustering visualizations** in the final dashboard.
+
+![The plot of clusters reveals the same patterns observed in the causal
+analysis](05_clustering_files/figure-html/cluster_plot-1.svg){#fig-cluster_plot}
+
+::: callout-tip
+See [Clustering
+Analysis](/posts/20251026-cfpb-dashboard/05_clustering.html){target="_blank"}
+for full details.
+:::
+
+## Key Dashboard Visuals
+
+The final dashboard provides users with an interactive, clear overview
+of the financial complaints landscape, structured across tabs for
+Overview, Geography, Products, Companies, and Factor Analysis.
+
+### Overview
+
+The dashboard immediately shows key metrics.
+
+![Overview Metrics and Complaints by Product](0001.svg){#fig-overview}
+
+### Geography and Product Breakdowns
+
+The geographical tab highlights totals by Census Region, for example,
+the South region accounted for 4K complaints, the West for 3K, and the
+Midwest for 1K.
+
+![Complaints by Region](0002.svg){#fig-geography}
+
+In terms of products, corresponding report section provides breakdown of
+complaints by product, including YoY changes.
+
+![Complaints by Product Details](0003.svg){#fig-product}
+
+### Companies
+
+This report section provides descriptive statistics about companies.
+
+![Company Statistics](0004.svg){#fig-companies}
+
+### Factor Analysis
+
+This tab presents the results of the causal modeling, comparing the full
+and reduced models.
+
+![Factor Analysis](0005.svg){#fig-factor-analysis}
+
+## Conclusion
+
+I hope this overview of the dashboard construction process, from initial
+data cleaning to final model integration, gives the reader a clear
+picture of the analytical work involved.
+
+## References
+
+-   [Project
+    Repository](https://github.com/AxesAccess/DataDNA-Dataset-Challenge-Consumer-Financial-Complaints-Dataset-October-2025){target="_blank"}
+
+-   [Interactive
+    Dashboard](https://app.powerbi.com/view?r=eyJrIjoiYzgwMmRmZTEtZWJiZi00NGIwLWE3YTUtNjJiMDFjZTg2NTU2IiwidCI6ImZmYzg3OTVlLTAxODUtNDg5Yi05ZGE2LTQ5MDI0MTJmMDNhMCIsImMiOjl9){target="_blank"}
