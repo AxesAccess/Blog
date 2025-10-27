@@ -8,6 +8,7 @@
 
 <meta name="author" content="Aleksei Prishchepo">
 <meta name="dcterms.date" content="2025-10-26">
+<meta name="description" content="An overview of the process of building an analytical dashboard using Power BI and R, focusing on data preparation, time series forecasting, and causal analysis.">
 
 <title>Building the Analytical Dashboard with Power BI and R – Blog</title>
 <style>
@@ -164,7 +165,12 @@ gtag('config', 'G-H2HYLD7LV5', { 'anonymize_ip': true});
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">Building the Analytical Dashboard with Power BI and R</h1>
-                                <div class="quarto-categories">
+                  <div>
+        <div class="description">
+          An overview of the process of building an analytical dashboard using Power BI and R, focusing on data preparation, time series forecasting, and causal analysis.
+        </div>
+      </div>
+                          <div class="quarto-categories">
                 <div class="quarto-category">BI</div>
                 <div class="quarto-category">Statistics</div>
                 <div class="quarto-category">ML</div>
@@ -238,13 +244,13 @@ Figure&nbsp;2: Correlation Matrix of Numeric Variables
 </figcaption>
 </figure>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -269,14 +275,14 @@ Tip
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(state, month) <span class="sc">|&gt;</span>   </span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">complaints =</span> <span class="fu">n</span>(), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span>   </span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(state, month) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Using <code>floor_date</code> from the <code>lubridate</code> package allowed me to create a “many-to-one” relationship between the resulting table and the <code>Calendar</code> table in Power BI using <code>month</code> column as the key.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
+<p>Using <code>floor_date</code> from the <code>lubridate</code> package, which sets the date to the start of a month, allowed me to create a “many-to-one” relationship between the resulting table and the <code>Calendar</code> table in Power BI, using the <code>month</code> column as the key.</p>
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -332,13 +338,13 @@ Figure&nbsp;3: Time series by census division
 </tr>
 </tbody>
 </table>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -399,13 +405,13 @@ Figure&nbsp;4: Time Series with Anomalies Highlighted
 </figcaption>
 </figure>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -432,13 +438,13 @@ Figure&nbsp;5: The plot of clusters reveals the same patterns observed in the ca
 </figcaption>
 </figure>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">

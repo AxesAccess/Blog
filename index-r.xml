@@ -53,13 +53,13 @@ Figure&nbsp;2: Correlation Matrix of Numeric Variables
 </figcaption>
 </figure>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -118,14 +118,14 @@ font-style: inherit;">|&gt;</span>   </span>
 <span id="cb1-5">    <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">arrange</span>(state, month) </span></code></pre></div>
-<p>Using <code>floor_date</code> from the <code>lubridate</code> package allowed me to create a “many-to-one” relationship between the resulting table and the <code>Calendar</code> table in Power BI using <code>month</code> column as the key.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
+<p>Using <code>floor_date</code> from the <code>lubridate</code> package, which sets the date to the start of a month, allowed me to create a “many-to-one” relationship between the resulting table and the <code>Calendar</code> table in Power BI, using the <code>month</code> column as the key.</p>
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -181,13 +181,13 @@ Figure&nbsp;3: Time series by census division
 </tr>
 </tbody>
 </table>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -248,13 +248,13 @@ Figure&nbsp;4: Time Series with Anomalies Highlighted
 </figcaption>
 </figure>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -281,13 +281,13 @@ Figure&nbsp;5: The plot of clusters reveals the same patterns observed in the ca
 </figcaption>
 </figure>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">

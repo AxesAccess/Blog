@@ -53,13 +53,13 @@ Figure&nbsp;2: Correlation Matrix of Numeric Variables
 </figcaption>
 </figure>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -118,14 +118,14 @@ font-style: inherit;">|&gt;</span>   </span>
 <span id="cb1-5">    <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">arrange</span>(state, month) </span></code></pre></div>
-<p>Using <code>floor_date</code> from the <code>lubridate</code> package allowed me to create a “many-to-one” relationship between the resulting table and the <code>Calendar</code> table in Power BI using <code>month</code> column as the key.</p>
-<div class="callout callout-style-default callout-tip callout-titled">
+<p>Using <code>floor_date</code> from the <code>lubridate</code> package, which sets the date to the start of a month, allowed me to create a “many-to-one” relationship between the resulting table and the <code>Calendar</code> table in Power BI, using the <code>month</code> column as the key.</p>
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -181,13 +181,13 @@ Figure&nbsp;3: Time series by census division
 </tr>
 </tbody>
 </table>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -248,13 +248,13 @@ Figure&nbsp;4: Time Series with Anomalies Highlighted
 </figcaption>
 </figure>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -281,13 +281,13 @@ Figure&nbsp;5: The plot of clusters reveals the same patterns observed in the ca
 </figcaption>
 </figure>
 </div>
-<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Tip
+Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
@@ -12065,7 +12065,7 @@ Figure&nbsp;1: Example of a Kano diagram.
 </ul>
 <p>Each question offers five possible responses, from “I like it” to “I dislike it.” Subsequently, these responses are classified into the five Kano categories.</p>
 <div class="cell" data-execution_count="1" data-cap-location="undefined" data-tbl-cap-location="top">
-<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="1" data-cap-location="undefined" data-tbl-cap-location="top">
+<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="undefined" data-execution_count="1" data-tbl-cap-location="top">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cap-margin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1: Classification of answers to the Kano questionnaire.
@@ -12302,7 +12302,7 @@ Table&nbsp;2: Example of aggregated answers for a feature.
 <h3 class="anchored" data-anchor-id="calculating-satisfaction-and-dissatisfaction-scores">Calculating Satisfaction and Dissatisfaction Scores</h3>
 <p>After aggregating the responses, we calculate the satisfaction and dissatisfaction scores for each feature using Equation&nbsp;1 and Equation&nbsp;2. The table below shows the qualities: Attractive (<strong>A</strong>), Indifferent (<strong>I</strong>), Must-be (<strong>M</strong>), One-dimensional (<strong>O</strong>), Questionable (<strong>Q</strong>), Reverse (<strong>R</strong>), as well as satisfaction (<strong>S</strong>) and dissatisfaction (<strong>D</strong>) scores for each feature.</p>
 <div class="cell" data-tbl-align="center" data-execution_count="10">
-<div id="tbl-scores" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="10" data-tbl-align="center">
+<div id="tbl-scores" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-align="center" data-execution_count="10">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;3: Qualities and satisfaction and dissatisfaction scores for each feature.
