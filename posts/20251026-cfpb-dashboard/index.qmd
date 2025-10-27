@@ -4,6 +4,7 @@ author: "Aleksei Prishchepo"
 date: "2025-10-26"
 categories: [BI, Statistics, ML, Visualization, R]
 image: "0001.svg"
+description: "An overview of the process of building an analytical dashboard using Power BI and R, focusing on data preparation, time series forecasting, and causal analysis."
 ---
 
 In this article I'm going to share the process I followed in developing
@@ -46,7 +47,7 @@ fig-alt="Distributions of Numeric Variables"}
 Variables](01_eda_files/figure-html/fig-corrplot-1.svg){#fig-corrplot-1
 fig-alt="Distributions of Numeric Variables"}
 
-::: callout-tip
+::: callout-note
 See the document [Exploratory Data
 Analysis](/posts/20251026-cfpb-dashboard/01_eda.html){target="_blank"}
 for the detailed description of the EDA process.
@@ -83,13 +84,15 @@ monthly <- dataset |>
     arrange(state, month) 
 ```
 
-Using `floor_date` from the `lubridate` package allowed me to create a
-"many-to-one" relationship between the resulting table and the
-`Calendar` table in Power BI using `month` column as the key.
+Using `floor_date` from the `lubridate` package, which sets the date to
+the start of a month, allowed me to create a "many-to-one" relationship
+between the resulting table and the `Calendar` table in Power BI, using
+the `month` column as the key.
 
-::: callout-tip
+::: callout-note
 See the full Time Series Analysis document
-[here](/posts/20251026-cfpb-dashboard/02_time_series_forecast.html){target="_blank"} for details.
+[here](/posts/20251026-cfpb-dashboard/02_time_series_forecast.html){target="_blank"}
+for details.
 :::
 
 ### Dashboard Visual: Complaints Over Time
@@ -135,7 +138,7 @@ The model metrics confirmed the quality of the reduced regression model:
 
 : Reduced Model Quality Metrics
 
-::: callout-tip
+::: callout-note
 See the full [Causal
 Analysis](/posts/20251026-cfpb-dashboard/03_causal_inference.html){target="_blank"}
 document for details.
@@ -175,7 +178,7 @@ the report at this stage.
 Highlighted](04_anomaly_detection_files/figure-html/anomaly_plot-1.svg){#fig-anomaly-plot
 fig-alt="Time Series with Anomalies Highlighted"}
 
-::: callout-tip
+::: callout-note
 See [Anomaly
 Detection](/posts/20251026-cfpb-dashboard/04_anomaly_detection.html){target="_blank"}
 for full details.
@@ -201,7 +204,7 @@ chose to **skip the clustering visualizations** in the final dashboard.
 ![The plot of clusters reveals the same patterns observed in the causal
 analysis](05_clustering_files/figure-html/cluster_plot-1.svg){#fig-cluster_plot}
 
-::: callout-tip
+::: callout-note
 See [Clustering
 Analysis](/posts/20251026-cfpb-dashboard/05_clustering.html){target="_blank"}
 for full details.
