@@ -1,0 +1,172 @@
+---
+title: "Propensity Score Matching for Causal Analysis"
+author: "Aleksei Prishchepo"
+date: "2025-10-26"
+categories: ["A/B Testing", Statistics, R]
+image: "image.svg"
+description: "A hands-on guide to implementing propensity score matching in R for causal inference in A/B testing scenarios using marketing data."
+---
+
+In marketing analytics, one of the most common questions is:
+
+> Did our campaign actually cause people to subscribe, or were they
+> already more likely to do so?
+
+When we only have observational data — not a randomized experiment —
+it’s tricky to separate correlation from causation. This is where
+Propensity Score Matching (PSM) comes in.
+
+In this tutorial, we’ll use the [Bank Marketing
+dataset](https://archive.ics.uci.edu/dataset/222/bank+marketing) from
+the UCI Machine Learning Repository to estimate the causal effect of
+being previously contacted on the probability of subscribing to a term
+deposit.
+
+We’ll use the R package MatchIt to perform matching and evaluate
+balance.
+
+## Data Overview
+
+First, let’s load the necessary libraries and the dataset.
+
+### Load Packages
+
+```{r setup, message=FALSE, warning=FALSE}
+library(MatchIt)
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(readr)
+library(skimr)
+library(here)
+```
+
+### Load Data
+
+We're going to download the UCI Bank Marketing dataset if it's not
+already present in the working directory.
+
+```{r load-data}
+if (file.exists(here("bank-full.csv"))) {
+  dataset <- read.csv(file.path(here(), "bank-full.csv"), sep = ";")
+} else {
+  url <- "https://archive.ics.uci.edu/static/public/222/bank+marketing.zip"
+  temp <- tempfile()
+  download.file(url, temp)
+  unzip(temp, "bank.zip", exdir = here())
+  unzip(here("bank.zip"), "bank-full.csv", exdir = here())
+  dataset <- read.csv(file.path(here(), "bank-full.csv"), sep = ";")
+  unlink(temp)
+}
+dataset |> glimpse()
+```
+
+```{r data-skim}
+
+dataset |> skim()
+
+```
+
+### Correlation Matrix
+
+```{r fig-correlation-matrix}
+library(corrplot)
+
+numeric_vars <- dataset |>
+  select_if(is.numeric)
+cor_matrix <- cor(numeric_vars, use = "pairwise.complete.obs")
+corrplot(cor_matrix, method = "circle", type = "upper", tl.col = "black")
+```
+
+### Defining Treatment and Outcome
+
+Our treatment variable will be whether the client was previously
+contacted (`pdays` != -1), and the outcome variable will be whether the
+client subscribed to a term deposit (`y` == "yes").
+
+```{r treatment-outcome}
+dataset <- dataset |>
+  mutate(
+    treat = ifelse(pdays != -1, 1, 0),    # previously contacted
+    outcome = ifelse(y == "yes", 1, 0)
+  )
+
+```
+
+-   `treat = 1`: client was previously contacted (pdays != 999);
+
+-   `treat = 0`: new client, not contacted before;
+
+-   `outcome = 1`: client subscribed to term deposit;
+
+-   `outcome = 0`: client did not subscribe.
+
+Let’s check the basic rates:
+
+```{r basic-rates}
+dataset |>
+  group_by(treat) |>
+  summarise(
+    n = n(),
+    subscription_rate = mean(outcome)
+  )
+```
+
+We can clearly see that previously contacted clients (treat = 1) have a
+higher subscription rate — but this might be due to other factors like
+income or engagement.
+
+## Covariates and Model Formula
+
+We include demographic and financial variables that can influence both
+being re-contacted and subscribing. We need to exclude previous (number
+of contacts performed before this campaign) and poutcome (outcome of the
+previous marketing campaign) to avoid leakage.
+
+```{r propensity-score-formula}
+
+formula <- treat ~ age + job + marital + education + default +
+  balance + housing + loan + contact + campaign 
+
+```
+
+Estimating Propensity Scores and Matching
+
+We now fit the PSM model using nearest-neighbor matching:
+
+```{r propensity-score-matching}
+psm <- matchit(
+  formula,
+  data = dataset,
+  method = "nearest",
+  ratio = 1
+)
+```
+
+Let’s inspect the summary:
+
+```{r psm-summary}
+psm |> summary()
+```
+
+## Visualizing Balance
+
+```{r fig-balance-plot}
+
+plot(psm, type = "jitter", interactive = FALSE)
+
+```
+
+```{r}
+plot(psm, type = "density", interactive = FALSE,
+     which.xs = ~ age + job + marital + education + default + balance + 
+    housing + loan + contact + campaign)
+
+```
+
+```{r}
+#| fig-height: 8
+#| fig-width: 6
+plot(summary(psm))
+
+```
