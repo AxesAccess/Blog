@@ -1,7 +1,7 @@
 ---
 title: "Propensity Score Matching for Causal Analysis"
 author: "Aleksei Prishchepo"
-date: "2025-10-26"
+date: "2025-10-30"
 categories: ["A/B Testing", Statistics, R]
 image: "image.svg"
 description: "A hands-on guide to implementing propensity score matching in R for causal inference in A/B testing scenarios using marketing data."
@@ -9,8 +9,8 @@ description: "A hands-on guide to implementing propensity score matching in R fo
 
 In marketing analytics, one of the most common questions is:
 
-> Did our campaign actually cause people to subscribe, or were they
-> already more likely to do so?
+> Did our campaign actually cause people to subscribe, or the
+> subscribers were already more likely to do so?
 
 When we only have observational data — not a randomized experiment —
 it’s tricky to separate correlation from causation. This is where
@@ -22,7 +22,7 @@ the UCI Machine Learning Repository to estimate the causal effect of
 being previously contacted on the probability of subscribing to a term
 deposit.
 
-We’ll use the R package MatchIt to perform matching and evaluate
+We’ll use the R package **MatchIt** to perform matching and evaluate
 balance.
 
 ## Data Overview
@@ -31,7 +31,13 @@ First, let’s load the necessary libraries and the dataset.
 
 ### Load Packages
 
-```{r setup, message=FALSE, warning=FALSE}
+```{r}
+#| include: false
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+```{r load-packages, message=FALSE, warning=FALSE}
+
 library(MatchIt)
 library(tidyverse)
 library(lubridate)
@@ -43,8 +49,8 @@ library(here)
 
 ### Load Data
 
-We're going to download the UCI Bank Marketing dataset if it's not
-already present in the working directory.
+Here we download the UCI Bank Marketing dataset if it's not already
+present in the working directory.
 
 ```{r load-data}
 if (file.exists(here("bank-full.csv"))) {
@@ -61,28 +67,36 @@ if (file.exists(here("bank-full.csv"))) {
 dataset |> glimpse()
 ```
 
+### Data Summary
+
 ```{r data-skim}
 
 dataset |> skim()
 
 ```
 
-### Correlation Matrix
+## Correlation Matrix
 
 ```{r fig-correlation-matrix}
-library(corrplot)
+#| warning: false
+#| fig-height: 7
+#| fig-width: 7
+library(PerformanceAnalytics)
 
-numeric_vars <- dataset |>
-  select_if(is.numeric)
-cor_matrix <- cor(numeric_vars, use = "pairwise.complete.obs")
-corrplot(cor_matrix, method = "circle", type = "upper", tl.col = "black")
+set.seed(123)
+
+dataset |>
+  sample_n(1000) |>
+  select_if(is.numeric) |>
+  chart.Correlation(histogram = TRUE, pch = "+")
+
 ```
 
-### Defining Treatment and Outcome
+## Defining Treatment and Outcome
 
 Our treatment variable will be whether the client was previously
-contacted (`pdays` != -1), and the outcome variable will be whether the
-client subscribed to a term deposit (`y` == "yes").
+contacted (`pdays != -1`), and the outcome variable will be whether the
+client subscribed to a term deposit (`y == "yes"`).
 
 ```{r treatment-outcome}
 dataset <- dataset |>
@@ -90,7 +104,6 @@ dataset <- dataset |>
     treat = ifelse(pdays != -1, 1, 0),    # previously contacted
     outcome = ifelse(y == "yes", 1, 0)
   )
-
 ```
 
 -   `treat = 1`: client was previously contacted (pdays != 999);
@@ -116,12 +129,17 @@ We can clearly see that previously contacted clients (treat = 1) have a
 higher subscription rate — but this might be due to other factors like
 income or engagement.
 
+```{r initial-t-test}
+t_test_all <- t.test(outcome ~ treat, data = dataset)
+t_test_all
+```
+
 ## Covariates and Model Formula
 
 We include demographic and financial variables that can influence both
-being re-contacted and subscribing. We need to exclude previous (number
-of contacts performed before this campaign) and poutcome (outcome of the
-previous marketing campaign) to avoid leakage.
+being re-contacted and subscribing. We need to exclude `previous`
+(number of contacts performed before this campaign) and `poutcome`
+(outcome of the previous marketing campaign) to avoid collinearity.
 
 ```{r propensity-score-formula}
 
@@ -130,7 +148,7 @@ formula <- treat ~ age + job + marital + education + default +
 
 ```
 
-Estimating Propensity Scores and Matching
+## Estimating Propensity Scores and Matching
 
 We now fit the PSM model using nearest-neighbor matching:
 
@@ -143,10 +161,11 @@ psm <- matchit(
 )
 ```
 
-Let’s inspect the summary:
+Let’s inspect the summary. We won't include the whole output of the
+summary function, just the number of matched pairs:
 
 ```{r psm-summary}
-psm |> summary()
+summary(psm)$nn
 ```
 
 ## Visualizing Balance
@@ -157,16 +176,114 @@ plot(psm, type = "jitter", interactive = FALSE)
 
 ```
 
-```{r}
+```{r fig-density-plots}
 plot(psm, type = "density", interactive = FALSE,
      which.xs = ~ age + job + marital + education + default + balance + 
     housing + loan + contact + campaign)
 
 ```
 
-```{r}
-#| fig-height: 8
-#| fig-width: 6
-plot(summary(psm))
+```{r fig-cobalt-love-plot}
+#| warning: false
+library(cobalt)
+love.plot(psm, threshold = 0.1)
 
 ```
+
+## Estimating the Treatment Effect
+
+Extract the matched data and estimate the effect on subscription:
+
+```{r matched-data-t-test}
+matched_data <- match.data(psm)  
+t_test <- t.test(outcome ~ treat, data = matched_data)
+t_test
+```
+
+The difference in means represents the **Average Treatment Effect on the
+Treated (ATT)** — how much more likely previously contacted customers
+are to subscribe, compared to similar new customers.
+
+```{r difference-in-means}
+
+diff_means <- unname(t_test$estimate[2] - t_test$estimate[1])
+diff_means
+```
+
+We can also estimate the effect using logistic regression on the matched
+data:
+
+```{r logistic-regression-matched}
+model <- glm(outcome ~ treat, data = matched_data, family = binomial)
+summary(model)
+```
+
+Let's compute the marginal effects to interpret the logistic regression
+coefficients in terms of probability changes:
+
+```{r marginal-effects}
+library(margins)
+
+marginal_effects <- margins(model)
+summary(marginal_effects)
+```
+
+We can see that marginal effect is approximately equal to the difference
+in means from the t-test. This wouldn't be the case if we estimated the
+effect on the unmatched data.
+
+```{r marginal-effects-unmatched}
+model_unmatched <- glm(outcome ~ treat, data = dataset, family = binomial)
+marginal_effects_unmatched <- margins(model_unmatched)
+summary(marginal_effects_unmatched)
+```
+
+Compare the ME from unmatched data with the difference in means from the
+unmatched t-test — they will differ significantly.
+
+## Results and Interpretation
+
+Before matching, customers who were previously contacted were
+`r (unname(t_test_all$estimate[2] - t_test_all$estimate[1]) * 100) |> format(digits = 4)`
+percentage points more likely to subscribe to a term deposit. After
+controlling for demographics and financial variables via propensity
+score matching, previously contacted customers were
+`r (unname(t_test$estimate[2] - t_test$estimate[1]) * 100) |> format(digits = 4)`
+percentage points more likely to subscribe than comparable new customers
+(p = `r t_test$p.value`).
+
+-   **Before matching**: previously contacted customers have a much
+    higher subscription rate.
+
+-   **After matching**: the difference decreases, indicating that part
+    of the initial gap was due to selection bias.
+
+## Discussion and Limitations
+
+**Unobserved confounding**: we only matched on observed variables;
+factors like personality or spending habits might still bias the result.
+
+**Choice of treatment**: we assumed “previous contact” is the cause;
+other definitions (e.g., contact channel, number of calls) could be
+explored.
+
+**Generalization**: results apply to customers similar to those treated
+(ATT), not necessarily to all clients.
+
+## Conclusion
+
+In this tutorial, we’ve demonstrated how to estimate a causal effect
+using Propensity Score Matching with real marketing data.
+
+### The key takeaways:
+
+-   PSM helps approximate experimental conditions in observational
+    settings.
+
+-   Always check covariate balance before interpreting results.
+
+-   Proper treatment and covariate definitions are critical.
+
+The full R code can be easily adapted to other business questions, for
+example, measuring the effect of marketing emails, app notifications, or
+loyalty programs when randomization is not possible.
