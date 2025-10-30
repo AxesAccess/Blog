@@ -17,13 +17,14 @@ it’s tricky to separate correlation from causation. This is where
 Propensity Score Matching (PSM) comes in.
 
 In this tutorial, we’ll use the [Bank Marketing
-dataset](https://archive.ics.uci.edu/dataset/222/bank+marketing) from
-the UCI Machine Learning Repository to estimate the causal effect of
-being previously contacted on the probability of subscribing to a term
-deposit.
+dataset](https://archive.ics.uci.edu/dataset/222/bank+marketing){target="_blank"}
+from the UCI Machine Learning Repository to estimate the causal effect
+of being previously contacted on the probability of subscribing to a
+term deposit.
 
-We’ll use the R package **MatchIt** to perform matching and evaluate
-balance.
+We’ll use the R package
+[MatchIt](https://cloud.r-project.org/web/packages/MatchIt/index.html){target="_blank"}
+to perform matching and evaluate balance.
 
 ## Data Overview
 
@@ -81,6 +82,7 @@ dataset |> skim()
 #| warning: false
 #| fig-height: 7
 #| fig-width: 7
+#| fig-cap: "Distributions and correlations of numeric variables in the dataset."
 library(PerformanceAnalytics)
 
 set.seed(123)
@@ -137,14 +139,17 @@ t_test_all
 ## Covariates and Model Formula
 
 We include demographic and financial variables that can influence both
-being re-contacted and subscribing. We need to exclude `previous`
-(number of contacts performed before this campaign) and `poutcome`
-(outcome of the previous marketing campaign) to avoid collinearity.
+being re-contacted and subscribing. We need to exclude`campaign` (number
+of contacts performed during this campaign and for this client),
+`contact` (contact communication type), `previous` (number of contacts
+performed before this campaign), and `poutcome` (outcome of the previous
+marketing campaign) to avoid leaking information about treatment
+assignment.
 
 ```{r propensity-score-formula}
 
 formula <- treat ~ age + job + marital + education + default +
-  balance + housing + loan + contact + campaign 
+  balance + housing + loan 
 
 ```
 
@@ -171,23 +176,28 @@ summary(psm)$nn
 ## Visualizing Balance
 
 ```{r fig-balance-plot}
+#| warning: false
+#| fig-cap: "Plot of propensity scores before and after matching."
 
 plot(psm, type = "jitter", interactive = FALSE)
 
 ```
 
 ```{r fig-density-plots}
+#| warning: false
+#| fig-cap: "Density plots of variables before and after matching."
 plot(psm, type = "density", interactive = FALSE,
      which.xs = ~ age + job + marital + education + default + balance + 
-    housing + loan + contact + campaign)
+    housing + loan)
 
 ```
 
 ```{r fig-cobalt-love-plot}
 #| warning: false
+#| fig-cap: "Love plot showing standardized mean differences before and after matching."
 library(cobalt)
-love.plot(psm, threshold = 0.1)
 
+love.plot(psm, threshold = 0.1)
 ```
 
 ## Estimating the Treatment Effect
@@ -225,7 +235,7 @@ coefficients in terms of probability changes:
 library(margins)
 
 marginal_effects <- margins(model)
-summary(marginal_effects)
+summary(marginal_effects) |> kableExtra::kable()
 ```
 
 We can see that marginal effect is approximately equal to the difference
@@ -235,7 +245,7 @@ effect on the unmatched data.
 ```{r marginal-effects-unmatched}
 model_unmatched <- glm(outcome ~ treat, data = dataset, family = binomial)
 marginal_effects_unmatched <- margins(model_unmatched)
-summary(marginal_effects_unmatched)
+summary(marginal_effects_unmatched) |> kableExtra::kable()
 ```
 
 Compare the ME from unmatched data with the difference in means from the
@@ -243,20 +253,80 @@ unmatched t-test — they will differ significantly.
 
 ## Results and Interpretation
 
+```{r p_value}
+#| include: false
+
+t_test_all_effect <- (unname(t_test_all$estimate[2] - t_test_all$estimate[1]) * 100) |> format(digits = 4)
+t_test_effect <- (unname(t_test$estimate[2] - t_test$estimate[1]) * 100) |> format(digits = 4)
+
+t_test_p_value <- t_test$p.value
+```
+
 Before matching, customers who were previously contacted were
-`r (unname(t_test_all$estimate[2] - t_test_all$estimate[1]) * 100) |> format(digits = 4)`
-percentage points more likely to subscribe to a term deposit. After
-controlling for demographics and financial variables via propensity
-score matching, previously contacted customers were
-`r (unname(t_test$estimate[2] - t_test$estimate[1]) * 100) |> format(digits = 4)`
-percentage points more likely to subscribe than comparable new customers
-(p = `r t_test$p.value`).
+$`r t_test_all_effect`$ percentage points more likely to subscribe to a
+term deposit. After controlling for demographics and financial variables
+via propensity score matching, previously contacted customers were
+$`r t_test_effect`$ percentage points more likely to subscribe than
+comparable new customers ($p = `r t_test_p_value`$).
 
 -   **Before matching**: previously contacted customers have a much
     higher subscription rate.
 
 -   **After matching**: the difference decreases, indicating that part
     of the initial gap was due to selection bias.
+
+```{r fig-subscription-rates}
+#| echo: false
+#| fig-cap: Subscription rates before and after matching.
+#| fig-height: 4
+#| fig-width: 6
+
+library(ggpubr)
+
+subscription_rates <- data.frame(
+  Stage = c("Before Matching", "After Matching"),
+  Treated = c(
+    mean(dataset$outcome[dataset$treat == 1]),
+    mean(matched_data$outcome[matched_data$treat == 1])
+  ),
+  Control = c(
+    mean(dataset$outcome[dataset$treat == 0]),
+    mean(matched_data$outcome[matched_data$treat == 0])
+  )
+)
+subscription_rates$Stage <- subscription_rates$Stage |>
+  factor(levels = c("Before Matching", "After Matching"))
+
+subscription_rates_long <- subscription_rates |>
+  pivot_longer(
+    cols = c("Treated", "Control"),
+    names_to = "Group", values_to = "SubscriptionRate"
+  )
+
+
+fig <- ggplot(subscription_rates_long, aes(x = Stage, y = SubscriptionRate, fill = Group)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.6) +
+  labs(
+    y = "Subscription Rate",
+    x = element_blank(),
+  ) +
+  scale_y_continuous(labels = scales::percent_format(), limits = c(0, 0.27)) +
+  theme_bw(base_size = 14) +
+  scale_fill_brewer(palette = "Paired") +
+  geom_bracket(
+    xmin = 1 - 0.15, xmax = 2 - 0.15,
+    y.position = max(subscription_rates_long$SubscriptionRate) * 1.1,
+    label = paste0("Δ ", paste(round(diff(subscription_rates$Control)*100, 1), "percent. points")),
+    tip.length = c(0.05, 0.05),
+    color = "dimgray",
+    size = 0.7,
+    inherit.aes = FALSE
+  )
+
+
+ggsave("image.svg", fig, width = 6, height = 4)
+fig
+```
 
 ## Discussion and Limitations
 
@@ -287,3 +357,10 @@ using Propensity Score Matching with real marketing data.
 The full R code can be easily adapted to other business questions, for
 example, measuring the effect of marketing emails, app notifications, or
 loyalty programs when randomization is not possible.
+
+## References
+
+Ho D, Imai K, King G, Stuart E (2011). “MatchIt: Nonparametric
+Preprocessing for Parametric Causal Inference.” *Journal of Statistical
+Software*, *42*(8), 1-28. doi:10.18637/jss.v042.i08
+<https://doi.org/10.18637/jss.v042.i08>.
