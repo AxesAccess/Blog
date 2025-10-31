@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Aleksei Prishchepo">
-<meta name="dcterms.date" content="2025-10-30">
+<meta name="dcterms.date" content="2025-10-31">
 <meta name="description" content="A hands-on guide to implementing propensity score matching in R for causal inference in A/B testing scenarios using marketing data.">
 
 <title>Propensity Score Matching for Causal Analysis – Blog</title>
@@ -220,7 +220,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">October 30, 2025</p>
+        <p class="date">October 31, 2025</p>
       </div>
     </div>
     
@@ -818,7 +818,7 @@ mean in group 0 mean in group 1
 </section>
 <section id="results-and-interpretation" class="level2">
 <h2 class="anchored" data-anchor-id="results-and-interpretation">Results and Interpretation</h2>
-<p>Before matching, customers who were previously contacted were <span class="math inline">\(13.91\)</span> percentage points more likely to subscribe to a term deposit. After controlling for demographics and financial variables via propensity score matching, previously contacted customers were <span class="math inline">\(10.86\)</span> percentage points more likely to subscribe than comparable new customers (<span class="math inline">\(p = 1.3128662\times 10^{-75}\)</span>).</p>
+<p>Before matching, customers who were previously contacted were <span class="math inline">\(13.91\)</span> percentage points more likely to subscribe to a term deposit. After controlling for demographics and financial variables via propensity score matching, previously contacted customers were <span class="math inline">\(10.86\)</span> percentage points more likely to subscribe than comparable new customers (<span class="math inline">\(p = 1.3128662\times 10^{-75}\)</span>), which is <span class="math inline">\(3.05\)</span> percentage points (<span class="math inline">\(21.92\%\)</span>) less than the initial estimate.</p>
 <ul>
 <li><p><strong>Before matching</strong>: previously contacted customers have a much higher subscription rate.</p></li>
 <li><p><strong>After matching</strong>: the difference decreases, indicating that part of the initial gap was due to selection bias.</p></li>

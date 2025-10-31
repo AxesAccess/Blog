@@ -888,7 +888,7 @@ font-style: inherit;">1</span>])</span>
 </section>
 <section id="results-and-interpretation" class="level2">
 <h2 class="anchored" data-anchor-id="results-and-interpretation">Results and Interpretation</h2>
-<p>Before matching, customers who were previously contacted were <img src="https://latex.codecogs.com/png.latex?13.91"> percentage points more likely to subscribe to a term deposit. After controlling for demographics and financial variables via propensity score matching, previously contacted customers were <img src="https://latex.codecogs.com/png.latex?10.86"> percentage points more likely to subscribe than comparable new customers (<img src="https://latex.codecogs.com/png.latex?p%20=%201.3128662%5Ctimes%2010%5E%7B-75%7D">).</p>
+<p>Before matching, customers who were previously contacted were <img src="https://latex.codecogs.com/png.latex?13.91"> percentage points more likely to subscribe to a term deposit. After controlling for demographics and financial variables via propensity score matching, previously contacted customers were <img src="https://latex.codecogs.com/png.latex?10.86"> percentage points more likely to subscribe than comparable new customers (<img src="https://latex.codecogs.com/png.latex?p%20=%201.3128662%5Ctimes%2010%5E%7B-75%7D">), which is <img src="https://latex.codecogs.com/png.latex?3.05"> percentage points (<img src="https://latex.codecogs.com/png.latex?21.92%5C%25">) less than the initial estimate.</p>
 <ul>
 <li><p><strong>Before matching</strong>: previously contacted customers have a much higher subscription rate.</p></li>
 <li><p><strong>After matching</strong>: the difference decreases, indicating that part of the initial gap was due to selection bias.</p></li>
