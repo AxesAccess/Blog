@@ -10,7 +10,938 @@
 <atom:link href="https://blog.frequentist.org/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.7.5</generator>
-<lastBuildDate>Sun, 26 Oct 2025 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Fri, 31 Oct 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Propensity Score Matching for Causal Analysis</title>
+  <dc:creator>Aleksei Prishchepo</dc:creator>
+  <link>https://blog.frequentist.org/posts/20251028-propensity-score-matching/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>In marketing analytics, one of the most common questions is:</p>
+<blockquote class="blockquote">
+<p>Did our campaign actually cause people to subscribe, or the subscribers were already more likely to do so?</p>
+</blockquote>
+<p>When we only have observational data — not a randomized experiment — it’s tricky to separate correlation from causation. This is where Propensity Score Matching (PSM) comes in.</p>
+<p>In this tutorial, we’ll use the <a href="https://archive.ics.uci.edu/dataset/222/bank+marketing" target="_blank">Bank Marketing dataset</a> from the UCI Machine Learning Repository to estimate the causal effect of being previously contacted on the probability of subscribing to a term deposit.</p>
+<p>We’ll use the R package <a href="https://cloud.r-project.org/web/packages/MatchIt/index.html" target="_blank">MatchIt</a> to perform matching and evaluate balance.</p>
+<section id="data-overview" class="level2">
+<h2 class="anchored" data-anchor-id="data-overview">Data Overview</h2>
+<p>First, let’s load the necessary libraries and the dataset.</p>
+<section id="load-packages" class="level3">
+<h3 class="anchored" data-anchor-id="load-packages">Load Packages</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(MatchIt)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb1-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(lubridate)</span>
+<span id="cb1-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(ggplot2)</span>
+<span id="cb1-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(readr)</span>
+<span id="cb1-6"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(skimr)</span>
+<span id="cb1-7"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(here)</span></code></pre></div>
+</div>
+</section>
+<section id="load-data" class="level3">
+<h3 class="anchored" data-anchor-id="load-data">Load Data</h3>
+<p>Here we download the UCI Bank Marketing dataset if it’s not already present in the working directory.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> (<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">file.exists</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bank-full.csv"</span>))) {</span>
+<span id="cb2-2">  dataset <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">read.csv</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">file.path</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>(), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bank-full.csv"</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sep =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">";"</span>)</span>
+<span id="cb2-3">} <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">else</span> {</span>
+<span id="cb2-4">  url <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"https://archive.ics.uci.edu/static/public/222/bank+marketing.zip"</span></span>
+<span id="cb2-5">  temp <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tempfile</span>()</span>
+<span id="cb2-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">download.file</span>(url, temp)</span>
+<span id="cb2-7">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">unzip</span>(temp, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bank.zip"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">exdir =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>())</span>
+<span id="cb2-8">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">unzip</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bank.zip"</span>), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bank-full.csv"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">exdir =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>())</span>
+<span id="cb2-9">  dataset <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">read.csv</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">file.path</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>(), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bank-full.csv"</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sep =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">";"</span>)</span>
+<span id="cb2-10">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">unlink</span>(temp)</span>
+<span id="cb2-11">}</span>
+<span id="cb2-12">dataset <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">glimpse</span>()</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 45,211
+Columns: 17
+$ age       &lt;int&gt; 58, 44, 33, 47, 33, 35, 28, 42, 58, 43, 41, 29, 53, 58, 57, …
+$ job       &lt;chr&gt; "management", "technician", "entrepreneur", "blue-collar", "…
+$ marital   &lt;chr&gt; "married", "single", "married", "married", "single", "marrie…
+$ education &lt;chr&gt; "tertiary", "secondary", "secondary", "unknown", "unknown", …
+$ default   &lt;chr&gt; "no", "no", "no", "no", "no", "no", "no", "yes", "no", "no",…
+$ balance   &lt;int&gt; 2143, 29, 2, 1506, 1, 231, 447, 2, 121, 593, 270, 390, 6, 71…
+$ housing   &lt;chr&gt; "yes", "yes", "yes", "yes", "no", "yes", "yes", "yes", "yes"…
+$ loan      &lt;chr&gt; "no", "no", "yes", "no", "no", "no", "yes", "no", "no", "no"…
+$ contact   &lt;chr&gt; "unknown", "unknown", "unknown", "unknown", "unknown", "unkn…
+$ day       &lt;int&gt; 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, …
+$ month     &lt;chr&gt; "may", "may", "may", "may", "may", "may", "may", "may", "may…
+$ duration  &lt;int&gt; 261, 151, 76, 92, 198, 139, 217, 380, 50, 55, 222, 137, 517,…
+$ campaign  &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+$ pdays     &lt;int&gt; -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, …
+$ previous  &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ poutcome  &lt;chr&gt; "unknown", "unknown", "unknown", "unknown", "unknown", "unkn…
+$ y         &lt;chr&gt; "no", "no", "no", "no", "no", "no", "no", "no", "no", "no", …</code></pre>
+</div>
+</div>
+</section>
+<section id="data-summary" class="level3">
+<h3 class="anchored" data-anchor-id="data-summary">Data Summary</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">dataset <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">skim</span>()</span></code></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">dataset</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">45211</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">17</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">character</td>
+<td style="text-align: left;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 19%">
+<col style="width: 13%">
+<col style="width: 19%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 12%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">min</th>
+<th style="text-align: right;">max</th>
+<th style="text-align: right;">empty</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: right;">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">job</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">marital</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">education</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">default</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">housing</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">loan</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">contact</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">month</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">poutcome</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">y</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 11%">
+<col style="width: 16%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 6%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p25</th>
+<th style="text-align: right;">p50</th>
+<th style="text-align: right;">p75</th>
+<th style="text-align: right;">p100</th>
+<th style="text-align: left;">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">age</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">40.94</td>
+<td style="text-align: right;">10.62</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">95</td>
+<td style="text-align: left;">▅▇▃▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">balance</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1362.27</td>
+<td style="text-align: right;">3044.77</td>
+<td style="text-align: right;">-8019</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">448</td>
+<td style="text-align: right;">1428</td>
+<td style="text-align: right;">102127</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">day</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">15.81</td>
+<td style="text-align: right;">8.32</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: left;">▇▆▇▆▆</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">duration</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">258.16</td>
+<td style="text-align: right;">257.53</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">103</td>
+<td style="text-align: right;">180</td>
+<td style="text-align: right;">319</td>
+<td style="text-align: right;">4918</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">campaign</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2.76</td>
+<td style="text-align: right;">3.10</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pdays</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">40.20</td>
+<td style="text-align: right;">100.13</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">871</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">previous</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.58</td>
+<td style="text-align: right;">2.30</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">275</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</section>
+<section id="correlation-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="correlation-matrix">Correlation Matrix</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(PerformanceAnalytics)</span>
+<span id="cb5-2"></span>
+<span id="cb5-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">set.seed</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">123</span>)</span>
+<span id="cb5-4"></span>
+<span id="cb5-5">dataset <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb5-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sample_n</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb5-7">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">select_if</span>(is.numeric) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb5-8">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">chart.Correlation</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">histogram =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pch =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"+"</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<div id="fig-correlation-matrix" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-correlation-matrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251028-propensity-score-matching/index_files/figure-html/fig-correlation-matrix-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-correlation-matrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Distributions and correlations of numeric variables in the dataset.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="defining-treatment-and-outcome" class="level2">
+<h2 class="anchored" data-anchor-id="defining-treatment-and-outcome">Defining Treatment and Outcome</h2>
+<p>Our treatment variable will be whether the client was previously contacted (<code>pdays != -1</code>), and the outcome variable will be whether the client subscribed to a term deposit (<code>y == "yes"</code>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">dataset <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> dataset <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb6-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(</span>
+<span id="cb6-3">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">treat =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ifelse</span>(pdays <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>),    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># previously contacted</span></span>
+<span id="cb6-4">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">outcome =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ifelse</span>(y <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"yes"</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb6-5">  )</span></code></pre></div>
+</div>
+<ul>
+<li><p><code>treat = 1</code>: client was previously contacted (pdays != 999);</p></li>
+<li><p><code>treat = 0</code>: new client, not contacted before;</p></li>
+<li><p><code>outcome = 1</code>: client subscribed to term deposit;</p></li>
+<li><p><code>outcome = 0</code>: client did not subscribe.</p></li>
+</ul>
+<p>Let’s check the basic rates:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">dataset <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb7-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">group_by</span>(treat) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb7-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summarise</span>(</span>
+<span id="cb7-4">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">n</span>(),</span>
+<span id="cb7-5">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">subscription_rate =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mean</span>(outcome)</span>
+<span id="cb7-6">  )</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 3
+  treat     n subscription_rate
+  &lt;dbl&gt; &lt;int&gt;             &lt;dbl&gt;
+1     0 36954            0.0916
+2     1  8257            0.231 </code></pre>
+</div>
+</div>
+<p>We can clearly see that previously contacted clients (treat = 1) have a higher subscription rate — but this might be due to other factors like income or engagement.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">t_test_all <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">t.test</span>(outcome <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> treat, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> dataset)</span>
+<span id="cb9-2">t_test_all</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  outcome by treat
+t = -28.552, df = 10051, p-value &lt; 2.2e-16
+alternative hypothesis: true difference in means between group 0 and group 1 is not equal to 0
+95 percent confidence interval:
+ -0.1486926 -0.1295874
+sample estimates:
+mean in group 0 mean in group 1 
+     0.09157331      0.23071333 </code></pre>
+</div>
+</div>
+</section>
+<section id="covariates-and-model-formula" class="level2">
+<h2 class="anchored" data-anchor-id="covariates-and-model-formula">Covariates and Model Formula</h2>
+<p>We include demographic and financial variables that can influence both being re-contacted and subscribing. We need to exclude<code>campaign</code> (number of contacts performed during this campaign and for this client), <code>contact</code> (contact communication type), <code>previous</code> (number of contacts performed before this campaign), and <code>poutcome</code> (outcome of the previous marketing campaign) to avoid leaking information about treatment assignment.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1">formula <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> treat <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> age <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> job <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> marital <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> education <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> default <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb11-2">  balance <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> housing <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> loan </span></code></pre></div>
+</div>
+</section>
+<section id="estimating-propensity-scores-and-matching" class="level2">
+<h2 class="anchored" data-anchor-id="estimating-propensity-scores-and-matching">Estimating Propensity Scores and Matching</h2>
+<p>We now fit the PSM model using nearest-neighbor matching:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1">psm <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">matchit</span>(</span>
+<span id="cb12-2">  formula,</span>
+<span id="cb12-3">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> dataset,</span>
+<span id="cb12-4">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">method =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"nearest"</span>,</span>
+<span id="cb12-5">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ratio =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb12-6">)</span></code></pre></div>
+</div>
+<p>Let’s inspect the summary. We won’t include the whole output of the summary function, just the number of matched pairs:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summary</span>(psm)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>nn</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              Control Treated
+All (ESS)       36954    8257
+All             36954    8257
+Matched (ESS)    8257    8257
+Matched          8257    8257
+Unmatched       28697       0
+Discarded           0       0</code></pre>
+</div>
+</div>
+</section>
+<section id="visualizing-balance" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-balance">Visualizing Balance</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">plot</span>(psm, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">type =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"jitter"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interactive =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">FALSE</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<div id="fig-balance-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-balance-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251028-propensity-score-matching/index_files/figure-html/fig-balance-plot-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-balance-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Plot of propensity scores before and after matching.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">plot</span>(psm, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">type =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"density"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">interactive =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">FALSE</span>,</span>
+<span id="cb16-2">     <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">which.xs =</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> age <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> job <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> marital <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> education <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> default <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> balance <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb16-3">    housing <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> loan)</span></code></pre></div>
+<div class="cell-output-display">
+<div id="fig-density-plots-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-density-plots-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251028-propensity-score-matching/index_files/figure-html/fig-density-plots-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-density-plots-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Density plots of variables before and after matching.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div id="fig-density-plots-2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-density-plots-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251028-propensity-score-matching/index_files/figure-html/fig-density-plots-2.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-density-plots-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Density plots of variables before and after matching.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div id="fig-density-plots-3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-density-plots-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251028-propensity-score-matching/index_files/figure-html/fig-density-plots-3.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-density-plots-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Density plots of variables before and after matching.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(cobalt)</span>
+<span id="cb17-2"></span>
+<span id="cb17-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">love.plot</span>(psm, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">threshold =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<div id="fig-cobalt-love-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cobalt-love-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251028-propensity-score-matching/index_files/figure-html/fig-cobalt-love-plot-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cobalt-love-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Love plot showing standardized mean differences before and after matching.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="estimating-the-treatment-effect" class="level2">
+<h2 class="anchored" data-anchor-id="estimating-the-treatment-effect">Estimating the Treatment Effect</h2>
+<p>Extract the matched data and estimate the effect on subscription:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1">matched_data <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">match.data</span>(psm)  </span>
+<span id="cb18-2">t_test <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">t.test</span>(outcome <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> treat, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> matched_data)</span>
+<span id="cb18-3">t_test</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  outcome by treat
+t = -18.501, df = 15563, p-value &lt; 2.2e-16
+alternative hypothesis: true difference in means between group 0 and group 1 is not equal to 0
+95 percent confidence interval:
+ -0.1201447 -0.0971255
+sample estimates:
+mean in group 0 mean in group 1 
+      0.1220782       0.2307133 </code></pre>
+</div>
+</div>
+<p>The difference in means represents the <strong>Average Treatment Effect on the Treated (ATT)</strong> — how much more likely previously contacted customers are to subscribe, compared to similar new customers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1">diff_means <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">unname</span>(t_test<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>estimate[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>] <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> t_test<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>estimate[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>])</span>
+<span id="cb20-2">diff_means</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1086351</code></pre>
+</div>
+</div>
+</section>
+<section id="results-and-interpretation" class="level2">
+<h2 class="anchored" data-anchor-id="results-and-interpretation">Results and Interpretation</h2>
+<p>Before matching, customers who were previously contacted were <img src="https://latex.codecogs.com/png.latex?13.91"> percentage points more likely to subscribe to a term deposit. After controlling for demographics and financial variables via propensity score matching, previously contacted customers were <img src="https://latex.codecogs.com/png.latex?10.86"> percentage points more likely to subscribe than comparable new customers (<img src="https://latex.codecogs.com/png.latex?p%20=%201.3128662%5Ctimes%2010%5E%7B-75%7D">).</p>
+<ul>
+<li><p><strong>Before matching</strong>: previously contacted customers have a much higher subscription rate.</p></li>
+<li><p><strong>After matching</strong>: the difference decreases, indicating that part of the initial gap was due to selection bias.</p></li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-subscription-rates" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-subscription-rates-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251028-propensity-score-matching/index_files/figure-html/fig-subscription-rates-1.png" class="img-fluid figure-img" width="576">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-subscription-rates-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Subscription rates before and after matching.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="discussion-and-limitations" class="level2">
+<h2 class="anchored" data-anchor-id="discussion-and-limitations">Discussion and Limitations</h2>
+<p><strong>Unobserved confounding</strong>: we only matched on observed variables; factors like personality or spending habits might still bias the result.</p>
+<p><strong>Choice of treatment</strong>: we assumed “previous contact” is the cause; other definitions (e.g., contact channel, number of calls) could be explored.</p>
+<p><strong>Generalization</strong>: results apply to customers similar to those treated (ATT), not necessarily to all clients.</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>In this tutorial, we’ve demonstrated how to estimate a causal effect using Propensity Score Matching with real marketing data.</p>
+<section id="the-key-takeaways" class="level3">
+<h3 class="anchored" data-anchor-id="the-key-takeaways">The key takeaways:</h3>
+<ul>
+<li><p>PSM helps approximate experimental conditions in observational settings.</p></li>
+<li><p>Always check covariate balance before interpreting results.</p></li>
+<li><p>Proper treatment and covariate definitions are critical.</p></li>
+</ul>
+<p>The full R code can be easily adapted to other business questions, for example, measuring the effect of marketing emails, app notifications, or loyalty programs when randomization is not possible.</p>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p>Ho D, Imai K, King G, Stuart E (2011). “MatchIt: Nonparametric Preprocessing for Parametric Causal Inference.” <em>Journal of Statistical Software</em>, <em>42</em>(8), 1-28. doi:10.18637/jss.v042.i08 <a href="https://doi.org/10.18637/jss.v042.i08" class="uri">https://doi.org/10.18637/jss.v042.i08</a>.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>A/B Testing</category>
+  <category>Statistics</category>
+  <category>R</category>
+  <guid>https://blog.frequentist.org/posts/20251028-propensity-score-matching/</guid>
+  <pubDate>Fri, 31 Oct 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://blog.frequentist.org/posts/20251028-propensity-score-matching/image.svg" medium="image" type="image/svg+xml"/>
+</item>
 <item>
   <title>Building the Analytical Dashboard with Power BI and R</title>
   <dc:creator>Aleksei Prishchepo</dc:creator>
@@ -12065,7 +12996,7 @@ Figure&nbsp;1: Example of a Kano diagram.
 </ul>
 <p>Each question offers five possible responses, from “I like it” to “I dislike it.” Subsequently, these responses are classified into the five Kano categories.</p>
 <div class="cell" data-execution_count="1" data-cap-location="undefined" data-tbl-cap-location="top">
-<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="undefined" data-execution_count="1" data-tbl-cap-location="top">
+<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="top" data-cap-location="undefined" data-execution_count="1">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cap-margin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1: Classification of answers to the Kano questionnaire.
@@ -12180,7 +13111,7 @@ Figure&nbsp;2: Histogram of respondents’ age
 <div>
 
 </div>
-<div id="cell-fig-income-empl-hist" class="cell quarto-layout-panel" data-execution_count="4" data-layout-ncol="2">
+<div id="cell-fig-income-empl-hist" class="cell quarto-layout-panel" data-layout-ncol="2" data-execution_count="4">
 <div class="quarto-layout-row">
 <div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
 <div id="fig-income-empl-hist" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -12215,7 +13146,7 @@ Figure&nbsp;4: Employment distribution
 <h3 class="anchored" data-anchor-id="aggregating-responses">Aggregating Responses</h3>
 <p>Next, we will aggregate the responses to functional and dysfunctional questions for each feature. The table below shows an example of aggregated answers for a feature with ID = F1.</p>
 <div class="cell" data-tbl-colwidths="[5,20,15,15,15,15,15]" data-execution_count="9">
-<div id="tbl-agg-answers" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-colwidths="[5,20,15,15,15,15,15]" data-execution_count="9">
+<div id="tbl-agg-answers" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="9" data-tbl-colwidths="[5,20,15,15,15,15,15]">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-agg-answers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2: Example of aggregated answers for a feature.
@@ -14251,30 +15182,6 @@ font-style: inherit;">""</span>)</span></code></pre></div>
   <guid>https://blog.frequentist.org/posts/20240725-views-of-russia/</guid>
   <pubDate>Thu, 25 Jul 2024 00:00:00 GMT</pubDate>
   <media:content url="https://blog.frequentist.org/posts/20240725-views-of-russia/image.png" medium="image" type="image/png" height="89" width="144"/>
-</item>
-<item>
-  <title>Welcome To My Blog</title>
-  <dc:creator>Aleksei </dc:creator>
-  <link>https://blog.frequentist.org/posts/20240721-welcome/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p>This is the first post in my blog. Welcome!</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://blog.frequentist.org/posts/20240721-welcome/round-profile.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
-</figure>
-</div>
-
-
-
- ]]></description>
-  <category>News</category>
-  <guid>https://blog.frequentist.org/posts/20240721-welcome/</guid>
-  <pubDate>Sun, 21 Jul 2024 00:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
