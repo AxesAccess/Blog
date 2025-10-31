@@ -1,7 +1,7 @@
 ---
 title: "Propensity Score Matching for Causal Analysis"
 author: "Aleksei Prishchepo"
-date: "2025-10-30"
+date: "2025-10-31"
 categories: ["A/B Testing", Statistics, R]
 image: "image.svg"
 description: "A hands-on guide to implementing propensity score matching in R for causal inference in A/B testing scenarios using marketing data."
@@ -220,37 +220,6 @@ diff_means <- unname(t_test$estimate[2] - t_test$estimate[1])
 diff_means
 ```
 
-We can also estimate the effect using logistic regression on the matched
-data:
-
-```{r logistic-regression-matched}
-model <- glm(outcome ~ treat, data = matched_data, family = binomial)
-summary(model)
-```
-
-Let's compute the marginal effects to interpret the logistic regression
-coefficients in terms of probability changes:
-
-```{r marginal-effects}
-library(margins)
-
-marginal_effects <- margins(model)
-summary(marginal_effects) |> kableExtra::kable()
-```
-
-We can see that marginal effect is approximately equal to the difference
-in means from the t-test. This wouldn't be the case if we estimated the
-effect on the unmatched data.
-
-```{r marginal-effects-unmatched}
-model_unmatched <- glm(outcome ~ treat, data = dataset, family = binomial)
-marginal_effects_unmatched <- margins(model_unmatched)
-summary(marginal_effects_unmatched) |> kableExtra::kable()
-```
-
-Compare the ME from unmatched data with the difference in means from the
-unmatched t-test — they will differ significantly.
-
 ## Results and Interpretation
 
 ```{r p_value}
@@ -323,8 +292,8 @@ fig <- ggplot(subscription_rates_long, aes(x = Stage, y = SubscriptionRate, fill
     inherit.aes = FALSE
   )
 
-
 ggsave("image.svg", fig, width = 6, height = 4)
+
 fig
 ```
 
