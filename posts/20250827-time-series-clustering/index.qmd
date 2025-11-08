@@ -1,6 +1,6 @@
 ---
 title: "Time-Series Clustering with R's dtwclust Package"
-author: "Aleksei"
+author: "Aleksei Prishchepo"
 date: "2025-08-27"
 categories: [Time-Series, Clustering, R]
 image: "image.svg"

@@ -108,7 +108,7 @@ dataset <- dataset |>
   )
 ```
 
--   `treat = 1`: client was previously contacted (pdays != 999);
+-   `treat = 1`: client was previously contacted (`pdays != -1`);
 
 -   `treat = 0`: new client, not contacted before;
 
@@ -139,7 +139,7 @@ t_test_all
 ## Covariates and Model Formula
 
 We include demographic and financial variables that can influence both
-being re-contacted and subscribing. We need to exclude`campaign` (number
+being re-contacted and subscribing. We need to exclude `campaign` (number
 of contacts performed during this campaign and for this client),
 `contact` (contact communication type), `previous` (number of contacts
 performed before this campaign), and `poutcome` (outcome of the previous
@@ -225,10 +225,18 @@ diff_means
 ```{r p_value}
 #| include: false
 
-t_test_all_effect <- (unname(t_test_all$estimate[2] - t_test_all$estimate[1]) * 100) |> format(digits = 4)
-t_test_effect <- (unname(t_test$estimate[2] - t_test$estimate[1]) * 100) |> format(digits = 4)
+t_test_all_effect <- unname(t_test_all$estimate[2] - t_test_all$estimate[1]) * 100
+t_test_effect <- unname(t_test$estimate[2] - t_test$estimate[1]) * 100
+t_test_diff_pp <- t_test_all_effect - t_test_effect
+t_test_diff <- (t_test_all_effect - t_test_effect) / t_test_all_effect * 100
+
+t_test_all_effect <- t_test_all_effect |> format(digits = 4)
+t_test_effect <- t_test_effect |> format(digits = 4)
+t_test_diff_pp <- t_test_diff_pp |> format(digits = 4)
+t_test_diff <- abs(t_test_diff)  |> format(digits = 4)
 
 t_test_p_value <- t_test$p.value
+
 ```
 
 Before matching, customers who were previously contacted were
@@ -236,7 +244,9 @@ $`r t_test_all_effect`$ percentage points more likely to subscribe to a
 term deposit. After controlling for demographics and financial variables
 via propensity score matching, previously contacted customers were
 $`r t_test_effect`$ percentage points more likely to subscribe than
-comparable new customers ($p = `r t_test_p_value`$).
+comparable new customers ($p = `r t_test_p_value`$), which is
+$`r t_test_diff_pp`$ percentage points ($`r t_test_diff`\%$) less than
+the initial estimate.
 
 -   **Before matching**: previously contacted customers have a much
     higher subscription rate.

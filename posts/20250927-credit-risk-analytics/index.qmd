@@ -1,6 +1,6 @@
 ---
 title: "Building a Credit Risk Dashboard with Power BI and R"
-author: "Aleksei"
+author: "Aleksei Prishchepo"
 date: "2025-09-27"
 categories: [BI, Statistics, ML, Visualization, R]
 image: "image.png"

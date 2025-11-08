@@ -1,6 +1,6 @@
 ---
 title: "Minimum Detectable Effect (MDE) Calculation"
-author: "Aleksei"
+author: "Aleksei Prishchepo"
 date: "2025-08-07"
 categories: ["A/B Testing", Product, Statistics, R]
 image: "image.svg"
