@@ -637,7 +637,7 @@ Figure&nbsp;1: Distributions and correlations of numeric variables in the datase
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
-<li><p><code>treat = 1</code>: client was previously contacted (pdays != 999);</p></li>
+<li><p><code>treat = 1</code>: client was previously contacted (<code>pdays != -1</code>);</p></li>
 <li><p><code>treat = 0</code>: new client, not contacted before;</p></li>
 <li><p><code>outcome = 1</code>: client subscribed to term deposit;</p></li>
 <li><p><code>outcome = 0</code>: client did not subscribe.</p></li>
@@ -679,7 +679,7 @@ mean in group 0 mean in group 1
 </section>
 <section id="covariates-and-model-formula" class="level2">
 <h2 class="anchored" data-anchor-id="covariates-and-model-formula">Covariates and Model Formula</h2>
-<p>We include demographic and financial variables that can influence both being re-contacted and subscribing. We need to exclude<code>campaign</code> (number of contacts performed during this campaign and for this client), <code>contact</code> (contact communication type), <code>previous</code> (number of contacts performed before this campaign), and <code>poutcome</code> (outcome of the previous marketing campaign) to avoid leaking information about treatment assignment.</p>
+<p>We include demographic and financial variables that can influence both being re-contacted and subscribing. We need to exclude <code>campaign</code> (number of contacts performed during this campaign and for this client), <code>contact</code> (contact communication type), <code>previous</code> (number of contacts performed before this campaign), and <code>poutcome</code> (outcome of the previous marketing campaign) to avoid leaking information about treatment assignment.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>formula <span class="ot">&lt;-</span> treat <span class="sc">~</span> age <span class="sc">+</span> job <span class="sc">+</span> marital <span class="sc">+</span> education <span class="sc">+</span> default <span class="sc">+</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  balance <span class="sc">+</span> housing <span class="sc">+</span> loan </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

@@ -575,7 +575,7 @@ font-style: inherit;">0</span>)</span>
 <span id="cb6-5">  )</span></code></pre></div>
 </div>
 <ul>
-<li><p><code>treat = 1</code>: client was previously contacted (pdays != 999);</p></li>
+<li><p><code>treat = 1</code>: client was previously contacted (<code>pdays != -1</code>);</p></li>
 <li><p><code>treat = 0</code>: new client, not contacted before;</p></li>
 <li><p><code>outcome = 1</code>: client subscribed to term deposit;</p></li>
 <li><p><code>outcome = 0</code>: client did not subscribe.</p></li>
@@ -641,7 +641,7 @@ mean in group 0 mean in group 1
 </section>
 <section id="covariates-and-model-formula" class="level2">
 <h2 class="anchored" data-anchor-id="covariates-and-model-formula">Covariates and Model Formula</h2>
-<p>We include demographic and financial variables that can influence both being re-contacted and subscribing. We need to exclude<code>campaign</code> (number of contacts performed during this campaign and for this client), <code>contact</code> (contact communication type), <code>previous</code> (number of contacts performed before this campaign), and <code>poutcome</code> (outcome of the previous marketing campaign) to avoid leaking information about treatment assignment.</p>
+<p>We include demographic and financial variables that can influence both being re-contacted and subscribing. We need to exclude <code>campaign</code> (number of contacts performed during this campaign and for this client), <code>contact</code> (contact communication type), <code>previous</code> (number of contacts performed before this campaign), and <code>poutcome</code> (outcome of the previous marketing campaign) to avoid leaking information about treatment assignment.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1">formula <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -13146,7 +13146,7 @@ Figure&nbsp;4: Employment distribution
 <h3 class="anchored" data-anchor-id="aggregating-responses">Aggregating Responses</h3>
 <p>Next, we will aggregate the responses to functional and dysfunctional questions for each feature. The table below shows an example of aggregated answers for a feature with ID = F1.</p>
 <div class="cell" data-tbl-colwidths="[5,20,15,15,15,15,15]" data-execution_count="9">
-<div id="tbl-agg-answers" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-colwidths="[5,20,15,15,15,15,15]" data-execution_count="9">
+<div id="tbl-agg-answers" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="9" data-tbl-colwidths="[5,20,15,15,15,15,15]">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-agg-answers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2: Example of aggregated answers for a feature.
