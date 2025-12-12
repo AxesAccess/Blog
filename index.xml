@@ -10,7 +10,262 @@
 <atom:link href="https://blog.frequentist.org/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.7.5</generator>
-<lastBuildDate>Fri, 31 Oct 2025 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 26 Nov 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Building an E-Commerce Dashboard with Power BI and R</title>
+  <dc:creator>Aleksei Prishchepo</dc:creator>
+  <link>https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>This project showcases my process of building analytical dashboard for business decision-making, specifically in the e-commerce domain. The dashboard is built in Power BI and integrates R scripts for advanced analytics. The dashboard was created as part of the November 2025 DataDNA Dataset Challenge and was selected as the winner in both overall and accessibility categories.</p>
+</section>
+<section id="key-features" class="level2">
+<h2 class="anchored" data-anchor-id="key-features">Key Features</h2>
+<p>The dashboard includes several analytical features. The implementation of these involved data processing and modeling techniques, which I will outline below.</p>
+<section id="revenue-forecast" class="level3">
+<h3 class="anchored" data-anchor-id="revenue-forecast">Revenue Forecast</h3>
+<p>For the executives it’s important to know ahead of time whether the revenue will meet the target for the set period. To address this, I implemented a time series forecasting model. The model takes into account seasonality and trends to provide accurate revenue predictions. Due to the limited data span of less than two years, I opted for a simpler forecasting approach using <code>auto.arima</code> function from R’s <code>forecast</code> package.</p>
+<div id="fig-revenue-forecast" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-revenue-forecast-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/revenue-forecast.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-revenue-forecast-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Total &amp; Forecasted Revenue bar plot created in the Deneb custom visual using the Vega-Lite grammar
+</figcaption>
+</figure>
+</div>
+<p>The model was used to generate revenue forecasts for various segments, including country, category, and channel. I integrated the forecasting results into the Power BI dashboard, enabling users to easily view and interact with forecasts alongside historical data, with smooth segment switching when applying cross-filtering.</p>
+</section>
+<section id="abcxyz-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="abcxyz-analysis">ABC/XYZ Analysis</h3>
+<p>A classic way to segment products is by using ABC analysis. This method classifies products based on their revenue, placing items that contribute the most to revenue in category A, those with moderate contribution in category B, and the rest in category C.</p>
+<div id="fig-abc-xyz-matrix" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-abc-xyz-matrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/abc-xyz-matrix.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-abc-xyz-matrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Number of SKU by ABC/XYZ Segment visualized using Matrix visual from standard Power BI library
+</figcaption>
+</figure>
+</div>
+<p>To complement this, I applied XYZ analysis, which segments products based on their sales variability. Products with stable demand are classified as X, those with moderate variability as Y, and highly variable products as Z. Combining ABC and XYZ analyses provides a comprehensive view of product performance, enabling more informed inventory and marketing strategies.</p>
+</section>
+<section id="rfm-segmentation" class="level3">
+<h3 class="anchored" data-anchor-id="rfm-segmentation">RFM Segmentation</h3>
+<p>Another widely used customer segmentation technique is RFM analysis, which focuses on three key metrics: Recency (how recently a customer made a purchase), Frequency (how often they purchase), and Monetary value (how much they spend). By scoring customers on these dimensions, businesses can identify their most valuable customers and tailor marketing efforts accordingly.</p>
+<div id="fig-rfm" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rfm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/rfm.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rfm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: RFM segments are three-dimensional, which is why it’s common practice to combine Frequency and Monetary into a single FM axis (on the left).
+</figcaption>
+</figure>
+</div>
+<p>To make the segmentation more intuitive, I defined nine segments (levels) based on RFM scores: “Champions”, “Loyal Customers”, “New Customers”, “Potential Loyalists”, “Promising”, “Needs Attention”, “Cannot Lose Them”, “At Risk”, “Hibernating”. This categorization helps in devising targeted strategies for customer retention and engagement.</p>
+</section>
+</section>
+<section id="details-of-implementation" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="details-of-implementation">Details of Implementation</h2>
+<section id="data-cleaning-and-transformation" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="data-cleaning-and-transformation">Data Cleaning and Transformation</h3>
+<p>The most data cleaning and transformation steps were performed using R scripts running in Power Query, but first I explored the dataset in RStudio. Here are the documents produced by Quarto during the data analysis phase:</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>You can find source code in the form of the R markdown documents in the <a href="https://github.com/AxesAccess/DataDNA-Dataset-Challenge-E-commerce-Dataset-November-2025" target="_blank">project repository</a>.</p>
+</div></div><table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Document</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="01_EDA.html" target="_blank">Exploratory Data Analysis</a></td>
+<td>The initial steps to explore dataset structure, factors and distributions.</td>
+</tr>
+<tr class="even">
+<td><a href="02_Preprocess_in_Power_Query.html" target="_blank">Preprocess in Power Query</a></td>
+<td>The R code for processing dataset in Power Query, including RFM and ABC/XYZ segmentations.</td>
+</tr>
+<tr class="odd">
+<td><a href="03_TS_Forecasts.html" target="_blank">Time-Series Forecasting</a></td>
+<td>The separate document containing R code for time-series forecasting, also designed to run in Power Query.</td>
+</tr>
+<tr class="even">
+<td><a href="04_Refund_Prediction.html" target="_blank">Refund Prediction</a></td>
+<td>An attempt to create a model to predict refunds; no variables with statistical significance found.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="power-bi-data-model" class="level3">
+<h3 class="anchored" data-anchor-id="power-bi-data-model">Power BI Data Model</h3>
+<p>Tables and relations in the Power BI data model are organized following a “star” schema, with fact tables at the center connected to dimension tables. This structure optimizes query performance and simplifies data analysis.</p>
+<div id="fig-data-model" class="lightbox quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-data-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="power-bi-data-model.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;4: The Power BI data model may appear extensive but it’s organized following a “star” schema"><img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/power-bi-data-model.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-data-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: The Power BI data model may appear extensive but it’s organized following a “star” schema
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="power-bi-visuals" class="level3">
+<h3 class="anchored" data-anchor-id="power-bi-visuals">Power BI Visuals</h3>
+<p>Power BI visualizations are built using visuals from the standard Power BI library, except for a few bar charts created with the Deneb custom visual, which allows for advanced charting using the Vega-Lite grammar.</p>
+</section>
+</section>
+<section id="dashboard-overview" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="dashboard-overview">Dashboard Overview</h2>
+<p>The dashboard is structured into five key sections.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>You can try interactive version of the dashboard <a href="https://app.powerbi.com/view?r=eyJrIjoiNzY5NjZhMDAtZjNjNS00NmYxLTkzNWUtNGJkZWZlNWMzOWIxIiwidCI6ImZmYzg3OTVlLTAxODUtNDg5Yi05ZGE2LTQ5MDI0MTJmMDNhMCIsImMiOjl9" target="_blank">here</a></p>
+</div></div><section id="summary-page" class="level3">
+<h3 class="anchored" data-anchor-id="summary-page">Summary Page</h3>
+<p>The dashboard immediately shows key metrics.</p>
+<div id="fig-summary" class="lightbox quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="0001.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;5: Summary"><img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/0001.svg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Summary
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="loyalty-section" class="level3">
+<h3 class="anchored" data-anchor-id="loyalty-section">Loyalty Section</h3>
+<p>This section presents customer loyalty metrics, including Repeat Buyers Share, Life-time Value, and Purchase Frequency.</p>
+<div id="fig-loyalty" class="lightbox quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-loyalty-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="0002.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;6: Loyalty"><img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/0002.svg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-loyalty-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Loyalty
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="products-section" class="level3">
+<h3 class="anchored" data-anchor-id="products-section">Products Section</h3>
+<p>This section provides descriptive statistics about products. It includes ABC/XYZ analysis, Total Revenue breakdown by Category and Vendor, and Top Products.</p>
+<div id="fig-products" class="lightbox quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-products-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="0003.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;7: Products"><img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/0003.svg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-products-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Products
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="pricing-section" class="level3">
+<h3 class="anchored" data-anchor-id="pricing-section">Pricing Section</h3>
+<p>Pricing section provides insights into product pricing strategies, including Discount Penetration, Average Discount, and Revenue Lift from Discounts, as well as time series of Average Discount and Discount Penetration.</p>
+<div id="fig-pricing" class="lightbox quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pricing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="0004.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;8: Pricing"><img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/0004.svg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pricing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Pricing
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="customers-section" class="level3">
+<h3 class="anchored" data-anchor-id="customers-section">Customers Section</h3>
+<p>This tab presents the RFM segmentation results, showing the distribution of customers across different segments and their contribution to total revenue.</p>
+<div id="fig-customers" class="lightbox quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-customers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="0005.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;9: Customers"><img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/0005.svg" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-customers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Customers
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="areas-to-improve" class="level2">
+<h2 class="anchored" data-anchor-id="areas-to-improve">Areas to Improve</h2>
+<section id="dynamic-time-periods" class="level3">
+<h3 class="anchored" data-anchor-id="dynamic-time-periods">Dynamic Time Periods</h3>
+<p>The latest data point in the dataset is <code>2025-10-21</code>. All visuals in the dashboard reflect the data for the calendar year 2025, using time-series forecasting for the remaining months. This makes the dashboard unsuitable for use outside of the narrow period of October-December 2025. To make this dashboard a working instrument, I would need to implement a slicer for selecting the time period and adjust all measures accordingly. The year slicer would not be a good choice for this task, I’d rather opt for a date slicer with “Relative date filtering” option set to “in the last 12 months” plus 1..2 month forecast.</p>
+</section>
+<section id="web-and-marketing-data" class="level3">
+<h3 class="anchored" data-anchor-id="web-and-marketing-data">Web and Marketing Data</h3>
+<p>The dataset lacks web-analytics data, which would enable more comprehensive customer behavior analysis. Additionally, the absence of marketing data (except for the acquisition channel) prevents the evaluation of campaign effectiveness and customer acquisition strategies. Incorporating these data sources would significantly enhance the analytical capabilities of the dashboard.</p>
+</section>
+<section id="causal-modeling" class="level3">
+<h3 class="anchored" data-anchor-id="causal-modeling">Causal Modeling</h3>
+<p>The synthetic nature of the dataset also limits the depth of analysis: the data is too random to uncover meaningful patterns or trends. Access to real-world data would allow for causal modeling and insights.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>I hope this overview of the dashboard construction process, from initial data cleaning to final model integration, gives the reader a clear picture of the analytical work involved.</p>
+<div>
+
+</div>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="winner-certificate.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="This dashboard was selected as winning in the November 2025 DataDNA Dataset Challenge in the overall standings"><img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/winner-certificate.png" class="img-fluid figure-img" alt="This dashboard was selected as winning in the November 2025 DataDNA Dataset Challenge in the overall standings"></a></p>
+<figcaption>This dashboard was selected as winning in the November 2025 DataDNA Dataset Challenge in the overall standings</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="accessibility-certificate.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="…and also in the Accessibility category, thanks to the carefully chosen palette"><img src="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/accessibility-certificate.png" class="img-fluid figure-img" alt="…and also in the Accessibility category, thanks to the carefully chosen palette"></a></p>
+<figcaption>…and also in the Accessibility category, thanks to the carefully chosen palette</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li><p><a href="https://github.com/AxesAccess/DataDNA-Dataset-Challenge-E-commerce-Dataset-November-2025" target="_blank">Project Repository</a></p></li>
+<li><p><a href="https://app.powerbi.com/view?r=eyJrIjoiNzY5NjZhMDAtZjNjNS00NmYxLTkzNWUtNGJkZWZlNWMzOWIxIiwidCI6ImZmYzg3OTVlLTAxODUtNDg5Yi05ZGE2LTQ5MDI0MTJmMDNhMCIsImMiOjl9" target="_blank">Interactive Dashboard</a></p></li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>BI</category>
+  <category>Statistics</category>
+  <category>ML</category>
+  <category>Visualization</category>
+  <guid>https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/</guid>
+  <pubDate>Wed, 26 Nov 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/0001.svg" medium="image" type="image/svg+xml"/>
+</item>
 <item>
   <title>Propensity Score Matching for Causal Analysis</title>
   <dc:creator>Aleksei Prishchepo</dc:creator>
@@ -12996,7 +13251,7 @@ Figure&nbsp;1: Example of a Kano diagram.
 </ul>
 <p>Each question offers five possible responses, from “I like it” to “I dislike it.” Subsequently, these responses are classified into the five Kano categories.</p>
 <div class="cell" data-execution_count="1" data-cap-location="undefined" data-tbl-cap-location="top">
-<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="top" data-execution_count="1" data-cap-location="undefined">
+<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="undefined" data-execution_count="1" data-tbl-cap-location="top">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cap-margin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1: Classification of answers to the Kano questionnaire.
@@ -13111,7 +13366,7 @@ Figure&nbsp;2: Histogram of respondents’ age
 <div>
 
 </div>
-<div id="cell-fig-income-empl-hist" class="cell quarto-layout-panel" data-execution_count="4" data-layout-ncol="2">
+<div id="cell-fig-income-empl-hist" class="cell quarto-layout-panel" data-layout-ncol="2" data-execution_count="4">
 <div class="quarto-layout-row">
 <div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
 <div id="fig-income-empl-hist" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -14287,901 +14542,6 @@ font-style: inherit;">False</span>)</span></code></pre></div>
   <guid>https://blog.frequentist.org/posts/20240731-customers-graphs/</guid>
   <pubDate>Wed, 31 Jul 2024 00:00:00 GMT</pubDate>
   <media:content url="https://blog.frequentist.org/posts/20240731-customers-graphs/image.png" medium="image" type="image/png" height="108" width="144"/>
-</item>
-<item>
-  <title>Exploring Geospatial Insights with R and rnaturalearth</title>
-  <dc:creator>Aleksei </dc:creator>
-  <link>https://blog.frequentist.org/posts/20240725-views-of-russia/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p>The article showcases the utilization of the <code>rnaturalearth</code> package for handling geographical data. This package provides valuable tools and functions for working with spatial information, making it a powerful resource for data analysts and researchers interested in geographic analyses.</p>
-<p>Today, I stumbled upon an article discussing the approval ratings of Russia among people from various nations around the world. As I examined the list, which was sorted from worst to best, a hypothesis formed in my mind: <strong>Could the distance between this particular country and others correlate with its citizens’ approval of its international affairs?</strong> To explore this, I promptly collected data and calculated the geographical distances between the boundaries of Russia and those of the countries in the list. The null hypothesis posits that distance has no impact on approval rates, while the alternative hypothesis suggests that distance does indeed influence approval levels.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_set</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_minimal</span>())</span>
-<span id="cb1-2"></span>
-<span id="cb1-3">world <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ne_countries</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">scale =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"medium"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">returnclass =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"sf"</span>)</span>
-<span id="cb1-4"></span>
-<span id="cb1-5">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">read.csv</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"ViewsOfRussia2024.csv"</span>)</span>
-<span id="cb1-6"></span>
-<span id="cb1-7">by <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">join_by</span>(admin <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> country)</span>
-<span id="cb1-8">world <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">left_join</span>(world, df, by)</span>
-<span id="cb1-9"></span>
-<span id="cb1-10">world <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> world[world<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>admin <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Antarctica"</span>, ]</span>
-<span id="cb1-11"></span>
-<span id="cb1-12"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> world) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb1-13">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_sf</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">fill =</span> approval)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb1-14">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_fill_viridis_c</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">option =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"plasma"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb1-15">  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># theme_void() +</span></span>
-<span id="cb1-16">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">legend.position =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"bottom"</span>, </span>
-<span id="cb1-17">        <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">legend.key.height =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">unit</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pt"</span>), </span>
-<span id="cb1-18">        <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">legend.key.width =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">unit</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">40</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pt"</span>), </span>
-<span id="cb1-19">        <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">legend.title.position =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"bottom"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb1-20">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">fill =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"% who have a favorable view of Russia"</span>)</span></code></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://blog.frequentist.org/posts/20240725-views-of-russia/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">countries <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ne_countries</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">returnclass =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"sf"</span>)</span>
-<span id="cb2-2">russia <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">filter</span>(countries, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">grepl</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Russia"</span>, admin))</span>
-<span id="cb2-3"></span>
-<span id="cb2-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">invisible</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sf_use_s2</span>(<span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">FALSE</span>))</span>
-<span id="cb2-5"></span>
-<span id="cb2-6">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> df <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rowwise</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span></span>
-<span id="cb2-7">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">distB =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">st_distance</span>(russia, countries[countries<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>admin <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> country, ])[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>])</span>
-<span id="cb2-8"></span>
-<span id="cb2-9">df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>distB <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.numeric</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sub</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"([0-9</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">\\</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">.]+)"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">\\</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">1"</span>, df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>distB)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000000</span></span>
-<span id="cb2-10"></span>
-<span id="cb2-11">model <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(approval <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> distB, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> df)</span>
-<span id="cb2-12"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(model)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-lm(formula = approval ~ distB, data = df)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--23.345 -11.519  -4.029  13.302  28.339 
-
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)   22.406      3.859   5.806 1.91e-06 ***
-distB          1.513      0.814   1.859   0.0723 .  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 16.02 on 32 degrees of freedom
-  (1 observation deleted due to missingness)
-Multiple R-squared:  0.09743,   Adjusted R-squared:  0.06922 
-F-statistic: 3.454 on 1 and 32 DF,  p-value: 0.07231</code></pre>
-</div>
-</div>
-<p>The model explains less than 10% of variability. P-value for distance is 0.072, so the null hypothesis cannot be rejected at the level of 0.05. Scatter plot also shows no obvious trend.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">qplot</span>(df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>distB, df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>approval) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb4-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb4-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">stat_smooth</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">method =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lm"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">se =</span> F, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">color =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"red"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">formula =</span> y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> x)</span></code></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://blog.frequentist.org/posts/20240725-views-of-russia/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>It emerged that the geographical distance between boundaries was statistically insignificant. However, I propose an alternative hypothesis in this scenario. Russia, being an exceptionally vast country, shares proximity with Asian nations in its eastern part. Interestingly, these eastern countries exhibit a more favorable attitude toward Russia compared to their European counterparts. One plausible explanation for this discrepancy is the absence of significant Russian territorial interests in Asia. Since Moscow, the capital, lies in the western part of Russia, <strong>let’s measure the distance between capitals and explore this further using regression analysis</strong>.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">cities <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ne_download</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">type =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"populated_places"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">returnclass =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"sf"</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `ne_110m_populated_places' from data source 
-  `/tmp/Rtmp1g0rpV/ne_110m_populated_places.shp' using driver `ESRI Shapefile'
-Simple feature collection with 243 features and 137 fields
-Geometry type: POINT
-Dimension:     XY
-Bounding box:  xmin: -175.2206 ymin: -41.29207 xmax: 179.2166 ymax: 64.14346
-Geodetic CRS:  WGS 84</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">capitals <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> cities[cities<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>FEATURECLA <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Admin-0 capital"</span>, ]</span></code></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">capitals <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> capitals <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">distinct</span>(ADM0NAME, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">.keep_all =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>)</span>
-<span id="cb8-2">moscow <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> cities[cities<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>NAME <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Moscow"</span>, ]</span>
-<span id="cb8-3"></span>
-<span id="cb8-4">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">read.csv</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"ViewsOfRussia2024.csv"</span>)</span>
-<span id="cb8-5"></span>
-<span id="cb8-6">by <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">join_by</span>(country <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> ADM0NAME)</span>
-<span id="cb8-7">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">left_join</span>(df, capitals, by) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">select</span>(country, approval, NAME)</span>
-<span id="cb8-8"></span>
-<span id="cb8-9">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> df <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rowwise</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb8-10">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">distC =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">st_distance</span>(moscow, capitals[capitals<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>NAME <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> NAME, ])[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>])</span>
-<span id="cb8-11">df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>distC <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.numeric</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sub</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"([0-9</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">\\</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">.]+)"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">\\</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">1"</span>, df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>distC)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000000</span></span>
-<span id="cb8-12"></span>
-<span id="cb8-13">model <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(approval <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> distC, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> df)</span>
-<span id="cb8-14"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(model)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-lm(formula = approval ~ distC, data = df)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--27.205 -14.005  -1.208  14.432  27.698 
-
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  21.7485     5.1834   4.196 0.000192 ***
-distC         0.9300     0.6958   1.337 0.190512    
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 16.21 on 33 degrees of freedom
-Multiple R-squared:  0.05135,   Adjusted R-squared:  0.02261 
-F-statistic: 1.786 on 1 and 33 DF,  p-value: 0.1905</code></pre>
-</div>
-</div>
-<p>Unfortunately, using the distance between capitals didn’t yield meaningful results either.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">qplot</span>(df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>distC, df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>approval) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb10-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb10-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">stat_smooth</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">method =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lm"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">se =</span> F, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">color =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"red"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">formula =</span> y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> x)</span></code></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://blog.frequentist.org/posts/20240725-views-of-russia/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>In my search for additional regressors, I included GDP per capita,</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">read.csv</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"ViewsOfRussia2024.csv"</span>)</span>
-<span id="cb11-2"></span>
-<span id="cb11-3">by <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">join_by</span>(country <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> admin)</span>
-<span id="cb11-4">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">left_join</span>(df, countries, by) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">select</span>(country, approval, gdp_md, pop_est, economy)</span>
-<span id="cb11-5"></span>
-<span id="cb11-6">df <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> df <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">gdp_pc =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> gdp_md <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> pop_est)</span>
-<span id="cb11-7"></span>
-<span id="cb11-8">model <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(approval <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> gdp_pc, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> df)</span>
-<span id="cb11-9"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(model)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-lm(formula = approval ~ gdp_pc, data = df)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--29.612  -6.029   1.617   4.936  22.483 
-
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) 42.26819    2.63352  16.050  &lt; 2e-16 ***
-gdp_pc      -0.67906    0.09049  -7.505 1.52e-08 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 10.15 on 32 degrees of freedom
-  (1 observation deleted due to missingness)
-Multiple R-squared:  0.6377,    Adjusted R-squared:  0.6264 
-F-statistic: 56.32 on 1 and 32 DF,  p-value: 1.521e-08</code></pre>
-</div>
-</div>
-<p>and it yielded promising results. The coefficient associated with GDP showed a remarkably low p-value of 1.52e-08, providing strong evidence against the null hypothesis. The coefficient of determination (R-squared) was also quite favorable at 0.6377, indicating that the model captures a substantial portion of the variation in approval rates. The coefficient with <code>gdp_pc</code> indicates that for every additional thousand USD of GDP per capita, there is a corresponding 0.7 percentage point decrease in the approval rate.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">qplot</span>(df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>gdp_pc, df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>approval) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb13-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb13-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">stat_smooth</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">method =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lm"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">formula =</span> y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> x) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb13-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"GDP per capita, K"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"% who have a favorable view of Russia"</span>)</span></code></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://blog.frequentist.org/posts/20240725-views-of-russia/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>In an effort to enhance predictive power, one can explore the possibility of non-linear dependencies. Let’s consider using the logarithm of GDP as a predictor.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1">model <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(approval <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(gdp_pc), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> df)</span>
-<span id="cb14-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(model)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-lm(formula = approval ~ log(gdp_pc), data = df)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--22.983  -5.332  -0.769   3.175  28.181 
-
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)   58.164      3.828  15.194 3.46e-16 ***
-log(gdp_pc)  -12.052      1.371  -8.794 4.77e-10 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 9.125 on 32 degrees of freedom
-  (1 observation deleted due to missingness)
-Multiple R-squared:  0.7073,    Adjusted R-squared:  0.6982 
-F-statistic: 77.33 on 1 and 32 DF,  p-value: 4.77e-10</code></pre>
-</div>
-</div>
-<p>The resulting model yields an impressive R² value of 0.7073, indicating that it explains the vast amount of the variation. Additionally, the p-value of 4.77e-10 provides the strongest evidence against the null hypothesis.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">qplot</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>gdp_pc), df<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>approval) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb16-2">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb16-3">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">stat_smooth</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">method =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lm"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">formula =</span> y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> x) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb16-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Logarithm of GDP per capita"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"% who have a favorable view of Russia"</span>)</span></code></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://blog.frequentist.org/posts/20240725-views-of-russia/index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>However, this improved model is more complex and less straightforward to explain. Allow me to attempt an interpretation: If a country’s GDP per capita is 1% lower than another country’s, it tends to have 0.12% more people who approve of Russia.</p>
-<p>Now that we’ve obtained the regression model, we can use it to make predictions for the remaining countries and visualize the results on a map. By assigning colors based on predicted approval rates, we’ll create an informative and visually appealing representation.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1">world <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ne_countries</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">scale =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"medium"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">returnclass =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"sf"</span>)</span>
-<span id="cb17-2"></span>
-<span id="cb17-3">world <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> world[world<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>admin <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Antarctica"</span>, ]</span>
-<span id="cb17-4"></span>
-<span id="cb17-5">world <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> world <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">gdp_pc =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> gdp_md <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> pop_est)</span>
-<span id="cb17-6"></span>
-<span id="cb17-7"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">invisible</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">na.omit</span>(world, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">cols =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"gdp_pc"</span>))</span>
-<span id="cb17-8"></span>
-<span id="cb17-9">pred <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">predict</span>(model, world)</span>
-<span id="cb17-10"></span>
-<span id="cb17-11">world <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">cbind</span>(world, pred)</span>
-<span id="cb17-12"></span>
-<span id="cb17-13">by <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">join_by</span>(admin <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> country)</span>
-<span id="cb17-14">world <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">left_join</span>(world, df, by)</span>
-<span id="cb17-15"></span>
-<span id="cb17-16">world <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mutate</span>(world, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">approval =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">coalesce</span>(approval, pred))</span>
-<span id="cb17-17"></span>
-<span id="cb17-18">world[world<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>admin <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Russia"</span>, ]<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>approval <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">NA</span></span>
-<span id="cb17-19"></span>
-<span id="cb17-20"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> world) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb17-21">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_sf</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">fill =</span> approval)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb17-22">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">scale_fill_viridis_c</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">option =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"plasma"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb17-23">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">legend.position =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"bottom"</span>, </span>
-<span id="cb17-24">        <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">legend.key.height =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">unit</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pt"</span>), </span>
-<span id="cb17-25">        <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">legend.key.width =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">unit</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">40</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pt"</span>), </span>
-<span id="cb17-26">        <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">legend.title.position =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"bottom"</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb17-27">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">fill =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>)</span></code></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://blog.frequentist.org/posts/20240725-views-of-russia/index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-
-
-
- ]]></description>
-  <category>R</category>
-  <category>Geo</category>
-  <guid>https://blog.frequentist.org/posts/20240725-views-of-russia/</guid>
-  <pubDate>Thu, 25 Jul 2024 00:00:00 GMT</pubDate>
-  <media:content url="https://blog.frequentist.org/posts/20240725-views-of-russia/image.png" medium="image" type="image/png" height="89" width="144"/>
 </item>
 </channel>
 </rss>
