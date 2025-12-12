@@ -22,27 +22,19 @@ editor: visual
 
 resources:
   - "posts/20250927-credit-risk-analytics/*.html"
-  - "posts/20250927-credit-risk-analytics/01_eda_files/libs/bootstrap/*"
-  - "posts/20250927-credit-risk-analytics/01_eda_files/libs/clipboard/*"
-  - "posts/20250927-credit-risk-analytics/01_eda_files/libs/quarto-html/*"
-  - "posts/20250927-credit-risk-analytics/01_eda_files/figure-html/*"
+  - "posts/20250927-credit-risk-analytics/*/libs/bootstrap/*"
+  - "posts/20250927-credit-risk-analytics/*/libs/clipboard/*"
+  - "posts/20250927-credit-risk-analytics/*/libs/quarto-html/*"
+  - "posts/20250927-credit-risk-analytics/*/figure-html/*"
 
-  - "posts/20250927-credit-risk-analytics/02_modelling_files/libs/bootstrap/*"
-  - "posts/20250927-credit-risk-analytics/02_modelling_files/libs/clipboard/*"
-  - "posts/20250927-credit-risk-analytics/02_modelling_files/libs/quarto-html/*"
-  - "posts/20250927-credit-risk-analytics/02_modelling_files/figure-html/*"
-
-  - "posts/20250927-credit-risk-analytics/03_power_query_files/libs/bootstrap/*"
-  - "posts/20250927-credit-risk-analytics/03_power_query_files/libs/clipboard/*"
-  - "posts/20250927-credit-risk-analytics/03_power_query_files/libs/quarto-html/*"
-  - "posts/20250927-credit-risk-analytics/03_power_query_files/figure-html/*"
-
-  - "posts/20250927-credit-risk-analytics/04_synthetic_data_files/libs/bootstrap/*"
-  - "posts/20250927-credit-risk-analytics/04_synthetic_data_files/libs/clipboard/*"
-  - "posts/20250927-credit-risk-analytics/04_synthetic_data_files/libs/quarto-html/*"
-  - "posts/20250927-credit-risk-analytics/04_synthetic_data_files/figure-html/*"
   - "posts/20251026-cfpb-dashboard/*.html"
   - "posts/20251026-cfpb-dashboard/*/libs/bootstrap/*"
   - "posts/20251026-cfpb-dashboard/*/libs/clipboard/*"
   - "posts/20251026-cfpb-dashboard/*/libs/quarto-html/*"
   - "posts/20251026-cfpb-dashboard/*/figure-html/*"
+
+  - "posts/20251126-e-commerce-dashboard/*.html"
+  - "posts/20251126-e-commerce-dashboard/*/libs/bootstrap/*"
+  - "posts/20251126-e-commerce-dashboard/*/libs/clipboard/*"
+  - "posts/20251126-e-commerce-dashboard/*/libs/quarto-html/*"
+  - "posts/20251126-e-commerce-dashboard/*/figure-html/*"

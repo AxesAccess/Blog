@@ -12,7 +12,9 @@ description: "An overview of the process of building an E-Commerce dashboard usi
 This project showcases my process of building analytical dashboard for
 business decision-making, specifically in the e-commerce domain. The
 dashboard is built in Power BI and integrates R scripts for advanced
-analytics.
+analytics. The dashboard was created as part of the November 2025
+DataDNA Dataset Challenge and was selected as the winner in both overall
+and accessibility categories.
 
 ## Key Features
 
@@ -31,7 +33,8 @@ simpler forecasting approach using `auto.arima` function from R's
 `forecast` package.
 
 ![Total & Forecasted Revenue bar plot created in the Deneb custom visual
-using the Vega-Lite grammar](revenue-forecast.svg)
+using the Vega-Lite
+grammar](revenue-forecast.svg){#fig-revenue-forecast}
 
 The model was used to generate revenue forecasts for various segments,
 including country, category, and channel. I integrated the forecasting
@@ -47,7 +50,7 @@ contribute the most to revenue in category A, those with moderate
 contribution in category B, and the rest in category C.
 
 ![Number of SKU by ABC/XYZ Segment visualized using Matrix visual from
-standard Power BI library](abc-xyz-matrix.svg)
+standard Power BI library](abc-xyz-matrix.svg){#fig-abc-xyz-matrix}
 
 To complement this, I applied XYZ analysis, which segments products
 based on their sales variability. Products with stable demand are
@@ -67,7 +70,7 @@ marketing efforts accordingly.
 
 ![RFM segments are three-dimensional, which is why it’s common practice
 to combine Frequency and Monetary into a single FM axis (on the
-left).](rfm.svg)
+left).](rfm.svg){#fig-rfm}
 
 To make the segmentation more intuitive, I defined nine segments
 (levels) based on RFM scores: "Champions", "Loyal Customers", "New
@@ -105,7 +108,8 @@ tables. This structure optimizes query performance and simplifies data
 analysis.
 
 ![The Power BI data model may appear extensive but it's organized
-following a "star" schema](power-bi-data-model.png){.lightbox}
+following a "star" schema](power-bi-data-model.png){#fig-data-model
+.lightbox}
 
 ### Power BI Visuals
 
@@ -117,18 +121,23 @@ visual, which allows for advanced charting using the Vega-Lite grammar.
 
 The dashboard is structured into five key sections.
 
+::: column-margin
+You can try interactive version of the dashboard
+[here](https://app.powerbi.com/view?r=eyJrIjoiNzY5NjZhMDAtZjNjNS00NmYxLTkzNWUtNGJkZWZlNWMzOWIxIiwidCI6ImZmYzg3OTVlLTAxODUtNDg5Yi05ZGE2LTQ5MDI0MTJmMDNhMCIsImMiOjl9){target="_blank"}
+:::
+
 ### Summary Page
 
 The dashboard immediately shows key metrics.
 
-![Summary](0001.svg){#fig-summary}
+![Summary](0001.svg){#fig-summary .lightbox}
 
 ### Loyalty Section
 
 This section presents customer loyalty metrics, including Repeat Buyers
 Share, Life-time Value, and Purchase Frequency.
 
-![Loyalty](0002.svg){#fig-loyalty}
+![Loyalty](0002.svg){#fig-loyalty .lightbox}
 
 ### Products Section
 
@@ -136,7 +145,7 @@ This section provides descriptive statistics about products. It includes
 ABC/XYZ analysis, Total Revenue breakdown by Category and Vendor, and
 Top Products.
 
-![Products](0003.svg){#fig-products}
+![Products](0003.svg){#fig-products .lightbox}
 
 ### Pricing Section
 
@@ -145,7 +154,7 @@ including Discount Penetration, Average Discount, and Revenue Lift from
 Discounts, as well as time series of Average Discount and Discount
 Penetration.
 
-![Pricing](0004.svg){#fig-pricing}
+![Pricing](0004.svg){#fig-pricing .lightbox}
 
 ### Customers Section
 
@@ -153,7 +162,7 @@ This tab presents the RFM segmentation results, showing the distribution
 of customers across different segments and their contribution to total
 revenue.
 
-![Customers](0005.svg){#fig-customers}
+![Customers](0005.svg){#fig-customers .lightbox}
 
 ## Areas to Improve
 
@@ -190,15 +199,13 @@ I hope this overview of the dashboard construction process, from initial
 data cleaning to final model integration, gives the reader a clear
 picture of the analytical work involved.
 
-::: {layout-ncol=2}
-
+::: {layout-ncol="2"}
 ![This dashboard was selected as winning in the November 2025 DataDNA
 Dataset Challenge in the overall
 standings](winner-certificate.png){.lightbox}
 
-![...and also in the Accessibility category](accessibility-certificate.png){.lightbox}
-
-
+![...and also in the Accessibility category, thanks to the carefully
+chosen palette](accessibility-certificate.png){.lightbox}
 :::
 
 ## References
