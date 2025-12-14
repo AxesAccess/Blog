@@ -10,7 +10,268 @@
 <atom:link href="https://blog.frequentist.org/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.7.5</generator>
-<lastBuildDate>Wed, 26 Nov 2025 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 13 Dec 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Agentic vs Deterministic Workflows: Building an Autonomous Career Assistant</title>
+  <dc:creator>Aleksei Prishchepo</dc:creator>
+  <link>https://blog.frequentist.org/posts/20251213-agentic-vs-deterministic/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>In this article, I’ll walk through the architecture of the <strong>Autonomous Career Agent (ACA)</strong>, a system I built to automate the tedious process of job hunting. Instead of just chatting, this agent acts as a specialized recruiter: it searches for live job vacancies, assesses your resume against them, and generates tailored resume and cover letter ready for submission.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>This application was created as a capstone project for the <a href="https://www.kaggle.com/learn-guide/5-day-agents" target="_blank">5-Day AI Agents Intensive Course with Google</a>.</p>
+</div></div><p>A video worth a thousand words, isn’t it? Jump to the Application Demo.</p>
+<p>We’ll dive into the <strong>Orchestrator Pattern</strong>, managing state across multiple specialized agents, and solving production challenges like secure artifact delivery using Google Cloud Storage (GCS).</p>
+<p>Many parts of job search automation can be implemented without LLM autonomy, so this project became a practical comparison between <em>explicit control flow</em> and <em>delegated reasoning</em>.</p>
+<section id="architecture-the-brain-and-the-hands" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="architecture-the-brain-and-the-hands">Architecture: the “Brain” and the “Hands”</h2>
+<p>When building complex agentic workflows, a common pitfall is the “God Prompt” — trying to stuff every possible instruction (search logic, evaluation criteria, formatting rules) into a single system prompt. This leads to fragile systems that are hard to debug and even harder to scale.</p>
+<p>For this application, I adopted a <strong>Multi-Agent Orchestration</strong> architecture using the <strong>Google Agents Development Kit (ADK)</strong>. This design separates high-level reasoning from low-level execution.</p>
+<section id="orchestrator-pattern" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="orchestrator-pattern">Orchestrator Pattern</h3>
+<p>At the core is the <strong>Orchestrator Agent</strong>. Think of it as the project manager. It doesn’t know how to scrape LinkedIn or how to format a resume. Its job is to understand the user’s intent, maintain the state of the workflow, and delegate tasks to specialists.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Explore the full source code on GitHub: <a href="https://github.com/AxesAccess/Autonomous-Career-Agent" target="_blank">AxesAccess / Autonomous-Career-Agent</a>.</p>
+</div></div><div id="fig-workflow" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20251213-agentic-vs-deterministic/workflow.svg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-workflow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The Application Workflow
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="why-this-approach" class="level3">
+<h3 class="anchored" data-anchor-id="why-this-approach">Why This Approach?</h3>
+<ol type="1">
+<li><strong>Separation of Concerns</strong>: The Search Agent can be iterated on (e.g., swapping a mock API for a real LinkedIn integration) without touching the Orchestrator’s logic.</li>
+<li><strong>Context Management</strong>: The Orchestrator keeps the “big picture” (the user’s goal), while sub-agents only need the context for their specific task. This saves tokens and reduces hallucinations.</li>
+<li><strong>Testability</strong>: We can unit test the Assessment Agent’s scoring logic independently of the Job Search results.</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+What a Deterministic Version Would Look Like
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>To understand the trade-offs, it’s helpful to imagine a deterministic version of this system:</p>
+<ul>
+<li><p><strong>Hard-coded Pipeline</strong>: <code>Input -&gt; Search() -&gt; Loop(Results) -&gt; Assess() -&gt; Generate() -&gt; Output</code>.</p></li>
+<li><p><strong>Rule-based Scoring</strong>: “If ‘Python’ in Resume and ‘Python’ in Job Description, Score += 10”.</p></li>
+<li><p><strong>Explicit Transitions</strong>: The code strictly dictates that step B always follows step A.</p></li>
+</ul>
+<p>While efficient, this approach requires us to pre-define every possible filter criteria. If a user asks for “a job with a great engineering culture,” a deterministic system fails unless we have an explicit “culture_score” column. An agent, however, can reason about the&nbsp;<em>unstructured</em>&nbsp;text in a job description to infer cultural values without requiring a schema change. The trade-off is clear: do we value raw efficiency (deterministic) or the ability to handle open-ended, ambiguous requirements (agentic)?</p>
+</div>
+</div>
+</section>
+</section>
+<section id="orchestration-logic" class="level2">
+<h2 class="anchored" data-anchor-id="orchestration-logic">Orchestration Logic</h2>
+<p>The Orchestrator’s intelligence comes from its ability to maintain a ‘Context Loop’ — remembering the results of Step 1 (Search) to inform Step 2 (Assessment).</p>
+<p>In <code>src/agents/orchestrator.py</code>, the system instruction acts as a state machine. It doesn’t just say “Help the user”, it defines a strict protocol:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1">orchestrator_agent <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> LlmAgent(</span>
+<span id="cb1-2">    name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"career_orchestrator"</span>,</span>
+<span id="cb1-3">    instruction<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb1-4"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">    Your responsibilities:</span></span>
+<span id="cb1-5"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">    ...</span></span>
+<span id="cb1-6"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">    3. Use the `recruitment_search_agent` to find relevant vacancies.</span></span>
+<span id="cb1-7"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">    4. Provide user with the list of relevant vacancies.</span></span>
+<span id="cb1-8"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">    5. Ask user to provide information about their skills and experiences.</span></span>
+<span id="cb1-9"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">    6. For each relevant vacancy chosen by the user:</span></span>
+<span id="cb1-10"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        a. Use the `skills_assessment_agent` to analyze the fit...</span></span>
+<span id="cb1-11"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        b. If the fit is good ... generate the tailored resume...</span></span>
+<span id="cb1-12"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">    """</span></span>
+<span id="cb1-13">)</span></code></pre></div>
+<p>By explicitly numbering the steps and restricting available tools at each phase, we reduce the degrees of freedom available to the LLM. The goal is not to make the model “smarter”, but to make incorrect behavior harder to express. This reliability is crucial for user trust.</p>
+</section>
+<section id="production-grade-integrations" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="production-grade-integrations">Production-Grade Integrations</h2>
+<p>Building a demo is one thing; building something that works in a restricted environment is another. One major challenge I faced was <strong>Artifact Delivery</strong>.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Explore the full source code on GitHub: <a href="https://github.com/AxesAccess/Autonomous-Career-Agent" target="_blank">AxesAccess / Autonomous-Career-Agent</a>.</p>
+</div></div><section id="challenge-where-do-the-files-go" class="level3">
+<h3 class="anchored" data-anchor-id="challenge-where-do-the-files-go">Challenge: “Where do the files go?”</h3>
+<p>When the agent generates a Resume (Markdown/PDF), we need to give it to the user.</p>
+<ul>
+<li><p><strong>Local File System</strong>: In a containerized web deployment, local files aren’t accessible to the user’s browser.</p></li>
+<li><p><strong>Chat Attachment</strong>: The ADK UI didn’t support attached files for unknown reason.</p></li>
+</ul>
+</section>
+<section id="solution-hybrid-cloud-storage" class="level3">
+<h3 class="anchored" data-anchor-id="solution-hybrid-cloud-storage">Solution: Hybrid Cloud Storage</h3>
+<p>I implemented a hybrid tooling strategy (<code>src/tools/hybrid_artifact_tools.py</code>) that satisfies both the agent’s memory needs and the user’s UX needs.</p>
+<ol type="1">
+<li><strong>Internal Memory</strong>: The file is saved to the Agent’s internal artifact store so it can “remember” what it wrote.</li>
+<li><strong>Public Delivery</strong>: The file is simultaneously uploaded to a private <strong>Google Cloud Storage (GCS)</strong> bucket.</li>
+<li><strong>Secure Access</strong>: The app generates <strong>Signed URL</strong> (valid for 24 hours) and present <em>that</em> link to the user in the chat.</li>
+</ol>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># From src/tools/hybrid_artifact_tools.py</span></span>
+<span id="cb2-2"></span>
+<span id="cb2-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 1. Upload to GCS</span></span>
+<span id="cb2-4">blob <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> bucket.blob(gcs_filename)</span>
+<span id="cb2-5">blob.upload_from_string(content, content_type<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mime_type)</span>
+<span id="cb2-6"></span>
+<span id="cb2-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 2. Generate Signed URL</span></span>
+<span id="cb2-8">signed_url <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> blob.generate_signed_url(</span>
+<span id="cb2-9">    version<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"v4"</span>, </span>
+<span id="cb2-10">    expiration<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>timedelta(hours<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">24</span>), </span>
+<span id="cb2-11">    method<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"GET"</span></span>
+<span id="cb2-12">)</span>
+<span id="cb2-13"></span>
+<span id="cb2-14"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 3. Return to Agent to show the user</span></span>
+<span id="cb2-15"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"📥 Download Link: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>signed_url<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span></span></code></pre></div>
+<p>This approach demonstrates how to bridge the gap between AI generation and standard web infrastructure which is a key aspect for moving agents from prototype to production. This pattern proved essential because it decouples generation from delivery, allowing the agent to operate in restricted execution environments without leaking infrastructure concerns into the prompting layer.</p>
+</section>
+</section>
+<section id="observability-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="observability-evaluation">Observability &amp; Evaluation</h2>
+<p>A reliable agent system requires more than just code; it requires rigorous testing.</p>
+<section id="evaluation-with-golden-datasets" class="level3">
+<h3 class="anchored" data-anchor-id="evaluation-with-golden-datasets">Evaluation with Golden Datasets</h3>
+<p>We don’t trust the agent blindly. We use an automated evaluation script (<code>tests/evaluation/evaluate.py</code>) that runs the agent against a <code>golden_dataset.json</code>. This dataset contains typical user scenarios (e.g., “Find Python jobs in Berlin”) and verifies:</p>
+<ol type="1">
+<li><p><strong>Safety</strong>: Did the agent error out?</p></li>
+<li><p><strong>Correctness</strong>: Did the response contain expected keywords (e.g., job titles found)?</p></li>
+<li><p><strong>Tool Usage</strong>: Did it call the Search Tool?</p></li>
+</ol>
+</section>
+<section id="observability" class="level3">
+<h3 class="anchored" data-anchor-id="observability">Observability</h3>
+<p>Using ADK’s built-in observability features, I trace every step of the orchestration. This allows for inspection of raw prompts and responses, helping to debug why an agent might have “hallucinated” a step or missed a user instruction.</p>
+<p>Notably, evaluation becomes more important as autonomy increases; unlike deterministic pipelines, agentic systems require behavioral testing rather than simple output validation.</p>
+</section>
+</section>
+<section id="application-demo" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="application-demo">Application Demo</h2>
+<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/o8VLHrvs3z8" title="Autonomous Career Agent Demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<p>Read the hackathon writeup on Kaggle: <a href="https://www.kaggle.com/competitions/agents-intensive-capstone-project/writeups/aca-autonomous-career-agent" target="_blank">ACA aka Autonomous Career Agent</a>.</p>
+</div></div></section>
+<section id="challenges-lessons-learned" class="level2">
+<h2 class="anchored" data-anchor-id="challenges-lessons-learned">Challenges &amp; Lessons Learned</h2>
+<ul>
+<li><strong>Latency vs.&nbsp;Accuracy</strong>: Splitting tasks into sub-agents improves accuracy but adds latency (multiple LLM round-trips). I optimized this by having the Orchestrator handle simple info-gathering without delegation where possible.</li>
+<li><strong>Tool Hallucinations</strong>: Early versions often tried to invent search parameters. Strict typing in the Tool classes <code>pydantic</code> models solved 90% of these issues.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Where a Deterministic Approach Was Better
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>It’s important to acknowledge where the agentic approach introduced friction compared to a traditional script:</p>
+<ul>
+<li><strong>Latency</strong>: The “thought process” of an LLM is orders of magnitude slower than a function call.</li>
+<li><strong>Reproducibility</strong>: Even with temperature=0, minor variations in phrasing can occur, making regression testing harder.</li>
+<li><strong>Cost Predictability</strong>: A loop in a script costs nothing; a loop in an agent consumes tokens with every iteration.</li>
+<li><strong>Debugging Difficulty</strong>: You can’t just set a breakpoint in a prompt; you have to trace the semantic flow.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>The Autonomous Career Agent app demonstrates that building useful GenAI applications goes beyond prompt engineering. It requires solid software engineering principles: modular architecture, secure integration patterns, and automated testing.</p>
+<p>This project reaffirmed an important engineering reality: for the specific task of matching keywords and filling templates, a deterministic pipeline offers distinct advantages in speed and predictability. The agentic overhead here is non-trivial.</p>
+<p>However, this architecture lays the groundwork for a much broader application; for example, <strong>Career Consulting</strong>. By grasping the observability and evaluation frameworks probed here, we can safely expand the agentic application to handle unstructured tasks like helping a user figure out&nbsp;<em>what</em>&nbsp;they want to do or pivoting strategies mid-search, where no deterministic application could succeed.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Agents</category>
+  <category>LLM</category>
+  <category>App</category>
+  <category>Python</category>
+  <guid>https://blog.frequentist.org/posts/20251213-agentic-vs-deterministic/</guid>
+  <pubDate>Sat, 13 Dec 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://blog.frequentist.org/posts/20251213-agentic-vs-deterministic/image.svg" medium="image" type="image/svg+xml"/>
+</item>
 <item>
   <title>Building an E-Commerce Dashboard with Power BI and R</title>
   <dc:creator>Aleksei Prishchepo</dc:creator>
@@ -13251,7 +13512,7 @@ Figure&nbsp;1: Example of a Kano diagram.
 </ul>
 <p>Each question offers five possible responses, from “I like it” to “I dislike it.” Subsequently, these responses are classified into the five Kano categories.</p>
 <div class="cell" data-execution_count="1" data-cap-location="undefined" data-tbl-cap-location="top">
-<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="undefined" data-execution_count="1" data-tbl-cap-location="top">
+<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="undefined" data-tbl-cap-location="top" data-execution_count="1">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cap-margin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1: Classification of answers to the Kano questionnaire.
@@ -13401,7 +13662,7 @@ Figure&nbsp;4: Employment distribution
 <h3 class="anchored" data-anchor-id="aggregating-responses">Aggregating Responses</h3>
 <p>Next, we will aggregate the responses to functional and dysfunctional questions for each feature. The table below shows an example of aggregated answers for a feature with ID = F1.</p>
 <div class="cell" data-tbl-colwidths="[5,20,15,15,15,15,15]" data-execution_count="9">
-<div id="tbl-agg-answers" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="9" data-tbl-colwidths="[5,20,15,15,15,15,15]">
+<div id="tbl-agg-answers" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-colwidths="[5,20,15,15,15,15,15]" data-execution_count="9">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-agg-answers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;2: Example of aggregated answers for a feature.
@@ -13704,844 +13965,6 @@ Figure&nbsp;5: Kano diagram
   <guid>https://blog.frequentist.org/posts/20240805-kano-model/</guid>
   <pubDate>Mon, 05 Aug 2024 00:00:00 GMT</pubDate>
   <media:content url="https://blog.frequentist.org/posts/20240805-kano-model/image.svg" medium="image" type="image/svg+xml"/>
-</item>
-<item>
-  <title>Merging Customers Records Using Graphs in Python</title>
-  <dc:creator>Aleksei </dc:creator>
-  <link>https://blog.frequentist.org/posts/20240731-customers-graphs/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Traditional relational databases and spreadsheets fall short in capturing complex relationships among customers. Enter graph theory – a powerful framework for representing and analyzing interconnected data. By visualizing customer relationships as a graph, we can uncover hidden patterns, identify clusters, and improve data quality.</p>
-</section>
-<section id="motivation" class="level2">
-<h2 class="anchored" data-anchor-id="motivation">Motivation</h2>
-<p>Over time, customers records can become fragmented and duplicated. For example, a customer may use multiple email addresses or phone numbers when interacting with a company. Creating a new record for each email or phone can lead to duplicate records for the same customer. This is especially common in B2B scenarios, where customers often have multiple representatives. Furthermore, some customers represent multiple companies, and their records may be duplicated across different companies.</p>
-<p>Doing any type of marketing analysis on such dataset can lead to incorrect results. We cannot be sure about the latest purchase, the total amount spent, or the number of orders. Is this customer a loyal one or not? Is that customer a new one or not? Is this customer going to leave us or they just started buying from another company? Do we need to send a discount to this customer or not? To answer these questions, we need to have customers database defragmented and deduplicated.</p>
-<p>Merging records manually can be time-consuming and error-prone. By using graphs, we can represent the relationships between customers, emails, and phones and find groups of connected customers. This can help us identify duplicate records and perform actions depending on our business logic.</p>
-</section>
-<section id="sample-data" class="level2">
-<h2 class="anchored" data-anchor-id="sample-data">Sample Data</h2>
-<p>We have three datasets: <code>customers</code>, <code>emails</code>, and <code>phones.</code> Each customer can have multiple emails and phones. The names, emails, and phones are generated randomly and do not correspond to real people, though the structure of the data is similar to what you might find in a real-world scenario. In fact, it <em>is</em> the sample taken from the real data, but the names and other personal information are generated randomly to replace the actual ones.</p>
-<div id="d22ded2e" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1">customers <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.read_csv(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"data/customers.csv"</span>)</span>
-<span id="cb1-2">emails <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.read_csv(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"data/emails.csv"</span>)</span>
-<span id="cb1-3">phones <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.read_csv(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"data/phones.csv"</span>)</span></code></pre></div>
-</div>
-<p>Take a look at the data.</p>
-<div id="0b932ff1" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">customers.head(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">customer_id</th>
-<th data-quarto-table-cell-role="th">name</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>330087</td>
-<td>William Sparks</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>443237</td>
-<td>Joseph Williams</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>329867</td>
-<td>Eddie Porter</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div id="777783d7" class="cell" data-execution_count="4">
-<div class="cell-output cell-output-stdout">
-<pre><code>Length: 1000 Unique: 1000</code></pre>
-</div>
-</div>
-<div id="fdcb909c" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">emails.head(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">customer_id</th>
-<th data-quarto-table-cell-role="th">email</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>599100</td>
-<td>brian12@example.net</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>330087</td>
-<td>emyers@example.com</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>25494</td>
-<td>cindymurphy@example.net</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div id="1d1b3864" class="cell" data-execution_count="6">
-<div class="cell-output cell-output-stdout">
-<pre><code>Length: 957 Unique: 626 Duplicated: 331 Empty: 0</code></pre>
-</div>
-</div>
-<div id="646c57f9" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">phones.head(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">customer_id</th>
-<th data-quarto-table-cell-role="th">phone</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>15962</td>
-<td>876.997.0254</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>99723</td>
-<td>001-706-213-0362</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>99723</td>
-<td>886.527.4420x90003</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<div id="ee643cb3" class="cell" data-execution_count="8">
-<div class="cell-output cell-output-stdout">
-<pre><code>Length: 855 Unique: 524 Duplicated: 331 Empty: 0</code></pre>
-</div>
-</div>
-</section>
-<section id="icons-for-nodes" class="level2">
-<h2 class="anchored" data-anchor-id="icons-for-nodes">Icons for Nodes</h2>
-<p>Next chunk of code creates a dictionary of icons for different types of nodes in the graph. It will be used later to visualize the subgraphs.</p>
-<div id="9bbbb540" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> PIL</span>
-<span id="cb8-2"></span>
-<span id="cb8-3">icons <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> {</span>
-<span id="cb8-4">    <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"customer"</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"icons/customer.png"</span>,</span>
-<span id="cb8-5">    <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"phone"</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"icons/phone.png"</span>,</span>
-<span id="cb8-6">    <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"email"</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"icons/email.png"</span>,</span>
-<span id="cb8-7">}</span>
-<span id="cb8-8"></span>
-<span id="cb8-9">images <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> {k: PIL.Image.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">open</span>(fname) <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> k, fname <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> icons.items()}</span></code></pre></div>
-</div>
-</section>
-<section id="creating-a-graph" class="level2">
-<h2 class="anchored" data-anchor-id="creating-a-graph">Creating a Graph</h2>
-<p>Let’s create graph and add nodes. Each node will represent a customer, email, or phone. We will use the images dictionary to assign an image to each node, but it’s not necessary for the procedure, as well as setting the type of the node.</p>
-<div id="2309f98e" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">G <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> nx.Graph()</span>
-<span id="cb9-2"></span>
-<span id="cb9-3">nodes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> []</span>
-<span id="cb9-4"></span>
-<span id="cb9-5"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> x <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> emails[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"email"</span>].dropna().unique():</span>
-<span id="cb9-6">    G.add_node(x, image<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>images[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"email"</span>], <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">type</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"email"</span>)</span>
-<span id="cb9-7"></span>
-<span id="cb9-8"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> x <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> phones[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"phone"</span>].dropna().unique():</span>
-<span id="cb9-9">    G.add_node(x, image<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>images[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"phone"</span>], <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">type</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"phone"</span>)</span>
-<span id="cb9-10"></span>
-<span id="cb9-11"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> x <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> customers[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"customer_id"</span>].unique():</span>
-<span id="cb9-12">    G.add_node(x, image<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>images[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"customer"</span>], <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">type</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"customer"</span>)</span></code></pre></div>
-</div>
-<p>Next, we will add edges to the graph. The edges will connect customers with their emails and phones.</p>
-<div id="6aeb13e8" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">edges <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> []</span>
-<span id="cb10-2"></span>
-<span id="cb10-3"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> x <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> customers[[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"customer_id"</span>]].merge(emails).values:</span>
-<span id="cb10-4">    edges.append(x)</span>
-<span id="cb10-5"></span>
-<span id="cb10-6"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> x <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> customers[[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"customer_id"</span>]].merge(phones).values:</span>
-<span id="cb10-7">    edges.append(x)</span>
-<span id="cb10-8"></span>
-<span id="cb10-9">G.add_edges_from(edges)</span></code></pre></div>
-</div>
-</section>
-<section id="finding-groups-of-connected-customers" class="level2">
-<h2 class="anchored" data-anchor-id="finding-groups-of-connected-customers">Finding Groups of Connected Customers</h2>
-<p>Customers that share the same email or phone will be connected by the edges. Let’s find groups of connected customers.</p>
-<div id="6e717621" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">groups <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">list</span>(nx.connected_components(G))</span>
-<span id="cb11-2"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Groups:"</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(groups))</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Groups: 559</code></pre>
-</div>
-</div>
-</section>
-<section id="visualizing-the-graph" class="level2">
-<h2 class="anchored" data-anchor-id="visualizing-the-graph">Visualizing the Graph</h2>
-<p>The number of connected components is rather large to visualize all of them, and most of the groups will contain only a few nodes. Let’s find the groups with the largest number of nodes and visualize them.</p>
-<div id="4723db96" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.DataFrame([groups]).T</span>
-<span id="cb13-2">df.columns <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"group"</span>]</span>
-<span id="cb13-3">df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"size"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"group"</span>].<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">apply</span>(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>)</span>
-<span id="cb13-4">df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"size"</span>].hist(bins<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>, log<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb13-5">plt.title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Group Size Distribution"</span>)</span>
-<span id="cb13-6">plt.show()<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span></span>
-<span id="cb13-7">plt.close()</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://blog.frequentist.org/posts/20240731-customers-graphs/index_files/figure-html/cell-14-output-1.png" width="573" height="431" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>The simplest way to visualize the graph is to use the draw function from the <code>networkx</code> library. We will use the <code>nx.draw</code> function to visualize the graph. We will create a grid of subplots and visualize the top groups. Parameter <code>seed</code> is set to 42 to make the layout reproducible.</p>
-<div id="b27b6fce" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">fig, axes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>, figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">6</span>))</span>
-<span id="cb14-2"></span>
-<span id="cb14-3">top_groups <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">list</span>(</span>
-<span id="cb14-4">    df.sort_values(</span>
-<span id="cb14-5">        <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"size"</span>,</span>
-<span id="cb14-6">        ascending<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>,</span>
-<span id="cb14-7">    )</span>
-<span id="cb14-8">    .head(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(axes.flatten()))</span>
-<span id="cb14-9">    .index</span>
-<span id="cb14-10">)</span>
-<span id="cb14-11"></span>
-<span id="cb14-12"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i, g <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(top_groups):</span>
-<span id="cb14-13">    ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> axes.flatten()[i]</span>
-<span id="cb14-14">    subgraph <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> G.subgraph(groups[g])</span>
-<span id="cb14-15">    pos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> nx.spring_layout(subgraph, seed<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">42</span>)</span>
-<span id="cb14-16">    nx.draw(</span>
-<span id="cb14-17">        subgraph,</span>
-<span id="cb14-18">        pos<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>pos,</span>
-<span id="cb14-19">        with_labels<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>,</span>
-<span id="cb14-20">        node_size<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">25</span>,</span>
-<span id="cb14-21">        ax<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>ax,</span>
-<span id="cb14-22">    )</span>
-<span id="cb14-23">    ax.set_title(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Group </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>g<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span></span>
-<span id="cb14-24"></span>
-<span id="cb14-25">plt.tight_layout()</span>
-<span id="cb14-26">plt.show()<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span></span>
-<span id="cb14-27">plt.close()</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://blog.frequentist.org/posts/20240731-customers-graphs/index_files/figure-html/cell-15-output-1.png" width="758" height="566" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>There are literally constellations of different shapes and sizes. Let’s visualize some of them in more detail.</p>
-</section>
-<section id="visualizing-subgraphs" class="level2">
-<h2 class="anchored" data-anchor-id="visualizing-subgraphs">Visualizing Subgraphs</h2>
-<p>Let’s visualize one of the largest group in more detail. We will use the <code>nx.draw_networkx_edges</code> function to draw the edges and the <code>imshow</code> function to display the icons of the nodes. We will also add the customer id to the customers’ nodes. The value of parameter <code>seed</code> is set to the same value as in the previous chunk to keep the layout. You can change it to see different layouts.</p>
-<div id="63041e7f" class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">subgraph <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> G.subgraph(groups[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">91</span>])</span>
-<span id="cb15-2">fig, ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(figsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>))</span>
-<span id="cb15-3"></span>
-<span id="cb15-4">pos <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> nx.spring_layout(subgraph, seed<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">42</span>)</span>
-<span id="cb15-5"></span>
-<span id="cb15-6">nx.draw_networkx_edges(</span>
-<span id="cb15-7">    subgraph,</span>
-<span id="cb15-8">    pos<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>pos,</span>
-<span id="cb15-9">    ax<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>ax,</span>
-<span id="cb15-10">    arrows<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>,</span>
-<span id="cb15-11">    arrowstyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"-"</span>,</span>
-<span id="cb15-12">    min_source_margin<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>,</span>
-<span id="cb15-13">    min_target_margin<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>,</span>
-<span id="cb15-14">)</span>
-<span id="cb15-15"></span>
-<span id="cb15-16"></span>
-<span id="cb15-17">tr_figure <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> ax.transData.transform</span>
-<span id="cb15-18">tr_axes <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> fig.transFigure.inverted().transform</span>
-<span id="cb15-19"></span>
-<span id="cb15-20"></span>
-<span id="cb15-21">icon_size <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (ax.get_xlim()[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> ax.get_xlim()[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>]) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.015</span></span>
-<span id="cb15-22">icon_center <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> icon_size <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2.0</span></span>
-<span id="cb15-23"></span>
-<span id="cb15-24"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> n <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> subgraph.nodes:</span>
-<span id="cb15-25">    xf, yf <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> tr_figure(pos[n])</span>
-<span id="cb15-26">    xa, ya <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> tr_axes((xf, yf))</span>
-<span id="cb15-27">    a <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.axes([xa <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> icon_center, ya <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> icon_center, icon_size, icon_size])</span>
-<span id="cb15-28">    a.imshow(subgraph.nodes[n][<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"image"</span>])</span>
-<span id="cb15-29">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> G.nodes[n][<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"type"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"customer"</span>:</span>
-<span id="cb15-30">        a.text(</span>
-<span id="cb15-31">            <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>,</span>
-<span id="cb15-32">            <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>,</span>
-<span id="cb15-33">            n,</span>
-<span id="cb15-34">            ha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"center"</span>,</span>
-<span id="cb15-35">            va<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"center"</span>,</span>
-<span id="cb15-36">            fontsize<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>,</span>
-<span id="cb15-37">            color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"red"</span>,</span>
-<span id="cb15-38">            backgroundcolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"white"</span>,</span>
-<span id="cb15-39">            bbox<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">dict</span>(color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"white"</span>, facecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"white"</span>, alpha<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>),</span>
-<span id="cb15-40">        )</span>
-<span id="cb15-41">    a.axis(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"off"</span>)</span>
-<span id="cb15-42"></span>
-<span id="cb15-43">sns.despine(left<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>, bottom<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb15-44"></span>
-<span id="cb15-45">plt.show()<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span></span>
-<span id="cb15-46">plt.close()</span></code></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://blog.frequentist.org/posts/20240731-customers-graphs/index_files/figure-html/cell-16-output-1.png" width="614" height="611" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="why-graphs-and-not-sql" class="level2">
-<h2 class="anchored" data-anchor-id="why-graphs-and-not-sql">Why Graphs and Not SQL?</h2>
-<p>We can see here that the customers in this group form pretty complex relationships. A customer may be connected to another one by the phone numbers, and the other one may be connected to the third one by the email, forming a chain of connections. I believe that it is nearly impossible to find this kind of relationship using SQL. The more complex the relationships are, the more time and effort it will take to find them using SQL. For example, if we have a chain of 10 customers, where each customer is connected to the next one by the phone number, it will take 10 joins to find this chain using SQL. If we have 100 customers in the chain, it will take 100 joins to find it using SQL, and the query will probably never complete. But it takes fractions of a second to find it using the graph.</p>
-</section>
-<section id="assigning-groups-to-customers" class="level2">
-<h2 class="anchored" data-anchor-id="assigning-groups-to-customers">Assigning Groups to Customers</h2>
-<p>Finally, we will assign a group to each customer. For that, we will expand the groups list and create a new DataFrame with the <code>group_id</code> and <code>customer_id</code> columns.</p>
-<div id="157edc97" class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pd.DataFrame([groups]).T</span>
-<span id="cb16-2">df.columns <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"customer_id"</span>]</span>
-<span id="cb16-3">df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df.explode(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"customer_id"</span>)</span>
-<span id="cb16-4">df[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"group_id"</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df.index</span>
-<span id="cb16-5">df.tail(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="16">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">customer_id</th>
-<th data-quarto-table-cell-role="th">group_id</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">557</td>
-<td>601053</td>
-<td>557</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">558</td>
-<td>571.212.7377x69843</td>
-<td>558</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">558</td>
-<td>590385</td>
-<td>558</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<p>Note that <code>customer_id</code> column contains phone numbers and emails as well as customer ids, but when we merge the data, there will remain only the customer ids.</p>
-<div id="da7ce215" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">customers <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> customers.merge(df)</span>
-<span id="cb17-2">customers.head(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="17">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">customer_id</th>
-<th data-quarto-table-cell-role="th">name</th>
-<th data-quarto-table-cell-role="th">group_id</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
-<td>330087</td>
-<td>William Sparks</td>
-<td>1</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
-<td>443237</td>
-<td>Joseph Williams</td>
-<td>4</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
-<td>329867</td>
-<td>Eddie Porter</td>
-<td>6</td>
-</tr>
-</tbody>
-</table>
-
-</div>
-</div>
-</div>
-<p>Let’s check the number of customers and unique customer ids to make sure that we didn’t lose any customers neither we added duplicates.</p>
-<div id="37fedf06" class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(customers), <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(customers[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"customer_id"</span>].unique())</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="18">
-<pre><code>(1000, 1000)</code></pre>
-</div>
-</div>
-<p>Looks good. Now we can save the data to the file.</p>
-<div id="e71a5f54" class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">customers.to_csv(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"data/customers_grouped.csv"</span>, index<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">False</span>)</span></code></pre></div>
-</div>
-</section>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>In this article, we explored how to merge customer records using graphs. We created a graph of customers, emails, and phones and found groups of connected customers. We assigned a group to each customer and saved the data to a file. This approach can help us identify duplicate records and perform actions depending on our business logic. We also visualized the graph and subgraphs to better understand the relationships between customers. This can be useful for marketing analysis, customer segmentation, and other tasks that require a deep understanding of customer relationships.</p>
-
-
-</section>
-
- ]]></description>
-  <category>Python</category>
-  <category>Graphs</category>
-  <guid>https://blog.frequentist.org/posts/20240731-customers-graphs/</guid>
-  <pubDate>Wed, 31 Jul 2024 00:00:00 GMT</pubDate>
-  <media:content url="https://blog.frequentist.org/posts/20240731-customers-graphs/image.png" medium="image" type="image/png" height="108" width="144"/>
 </item>
 </channel>
 </rss>

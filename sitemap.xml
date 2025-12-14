@@ -13,80 +13,84 @@
     <lastmod>2024-09-29T09:13:58.980Z</lastmod>
   </url>
   <url>
-    <loc>https://blog.frequentist.org/posts/20250106-bi-flowchart/index.html</loc>
-    <lastmod>2025-08-28T18:07:16.299Z</lastmod>
+    <loc>https://blog.frequentist.org/posts/20251213-agentic-vs-deterministic/index.html</loc>
+    <lastmod>2025-12-14T12:13:18.167Z</lastmod>
   </url>
   <url>
-    <loc>https://blog.frequentist.org/posts/20250807-mde/index.html</loc>
-    <lastmod>2025-09-30T21:19:52.458Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20240721-welcome/index.html</loc>
-    <lastmod>2025-01-04T20:57:19.729Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20251026-cfpb-dashboard/index.html</loc>
-    <lastmod>2025-10-27T19:33:45.538Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20240805-kano-model/index.html</loc>
-    <lastmod>2025-06-03T18:21:23.618Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20250729-ab-testing/index.html</loc>
-    <lastmod>2025-07-30T10:31:23.418Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/index.html</loc>
-    <lastmod>2025-12-12T12:31:38.154Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20241218-cv-week/index.html</loc>
-    <lastmod>2025-04-01T19:52:39.492Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20240731-customers-graphs/index.html</loc>
-    <lastmod>2024-12-28T21:54:30.721Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/about.html</loc>
-    <lastmod>2025-10-20T15:34:17.270Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/index.html</loc>
-    <lastmod>2025-09-30T21:19:00.502Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20250503-anki-part-1/index.html</loc>
-    <lastmod>2025-06-24T20:11:13.147Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20240725-views-of-russia/index.html</loc>
-    <lastmod>2024-12-28T21:54:11.553Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20250704-animation/index.html</loc>
-    <lastmod>2025-09-30T21:34:00.453Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20250827-time-series-clustering/index.html</loc>
-    <lastmod>2025-09-30T21:19:33.196Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20250927-credit-risk-analytics/index.html</loc>
-    <lastmod>2025-09-30T21:22:26.481Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.frequentist.org/posts/20250114-airflow-remote-docker/index.html</loc>
-    <lastmod>2025-01-14T09:34:58.125Z</lastmod>
+    <loc>https://blog.frequentist.org/posts/20240821-sophisthse/index.html</loc>
+    <lastmod>2025-08-27T14:17:55.864Z</lastmod>
   </url>
   <url>
     <loc>https://blog.frequentist.org/posts/20250321-rag/index.html</loc>
     <lastmod>2025-06-03T18:16:49.635Z</lastmod>
   </url>
   <url>
-    <loc>https://blog.frequentist.org/posts/20240821-sophisthse/index.html</loc>
-    <lastmod>2025-08-27T14:17:55.864Z</lastmod>
+    <loc>https://blog.frequentist.org/posts/20250114-airflow-remote-docker/index.html</loc>
+    <lastmod>2025-01-14T09:34:58.125Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20250927-credit-risk-analytics/index.html</loc>
+    <lastmod>2025-09-30T21:22:26.481Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20250827-time-series-clustering/index.html</loc>
+    <lastmod>2025-09-30T21:19:33.196Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20250704-animation/index.html</loc>
+    <lastmod>2025-09-30T21:34:00.453Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20240725-views-of-russia/index.html</loc>
+    <lastmod>2024-12-28T21:54:11.553Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20250503-anki-part-1/index.html</loc>
+    <lastmod>2025-06-24T20:11:13.147Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/index.html</loc>
+    <lastmod>2025-09-30T21:19:00.502Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/about.html</loc>
+    <lastmod>2025-10-20T15:34:17.270Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20240731-customers-graphs/index.html</loc>
+    <lastmod>2024-12-28T21:54:30.721Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20241218-cv-week/index.html</loc>
+    <lastmod>2025-04-01T19:52:39.492Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20251126-e-commerce-dashboard/index.html</loc>
+    <lastmod>2025-12-12T12:31:38.154Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20250729-ab-testing/index.html</loc>
+    <lastmod>2025-07-30T10:31:23.418Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20240805-kano-model/index.html</loc>
+    <lastmod>2025-06-03T18:21:23.618Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20251026-cfpb-dashboard/index.html</loc>
+    <lastmod>2025-10-27T19:33:45.538Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20240721-welcome/index.html</loc>
+    <lastmod>2025-01-04T20:57:19.729Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20250807-mde/index.html</loc>
+    <lastmod>2025-09-30T21:19:52.458Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.frequentist.org/posts/20250106-bi-flowchart/index.html</loc>
+    <lastmod>2025-08-28T18:07:16.299Z</lastmod>
   </url>
   <url>
     <loc>https://blog.frequentist.org/posts/20241105-airflow-filesensor/index.html</loc>
