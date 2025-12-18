@@ -25,12 +25,12 @@
 
 <div class="no-row-height column-margin column-container"><div class="">
 <p>This application was created as a capstone project for the <a href="https://www.kaggle.com/learn-guide/5-day-agents" target="_blank">5-Day AI Agents Intensive Course with Google</a>.</p>
-</div></div><p>A video worth a thousand words, isn’t it? Jump to the Application Demo.</p>
+</div></div><p>Jump to the Application Demo to see the application in action.</p>
 <p>We’ll dive into the <strong>Orchestrator Pattern</strong>, managing state across multiple specialized agents, and solving production challenges like secure artifact delivery using Google Cloud Storage (GCS).</p>
 <p>Many parts of job search automation can be implemented without LLM autonomy, so this project became a practical comparison between <em>explicit control flow</em> and <em>delegated reasoning</em>.</p>
-<section id="architecture-the-brain-and-the-hands" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="architecture-the-brain-and-the-hands">Architecture: the “Brain” and the “Hands”</h2>
-<p>When building complex agentic workflows, a common pitfall is the “God Prompt” — trying to stuff every possible instruction (search logic, evaluation criteria, formatting rules) into a single system prompt. This leads to fragile systems that are hard to debug and even harder to scale.</p>
+<section id="architecture" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="architecture">Architecture</h2>
+<p>When building complex agentic workflows, a common pitfall is the “God Prompt” — stuffing every possible instruction (search logic, evaluation criteria, formatting rules) into a single system prompt. This leads to fragile systems that are hard to debug and even harder to scale.</p>
 <p>For this application, I adopted a <strong>Multi-Agent Orchestration</strong> architecture using the <strong>Google Agents Development Kit (ADK)</strong>. This design separates high-level reasoning from low-level execution.</p>
 <section id="orchestrator-pattern" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="orchestrator-pattern">Orchestrator Pattern</h3>
@@ -56,16 +56,9 @@ Figure&nbsp;1: The Application Workflow
 <li><strong>Context Management</strong>: The Orchestrator keeps the “big picture” (the user’s goal), while sub-agents only need the context for their specific task. This saves tokens and reduces hallucinations.</li>
 <li><strong>Testability</strong>: We can unit test the Assessment Agent’s scoring logic independently of the Job Search results.</li>
 </ol>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-What a Deterministic Version Would Look Like
-</div>
-</div>
-<div class="callout-body-container callout-body">
+</section>
+<section id="what-a-deterministic-version-would-look-like" class="level3 highlight">
+<h3 class="anchored" data-anchor-id="what-a-deterministic-version-would-look-like">What a Deterministic Version Would Look Like</h3>
 <p>To understand the trade-offs, it’s helpful to imagine a deterministic version of this system:</p>
 <ul>
 <li><p><strong>Hard-coded Pipeline</strong>: <code>Input -&gt; Search() -&gt; Loop(Results) -&gt; Assess() -&gt; Generate() -&gt; Output</code>.</p></li>
@@ -73,8 +66,6 @@ What a Deterministic Version Would Look Like
 <li><p><strong>Explicit Transitions</strong>: The code strictly dictates that step B always follows step A.</p></li>
 </ul>
 <p>While efficient, this approach requires us to pre-define every possible filter criteria. If a user asks for “a job with a great engineering culture,” a deterministic system fails unless we have an explicit “culture_score” column. An agent, however, can reason about the&nbsp;<em>unstructured</em>&nbsp;text in a job description to infer cultural values without requiring a schema change. The trade-off is clear: do we value raw efficiency (deterministic) or the ability to handle open-ended, ambiguous requirements (agentic)?</p>
-</div>
-</div>
 </section>
 </section>
 <section id="orchestration-logic" class="level2">
@@ -132,10 +123,10 @@ font-style: inherit;">    """</span></span>
 <p>Explore the full source code on GitHub: <a href="https://github.com/AxesAccess/Autonomous-Career-Agent" target="_blank">AxesAccess / Autonomous-Career-Agent</a>.</p>
 </div></div><section id="challenge-where-do-the-files-go" class="level3">
 <h3 class="anchored" data-anchor-id="challenge-where-do-the-files-go">Challenge: “Where do the files go?”</h3>
-<p>When the agent generates a Resume (Markdown/PDF), we need to give it to the user.</p>
+<p>When the agent generates a Resume (in this version Markdown), we need to give it to the user.</p>
 <ul>
 <li><p><strong>Local File System</strong>: In a containerized web deployment, local files aren’t accessible to the user’s browser.</p></li>
-<li><p><strong>Chat Attachment</strong>: The ADK UI didn’t support attached files for unknown reason.</p></li>
+<li><p><strong>Chat Attachment</strong>: The ADK UI showed an error for the attached files at that time.</p></li>
 </ul>
 </section>
 <section id="solution-hybrid-cloud-storage" class="level3">
@@ -143,7 +134,7 @@ font-style: inherit;">    """</span></span>
 <p>I implemented a hybrid tooling strategy (<code>src/tools/hybrid_artifact_tools.py</code>) that satisfies both the agent’s memory needs and the user’s UX needs.</p>
 <ol type="1">
 <li><strong>Internal Memory</strong>: The file is saved to the Agent’s internal artifact store so it can “remember” what it wrote.</li>
-<li><strong>Public Delivery</strong>: The file is simultaneously uploaded to a private <strong>Google Cloud Storage (GCS)</strong> bucket.</li>
+<li><strong>Public Delivery</strong>: The file is simultaneously uploaded to a private <strong>Google Cloud Storage (GCS)</strong> bucket to deliver it to the user.</li>
 <li><strong>Secure Access</strong>: The app generates <strong>Signed URL</strong> (valid for 24 hours) and present <em>that</em> link to the user in the chat.</li>
 </ol>
 <div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
@@ -231,19 +222,11 @@ font-style: inherit;">"</span></span></code></pre></div>
 <section id="challenges-lessons-learned" class="level2">
 <h2 class="anchored" data-anchor-id="challenges-lessons-learned">Challenges &amp; Lessons Learned</h2>
 <ul>
-<li><strong>Latency vs.&nbsp;Accuracy</strong>: Splitting tasks into sub-agents improves accuracy but adds latency (multiple LLM round-trips). I optimized this by having the Orchestrator handle simple info-gathering without delegation where possible.</li>
+<li><strong>Latency vs.&nbsp;Accuracy</strong>: Splitting tasks into sub-agents improves accuracy but adds latency because of multiple LLM round-trips. I optimized this by having the Orchestrator handle simple info-gathering without delegation where possible.</li>
 <li><strong>Tool Hallucinations</strong>: Early versions often tried to invent search parameters. Strict typing in the Tool classes <code>pydantic</code> models solved 90% of these issues.</li>
 </ul>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Where a Deterministic Approach Was Better
-</div>
-</div>
-<div class="callout-body-container callout-body">
+<section id="where-a-deterministic-approach-was-better" class="level3 highlight">
+<h3 class="anchored" data-anchor-id="where-a-deterministic-approach-was-better">Where a Deterministic Approach Was Better</h3>
 <p>It’s important to acknowledge where the agentic approach introduced friction compared to a traditional script:</p>
 <ul>
 <li><strong>Latency</strong>: The “thought process” of an LLM is orders of magnitude slower than a function call.</li>
@@ -251,8 +234,7 @@ Where a Deterministic Approach Was Better
 <li><strong>Cost Predictability</strong>: A loop in a script costs nothing; a loop in an agent consumes tokens with every iteration.</li>
 <li><strong>Debugging Difficulty</strong>: You can’t just set a breakpoint in a prompt; you have to trace the semantic flow.</li>
 </ul>
-</div>
-</div>
+</section>
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
@@ -13512,7 +13494,7 @@ Figure&nbsp;1: Example of a Kano diagram.
 </ul>
 <p>Each question offers five possible responses, from “I like it” to “I dislike it.” Subsequently, these responses are classified into the five Kano categories.</p>
 <div class="cell" data-execution_count="1" data-cap-location="undefined" data-tbl-cap-location="top">
-<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="undefined" data-execution_count="1" data-tbl-cap-location="top">
+<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-cap-location="top" data-cap-location="undefined" data-execution_count="1">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cap-margin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Table&nbsp;1: Classification of answers to the Kano questionnaire.
