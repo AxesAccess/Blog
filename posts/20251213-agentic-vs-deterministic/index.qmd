@@ -5,6 +5,9 @@ date: "2025-12-13"
 categories: [Agents, LLM, App, Python]
 image: "image.svg"
 description: "A case study on designing an AI-assisted workflow, discussing agentic autonomy and deterministic control through architectural decisions and production constraints."
+format: 
+  html:
+    css: styles.css
 ---
 
 In this article, I'll walk through the architecture of the **Autonomous
@@ -20,8 +23,7 @@ Agents Intensive Course with
 Google](https://www.kaggle.com/learn-guide/5-day-agents){target="_blank"}.
 :::
 
-A video worth a thousand words, isn't it? Jump to the [Application
-Demo].
+Jump to the [Application Demo] to see the application in action.
 
 We'll dive into the **Orchestrator Pattern**, managing state across
 multiple specialized agents, and solving production challenges like
@@ -31,13 +33,12 @@ Many parts of job search automation can be implemented without LLM
 autonomy, so this project became a practical comparison between
 *explicit control flow* and *delegated reasoning*.
 
-## Architecture: the "Brain" and the "Hands"
+## Architecture
 
 When building complex agentic workflows, a common pitfall is the "God
-Prompt" — trying to stuff every possible instruction (search logic,
-evaluation criteria, formatting rules) into a single system prompt. This
-leads to fragile systems that are hard to debug and even harder to
-scale.
+Prompt" — stuffing every possible instruction (search logic, evaluation
+criteria, formatting rules) into a single system prompt. This leads to
+fragile systems that are hard to debug and even harder to scale.
 
 For this application, I adopted a **Multi-Agent Orchestration**
 architecture using the **Google Agents Development Kit (ADK)**. This
@@ -69,7 +70,7 @@ fig-align="center"}
 3.  **Testability**: We can unit test the Assessment Agent's scoring
     logic independently of the Job Search results.
 
-::: callout-note
+::: highlight
 ### What a Deterministic Version Would Look Like
 
 To understand the trade-offs, it's helpful to imagine a deterministic
@@ -138,14 +139,14 @@ Autonomous-Career-Agent](https://github.com/AxesAccess/Autonomous-Career-Agent){
 
 ### Challenge: "Where do the files go?"
 
-When the agent generates a Resume (Markdown/PDF), we need to give it to
-the user.
+When the agent generates a Resume (in this version Markdown), we need to
+give it to the user.
 
 -   **Local File System**: In a containerized web deployment, local
     files aren't accessible to the user's browser.
 
--   **Chat Attachment**: The ADK UI didn't support attached files for
-    unknown reason.
+-   **Chat Attachment**: The ADK UI showed an error for the attached
+    files at that time.
 
 ### Solution: Hybrid Cloud Storage
 
@@ -156,7 +157,7 @@ memory needs and the user's UX needs.
 1.  **Internal Memory**: The file is saved to the Agent's internal
     artifact store so it can "remember" what it wrote.
 2.  **Public Delivery**: The file is simultaneously uploaded to a
-    private **Google Cloud Storage (GCS)** bucket.
+    private **Google Cloud Storage (GCS)** bucket to deliver it to the user.
 3.  **Secure Access**: The app generates **Signed URL** (valid for 24
     hours) and present *that* link to the user in the chat.
 
@@ -227,14 +228,14 @@ Agent](https://www.kaggle.com/competitions/agents-intensive-capstone-project/wri
 ## Challenges & Lessons Learned
 
 -   **Latency vs. Accuracy**: Splitting tasks into sub-agents improves
-    accuracy but adds latency (multiple LLM round-trips). I optimized
-    this by having the Orchestrator handle simple info-gathering without
-    delegation where possible.
+    accuracy but adds latency because of multiple LLM round-trips. I
+    optimized this by having the Orchestrator handle simple
+    info-gathering without delegation where possible.
 -   **Tool Hallucinations**: Early versions often tried to invent search
     parameters. Strict typing in the Tool classes `pydantic` models
     solved 90% of these issues.
 
-::: callout-note
+::: highlight
 ### Where a Deterministic Approach Was Better
 
 It's important to acknowledge where the agentic approach introduced
