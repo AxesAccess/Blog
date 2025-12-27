@@ -16,10 +16,14 @@ website:
   google-analytics: "G-H2HYLD7LV5"
   cookie-consent:
     type: implied
+    palette: dark
   open-graph: true
 format:
   html:
-    theme: sandstone
+    respect-user-color-scheme: true
+    theme:
+      light: sandstone
+      dark: darkly
     css: styles.css
 editor: visual
 
