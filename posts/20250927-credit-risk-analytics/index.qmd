@@ -246,13 +246,13 @@ The final dashboard was structured into three main sections:
 
 ::: {layout="[[1,1,1], [1]]"}
 ![Credit Portfolio
-Overview](September-2025-DataDNA-Credit-Risk-Analytics-Challenge-1.png){.lightbox}
+Overview](September_2025_DataDNA_Credit_Risk_Analytics_Challenge_0001.svg){.lightbox}
 
 ![Default Risk
-Calculator](September-2025-DataDNA-Credit-Risk-Analytics-Challenge-2.png){.lightbox}
+Calculator](September_2025_DataDNA_Credit_Risk_Analytics_Challenge_0002.svg){.lightbox}
 
 ![Portfolio
-Simulation](September-2025-DataDNA-Credit-Risk-Analytics-Challenge-3.png){.lightbox}
+Simulation](September_2025_DataDNA_Credit_Risk_Analytics_Challenge_0003.svg){.lightbox}
 :::
 
 ## Conclusion
