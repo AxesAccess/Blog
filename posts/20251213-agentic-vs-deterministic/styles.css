@@ -1,7 +1,8 @@
 .highlight {
-  display: block;
-  background-color: #DAE8FC;
-  border-radius: .25rem;
-  padding: 8px;
-  word-wrap: break-word;
+    display: block;
+    color: rgb(52, 58, 64);
+    background-color: var(--bs-highlight-bg);
+    border-radius: .25rem;
+    padding: 8px;
+    word-wrap: break-word;
 }
