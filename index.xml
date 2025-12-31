@@ -10,89 +10,7 @@
 <atom:link href="https://blog.frequentist.org/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.7.5</generator>
-<lastBuildDate>Sat, 27 Dec 2025 00:00:00 GMT</lastBuildDate>
-<item>
-  <title>Restoring Ownership: Building a Privacy-First LinkedIn Analytics Platform</title>
-  <dc:creator>Aleksei Prishchepo</dc:creator>
-  <link>https://blog.frequentist.org/posts/20251227-linkedin-analytics/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<div class="cell" data-file="diagrams/architecture.mmd" data-layout-align="default">
-<div class="cell-output-display">
-<div id="fig-architecture" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div>
-<pre class="mermaid mermaid-js" data-label="fig-architecture">graph TD
-    User["User (Browser)"]
-
-    subgraph "Docker Compose Infrastructure"
-        Nginx["Nginx Load Balancer"]
-        Shiny["Shiny App (Web Server)"]
-        Postgres[("PostgreSQL Database")]
-        Redis[("Redis Key-Value Store")]
-        CeleryWorker["Celery Worker"]
-        CeleryBeat["Celery Beat Scheduler"]
-        TEI["Text Embeddings Inference Service"]
-    end
-
-    subgraph "External Services"
-        BrightData["Bright Data API"]
-        GoogleMaps["Google Maps API"]
-    end
-
-    %% User Interaction
-    User --&gt;|HTTP Requests| Nginx
-    Nginx --&gt;|Load Balancing| Shiny
-
-    %% Web App Interactions
-    Shiny --&gt;|Read/Write Data| Postgres
-    Shiny --&gt;|Cache &amp; Task Queueing| Redis
-    Shiny --&gt;|Generate Embeddings| TEI
-
-    %% Celery Interactions
-    CeleryBeat --&gt;|Schedule Tasks| Redis
-    CeleryWorker --&gt;|Consume Tasks| Redis
-    CeleryWorker --&gt;|Store Results| Postgres
-    CeleryWorker --&gt;|Update Job Status| Redis
-
-    %% External API Interactions
-    CeleryWorker --&gt;|Profile Scraping| BrightData
-    CeleryWorker --&gt;|Geocoding| GoogleMaps
-
-    %% Styles
-    classDef service stroke:#333,stroke-width:2px;
-    classDef db stroke:#333,stroke-width:2px,stroke-dasharray: 5 5;
-    classDef external stroke:#333,stroke-width:2px;
-
-    class Nginx,Shiny,CeleryWorker,CeleryBeat,TEI service;
-    class Postgres,Redis db;
-    class BrightData,GoogleMaps external;
-</pre>
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-architecture-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Data and control flows
-</figcaption>
-</figure>
-</div>
-</div>
-</div>
-
-
-
- ]]></description>
-  <category>App</category>
-  <category>Visualization</category>
-  <category>Python</category>
-  <guid>https://blog.frequentist.org/posts/20251227-linkedin-analytics/</guid>
-  <pubDate>Sat, 27 Dec 2025 00:00:00 GMT</pubDate>
-  <media:content url="https://blog.frequentist.org/posts/20251227-linkedin-analytics/image.svg" medium="image" type="image/svg+xml"/>
-</item>
+<lastBuildDate>Sat, 13 Dec 2025 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Agentic vs Deterministic Workflows: Designing a Reliable AI Application</title>
   <dc:creator>Aleksei Prishchepo</dc:creator>
@@ -13516,6 +13434,519 @@ font-style: inherit;">"CBEX_M"</span>]].plot()</span></code></pre></div>
   <guid>https://blog.frequentist.org/posts/20240821-sophisthse/</guid>
   <pubDate>Thu, 22 Aug 2024 00:00:00 GMT</pubDate>
   <media:content url="https://blog.frequentist.org/posts/20240821-sophisthse/image.png" medium="image" type="image/png" height="108" width="144"/>
+</item>
+<item>
+  <title>Kano Method for Prioritization of Features</title>
+  <dc:creator>Aleksei </dc:creator>
+  <link>https://blog.frequentist.org/posts/20240805-kano-model/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>The Kano model is a theory for product development and customer satisfaction developed in the 1980s by Professor Noriaki Kano. The model classifies customer preferences into five categories: Must-be Quality, One-dimensional Quality, Attractive Quality, Indifferent Quality, and Reverse Quality. The Kano model is used to prioritize features and functionalities in product development based on customer needs and expectations.</p>
+<p><img src="https://blog.frequentist.org/posts/20240805-kano-model/features.jpg" class="img-fluid"></p>
+<section id="categories-of-the-kano-model" class="level2">
+<h2 class="anchored" data-anchor-id="categories-of-the-kano-model">Categories of the Kano Model</h2>
+<p><strong>Must-be</strong> features are basic requirements that customers expect. If these features are not present in a product, customers will be dissatisfied. However, the presence of these features does not necessarily lead to customer satisfaction. Must-be Quality features are considered essential for the product.</p>
+<blockquote class="blockquote">
+<p>Examples: a car must have wheels, a smartphone must have a battery, a website must have a search function.</p>
+</blockquote>
+<p><strong>One-dimensional</strong> features are directly proportional to customer satisfaction. The more these features are present in a product, the more satisfied customers will be. These features are usually explicitly stated by customers and are easy to measure and quantify.</p>
+<blockquote class="blockquote">
+<p>Examples: a car with leather seats, a smartphone with a high-resolution camera, a website with fast loading times.</p>
+</blockquote>
+<p><strong>Attractive</strong> features are unexpected features that delight customers. These features are not explicitly requested by customers but can create a positive emotional response when present. Attractive Quality features can differentiate a product from its competitors and create a competitive advantage.</p>
+<blockquote class="blockquote">
+<p>Examples: a car with a built-in navigation system, a smartphone with facial recognition technology, a website with personalized recommendations.</p>
+</blockquote>
+<p><strong>Indifferent</strong> features are neither good nor bad from the customer’s perspective. Customers are indifferent to these features, and their presence or absence does not significantly impact customer satisfaction. These features are often considered “nice to have” but not essential.</p>
+<blockquote class="blockquote">
+<p>Examples: a car with cup holders, a smartphone with a stylus, a website with social media integration.</p>
+</blockquote>
+<p><strong>Reverse</strong> features are features that, when present, can lead to customer dissatisfaction. These features may be perceived as unnecessary or even annoying by customers. It is essential to identify and eliminate Reverse Quality features to prevent negative customer experiences.</p>
+<blockquote class="blockquote">
+<p>Examples: a car with uncomfortable seats, a smartphone with a short battery life, a website with intrusive pop-up ads.</p>
+</blockquote>
+</section>
+<section id="prioritizing-features-with-the-kano-model" class="level2">
+<h2 class="anchored" data-anchor-id="prioritizing-features-with-the-kano-model">Prioritizing Features with the Kano Model</h2>
+<div id="fig-kano-example" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kano-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20240805-kano-model/image.png" class="img-fluid figure-img" style="width:50.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kano-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Example of a Kano diagram.
+</figcaption>
+</figure>
+</div>
+<p>With the Kano model, prioritization of features and functionalities becomes clear and straightforward as that:</p>
+<p><strong>a)</strong> keep eye on the <em>Must-be Quality</em> features, as they are essential, <strong>b)</strong> incorporate <em>One-dimensional Quality</em> features to increase customer satisfaction, <strong>c)</strong> consider <em>Attractive Quality</em> features to create a competitive advantage; <strong>d)</strong> eliminate <em>Reverse Quality</em> features, and <strong>e)</strong> save resources by setting <em>Indifferent Quality</em> features as low priority.</p>
+</section>
+<section id="implementation-of-the-kano-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-of-the-kano-analysis">Implementation of the Kano Analysis</h2>
+<p>Implementing the Kano model involves a sequence of steps, beginning with the development of a questionnaire. For each feature, two types of questions are posed: functional and dysfunctional.</p>
+<ul>
+<li>The <strong>functional question</strong> assesses respondents’ feelings when a feature is present.</li>
+<li>The <strong>dysfunctional question</strong> gauges their reactions in the absence of that feature.</li>
+</ul>
+<p>Each question offers five possible responses, from “I like it” to “I dislike it.” Subsequently, these responses are classified into the five Kano categories.</p>
+<div class="cell" data-execution_count="1" data-cap-location="undefined" data-tbl-cap-location="top">
+<div id="tbl-cap-margin" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-cap-location="undefined" data-tbl-cap-location="top" data-execution_count="1">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cap-margin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Classification of answers to the Kano questionnaire.
+</figcaption>
+<div aria-describedby="tbl-cap-margin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th colspan="5" data-quarto-table-cell-role="th" data-halign="left">Category</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">Dysfunctional</th>
+<th data-quarto-table-cell-role="th">1) I like it</th>
+<th data-quarto-table-cell-role="th">2) I expect it</th>
+<th data-quarto-table-cell-role="th">3) I am neutral</th>
+<th data-quarto-table-cell-role="th">4) I can tolerate it</th>
+<th data-quarto-table-cell-role="th">5) I dislike it</th>
+</tr>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Functional</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1) I like it</td>
+<td>Questionable</td>
+<td>Attractive</td>
+<td>Attractive</td>
+<td>Attractive</td>
+<td>One-dimensional</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2) I expect it</td>
+<td>Reverse</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Must-be</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3) I am neutral</td>
+<td>Reverse</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Must-be</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4) I can tolerate it</td>
+<td>Reverse</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Indifferent</td>
+<td>Must-be</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5) I dislike it</td>
+<td>Reverse</td>
+<td>Reverse</td>
+<td>Reverse</td>
+<td>Reverse</td>
+<td>Questionable</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>After the classification of responses, the next step is to calculate the satisfaction and dissatisfaction scores for each feature. The satisfaction influence score is calculated as the percentage of Attractive and One-dimensional responses relative to the total number of responses.</p>
+<p><span id="eq-satisfaction-influence"><img src="https://latex.codecogs.com/png.latex?%20%5Ctext%7BSatisfaction%20Influence%7D%20=%20%5Cdfrac%7BA%20+%20O%7D%7B%20A%20+%20O%20+%20M%20+%20I%20%7D%20%5Ctimes%20100%20%5C%25%20%20%5Ctag%7B1%7D"></span> The dissatisfaction influence score is calculated as the percentage of One-dimensional and Must-be responses relative to the total number of responses.</p>
+<p><span id="eq-dissatisfaction-influence"><img src="https://latex.codecogs.com/png.latex?%20%5Ctext%7BDissatisfaction%20Influence%7D%20=%20%20-%20%5Cdfrac%7BO%20+%20M%7D%7BA%20+%20O%20+%20M%20+%20I%7D%20%5Ctimes%20100%20%5C%25%20%20%5Ctag%7B2%7D"></span></p>
+<p>The features are then plotted on a Kano diagram, with the dissatisfaction score on the x-axis and the satisfaction score on the y-axis. The features are categorized based on their position in the diagram: Attractive Quality features in the upper left quadrant, One-dimensional Quality features in the upper right quadrant, Must-be Quality features in the lower right quadrant, and Indifferent features in the lower left quadrant, as depicted in the Figure&nbsp;1.</p>
+</section>
+<section id="example-implementation-of-the-kano-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="example-implementation-of-the-kano-analysis">Example implementation of the Kano Analysis</h2>
+<section id="conducting-a-kano-survey" class="level3">
+<h3 class="anchored" data-anchor-id="conducting-a-kano-survey">Conducting a Kano Survey</h3>
+<p>For illustrative purposes, let’s consider existing dataset with responses to a Kano questionnaire from <a href="https://github.com/REPPL/Doing-research-online-the-kano-model">Doing Research Online: The Kano Model</a> project by <a href="https://github.com/REPPL">Alex Reppel</a> published on GitHub under the GPL-3.0 License. The dataset consists of five csv files containing responses to functional and dysfunctional questions for various features, along with demographic information about the respondents.</p>
+</section>
+<section id="exploratory-data-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h3>
+<p>Let’s explore data. The dataframe of shape (721, 39) includes an <code>ID</code> column, multiple columns with demographic data such as <code>Income_us</code>, <code>Gender</code>, <code>Age</code>, <code>Employment</code>, and <code>Education</code>, as well as responses to functional and dysfunctional questions (<code>F1_functional</code>, <code>F1_dysfunctional</code>, etc), and columns indicating the importance of certain features to the customer (<code>F1_importance</code>, <code>F2_importance</code>, etc).</p>
+<div id="cell-fig-hist-age" class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div id="fig-hist-age" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hist-age-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20240805-kano-model/index_files/figure-html/fig-hist-age-output-1.png" width="661" height="468" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hist-age-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Histogram of respondents’ age
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The customers’ age distribution is relatively balanced, with a slight skew towards younger respondents.</p>
+<div>
+
+</div>
+<div id="cell-fig-income-empl-hist" class="cell quarto-layout-panel" data-layout-ncol="2" data-execution_count="4">
+<div class="quarto-layout-row">
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-income-empl-hist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-income-empl-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20240805-kano-model/index_files/figure-html/fig-income-empl-hist-output-1.png" width="352" height="488" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-income-empl-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Income distribution
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-income-empl-hist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-income-empl-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20240805-kano-model/index_files/figure-html/fig-income-empl-hist-output-2.png" width="352" height="509" class="figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-income-empl-hist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Employment distribution
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p>The income distribution is expectedly skewed to the left. The employment distribution shows that the majority of respondents are employed full-time.</p>
+<p>While customer responses might vary based on demographic data, Kano analysis does not consider the demographic characteristics of the respondents.</p>
+</section>
+<section id="aggregating-responses" class="level3">
+<h3 class="anchored" data-anchor-id="aggregating-responses">Aggregating Responses</h3>
+<p>Next, we will aggregate the responses to functional and dysfunctional questions for each feature. The table below shows an example of aggregated answers for a feature with ID = F1.</p>
+<div class="cell" data-tbl-colwidths="[5,20,15,15,15,15,15]" data-execution_count="9">
+<div id="tbl-agg-answers" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="9" data-tbl-colwidths="[5,20,15,15,15,15,15]">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-agg-answers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Example of aggregated answers for a feature.
+</figcaption>
+<div aria-describedby="tbl-agg-answers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Dysfunctional</th>
+<th data-quarto-table-cell-role="th">1) I like it</th>
+<th data-quarto-table-cell-role="th">2) I expect it</th>
+<th data-quarto-table-cell-role="th">3) I am neutral</th>
+<th data-quarto-table-cell-role="th">4) I can tolerate it</th>
+<th data-quarto-table-cell-role="th">5) I dislike it</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">ID</th>
+<th data-quarto-table-cell-role="th">Functional</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td rowspan="5" data-quarto-table-cell-role="th" data-valign="top">F1_</td>
+<td data-quarto-table-cell-role="th">1) I like it</td>
+<td>12</td>
+<td>10</td>
+<td>21</td>
+<td>25</td>
+<td>9</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2) I expect it</td>
+<td>6</td>
+<td>6</td>
+<td>14</td>
+<td>10</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3) I am neutral</td>
+<td>15</td>
+<td>25</td>
+<td>72</td>
+<td>29</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4) I can tolerate it</td>
+<td>5</td>
+<td>13</td>
+<td>12</td>
+<td>10</td>
+<td>5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5) I dislike it</td>
+<td>14</td>
+<td>8</td>
+<td>4</td>
+<td>2</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="calculating-satisfaction-and-dissatisfaction-scores" class="level3">
+<h3 class="anchored" data-anchor-id="calculating-satisfaction-and-dissatisfaction-scores">Calculating Satisfaction and Dissatisfaction Scores</h3>
+<p>After aggregating the responses, we calculate the satisfaction and dissatisfaction scores for each feature using Equation&nbsp;1 and Equation&nbsp;2. The table below shows the qualities: Attractive (<strong>A</strong>), Indifferent (<strong>I</strong>), Must-be (<strong>M</strong>), One-dimensional (<strong>O</strong>), Questionable (<strong>Q</strong>), Reverse (<strong>R</strong>), as well as satisfaction (<strong>S</strong>) and dissatisfaction (<strong>D</strong>) scores for each feature.</p>
+<div class="cell" data-tbl-align="center" data-execution_count="10">
+<div id="tbl-scores" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-tbl-align="center" data-execution_count="10">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Qualities and satisfaction and dissatisfaction scores for each feature.
+</figcaption>
+<div aria-describedby="tbl-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="10">
+<style type="text/css">
+#T_1e201_row0_col3, #T_1e201_row1_col5, #T_1e201_row2_col5, #T_1e201_row3_col5, #T_1e201_row4_col3, #T_1e201_row5_col3, #T_1e201_row6_col5, #T_1e201_row7_col5, #T_1e201_row8_col2, #T_1e201_row9_col5, #T_1e201_row10_col3 {
+  background-color: lightgreen;
+}
+</style>
+
+<table id="T_1e201" class="do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th class="blank level0" data-quarto-table-cell-role="th">&nbsp;</th>
+<th id="T_1e201_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">ID</th>
+<th id="T_1e201_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">Question</th>
+<th id="T_1e201_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">A</th>
+<th id="T_1e201_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">I</th>
+<th id="T_1e201_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">M</th>
+<th id="T_1e201_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">O</th>
+<th id="T_1e201_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">Q</th>
+<th id="T_1e201_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">R</th>
+<th id="T_1e201_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">S</th>
+<th id="T_1e201_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">D</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td id="T_1e201_level0_row0" class="row_heading level0 row0" data-quarto-table-cell-role="th">0</td>
+<td id="T_1e201_row0_col0" class="data row0 col0">F1</td>
+<td id="T_1e201_row0_col1" class="data row0 col1">If your funds are stored in a way that does not have to be linked to your identity, how do you feel?</td>
+<td id="T_1e201_row0_col2" class="data row0 col2">17</td>
+<td id="T_1e201_row0_col3" class="data row0 col3">57</td>
+<td id="T_1e201_row0_col4" class="data row0 col4">3</td>
+<td id="T_1e201_row0_col5" class="data row0 col5">3</td>
+<td id="T_1e201_row0_col6" class="data row0 col6">4</td>
+<td id="T_1e201_row0_col7" class="data row0 col7">16</td>
+<td id="T_1e201_row0_col8" class="data row0 col8">24</td>
+<td id="T_1e201_row0_col9" class="data row0 col9">-7</td>
+</tr>
+<tr class="even">
+<td id="T_1e201_level0_row1" class="row_heading level0 row1" data-quarto-table-cell-role="th">1</td>
+<td id="T_1e201_row1_col0" class="data row1 col0">F2</td>
+<td id="T_1e201_row1_col1" class="data row1 col1">If it is easy to store funds, how do you feel?</td>
+<td id="T_1e201_row1_col2" class="data row1 col2">22</td>
+<td id="T_1e201_row1_col3" class="data row1 col3">27</td>
+<td id="T_1e201_row1_col4" class="data row1 col4">14</td>
+<td id="T_1e201_row1_col5" class="data row1 col5">30</td>
+<td id="T_1e201_row1_col6" class="data row1 col6">3</td>
+<td id="T_1e201_row1_col7" class="data row1 col7">4</td>
+<td id="T_1e201_row1_col8" class="data row1 col8">56</td>
+<td id="T_1e201_row1_col9" class="data row1 col9">-48</td>
+</tr>
+<tr class="odd">
+<td id="T_1e201_level0_row2" class="row_heading level0 row2" data-quarto-table-cell-role="th">2</td>
+<td id="T_1e201_row2_col0" class="data row2 col0">F3</td>
+<td id="T_1e201_row2_col1" class="data row2 col1">If you can access your funds wherever and whenever you want, how do you feel?</td>
+<td id="T_1e201_row2_col2" class="data row2 col2">15</td>
+<td id="T_1e201_row2_col3" class="data row2 col3">18</td>
+<td id="T_1e201_row2_col4" class="data row2 col4">14</td>
+<td id="T_1e201_row2_col5" class="data row2 col5">47</td>
+<td id="T_1e201_row2_col6" class="data row2 col6">3</td>
+<td id="T_1e201_row2_col7" class="data row2 col7">3</td>
+<td id="T_1e201_row2_col8" class="data row2 col8">66</td>
+<td id="T_1e201_row2_col9" class="data row2 col9">-65</td>
+</tr>
+<tr class="even">
+<td id="T_1e201_level0_row3" class="row_heading level0 row3" data-quarto-table-cell-role="th">3</td>
+<td id="T_1e201_row3_col0" class="data row3 col0">F4</td>
+<td id="T_1e201_row3_col1" class="data row3 col1">If it is guaranteed that no one else can access your funds without your permission, how do you feel?</td>
+<td id="T_1e201_row3_col2" class="data row3 col2">5</td>
+<td id="T_1e201_row3_col3" class="data row3 col3">12</td>
+<td id="T_1e201_row3_col4" class="data row3 col4">22</td>
+<td id="T_1e201_row3_col5" class="data row3 col5">53</td>
+<td id="T_1e201_row3_col6" class="data row3 col6">4</td>
+<td id="T_1e201_row3_col7" class="data row3 col7">4</td>
+<td id="T_1e201_row3_col8" class="data row3 col8">63</td>
+<td id="T_1e201_row3_col9" class="data row3 col9">-82</td>
+</tr>
+<tr class="odd">
+<td id="T_1e201_level0_row4" class="row_heading level0 row4" data-quarto-table-cell-role="th">4</td>
+<td id="T_1e201_row4_col0" class="data row4 col0">F5</td>
+<td id="T_1e201_row4_col1" class="data row4 col1">If relevant information is always easy to find, how do you feel?</td>
+<td id="T_1e201_row4_col2" class="data row4 col2">22</td>
+<td id="T_1e201_row4_col3" class="data row4 col3">34</td>
+<td id="T_1e201_row4_col4" class="data row4 col4">12</td>
+<td id="T_1e201_row4_col5" class="data row4 col5">21</td>
+<td id="T_1e201_row4_col6" class="data row4 col6">5</td>
+<td id="T_1e201_row4_col7" class="data row4 col7">6</td>
+<td id="T_1e201_row4_col8" class="data row4 col8">49</td>
+<td id="T_1e201_row4_col9" class="data row4 col9">-37</td>
+</tr>
+<tr class="even">
+<td id="T_1e201_level0_row5" class="row_heading level0 row5" data-quarto-table-cell-role="th">5</td>
+<td id="T_1e201_row5_col0" class="data row5 col0">F6</td>
+<td id="T_1e201_row5_col1" class="data row5 col1">If you can transfer funds without having to link that transaction to your name, how do you feel?</td>
+<td id="T_1e201_row5_col2" class="data row5 col2">26</td>
+<td id="T_1e201_row5_col3" class="data row5 col3">50</td>
+<td id="T_1e201_row5_col4" class="data row5 col4">2</td>
+<td id="T_1e201_row5_col5" class="data row5 col5">5</td>
+<td id="T_1e201_row5_col6" class="data row5 col6">4</td>
+<td id="T_1e201_row5_col7" class="data row5 col7">14</td>
+<td id="T_1e201_row5_col8" class="data row5 col8">38</td>
+<td id="T_1e201_row5_col9" class="data row5 col9">-8</td>
+</tr>
+<tr class="odd">
+<td id="T_1e201_level0_row6" class="row_heading level0 row6" data-quarto-table-cell-role="th">6</td>
+<td id="T_1e201_row6_col0" class="data row6 col0">F7</td>
+<td id="T_1e201_row6_col1" class="data row6 col1">If it is easy to transfer funds, how do you feel?</td>
+<td id="T_1e201_row6_col2" class="data row6 col2">20</td>
+<td id="T_1e201_row6_col3" class="data row6 col3">24</td>
+<td id="T_1e201_row6_col4" class="data row6 col4">17</td>
+<td id="T_1e201_row6_col5" class="data row6 col5">34</td>
+<td id="T_1e201_row6_col6" class="data row6 col6">4</td>
+<td id="T_1e201_row6_col7" class="data row6 col7">2</td>
+<td id="T_1e201_row6_col8" class="data row6 col8">57</td>
+<td id="T_1e201_row6_col9" class="data row6 col9">-54</td>
+</tr>
+<tr class="even">
+<td id="T_1e201_level0_row7" class="row_heading level0 row7" data-quarto-table-cell-role="th">7</td>
+<td id="T_1e201_row7_col0" class="data row7 col0">F8</td>
+<td id="T_1e201_row7_col1" class="data row7 col1">If you can transfer your funds wherever and whenever you want, how do you feel?</td>
+<td id="T_1e201_row7_col2" class="data row7 col2">21</td>
+<td id="T_1e201_row7_col3" class="data row7 col3">20</td>
+<td id="T_1e201_row7_col4" class="data row7 col4">18</td>
+<td id="T_1e201_row7_col5" class="data row7 col5">35</td>
+<td id="T_1e201_row7_col6" class="data row7 col6">4</td>
+<td id="T_1e201_row7_col7" class="data row7 col7">2</td>
+<td id="T_1e201_row7_col8" class="data row7 col8">60</td>
+<td id="T_1e201_row7_col9" class="data row7 col9">-56</td>
+</tr>
+<tr class="odd">
+<td id="T_1e201_level0_row8" class="row_heading level0 row8" data-quarto-table-cell-role="th">8</td>
+<td id="T_1e201_row8_col0" class="data row8 col0">F9</td>
+<td id="T_1e201_row8_col1" class="data row8 col1">If funds are transferred almost instantaneous, how do you feel?</td>
+<td id="T_1e201_row8_col2" class="data row8 col2">40</td>
+<td id="T_1e201_row8_col3" class="data row8 col3">23</td>
+<td id="T_1e201_row8_col4" class="data row8 col4">7</td>
+<td id="T_1e201_row8_col5" class="data row8 col5">22</td>
+<td id="T_1e201_row8_col6" class="data row8 col6">4</td>
+<td id="T_1e201_row8_col7" class="data row8 col7">3</td>
+<td id="T_1e201_row8_col8" class="data row8 col8">67</td>
+<td id="T_1e201_row8_col9" class="data row8 col9">-31</td>
+</tr>
+<tr class="even">
+<td id="T_1e201_level0_row9" class="row_heading level0 row9" data-quarto-table-cell-role="th">9</td>
+<td id="T_1e201_row9_col0" class="data row9 col0">F10</td>
+<td id="T_1e201_row9_col1" class="data row9 col1">If it is guaranteed that no one else can manipulate transfers you have initiated, how do you feel?</td>
+<td id="T_1e201_row9_col2" class="data row9 col2">5</td>
+<td id="T_1e201_row9_col3" class="data row9 col3">15</td>
+<td id="T_1e201_row9_col4" class="data row9 col4">25</td>
+<td id="T_1e201_row9_col5" class="data row9 col5">49</td>
+<td id="T_1e201_row9_col6" class="data row9 col6">4</td>
+<td id="T_1e201_row9_col7" class="data row9 col7">2</td>
+<td id="T_1e201_row9_col8" class="data row9 col8">58</td>
+<td id="T_1e201_row9_col9" class="data row9 col9">-79</td>
+</tr>
+<tr class="odd">
+<td id="T_1e201_level0_row10" class="row_heading level0 row10" data-quarto-table-cell-role="th">10</td>
+<td id="T_1e201_row10_col0" class="data row10 col0">F11</td>
+<td id="T_1e201_row10_col1" class="data row10 col1">If relevant information on how to make transfers is always easy to find, how do you feel?</td>
+<td id="T_1e201_row10_col2" class="data row10 col2">24</td>
+<td id="T_1e201_row10_col3" class="data row10 col3">30</td>
+<td id="T_1e201_row10_col4" class="data row10 col4">10</td>
+<td id="T_1e201_row10_col5" class="data row10 col5">26</td>
+<td id="T_1e201_row10_col6" class="data row10 col6">6</td>
+<td id="T_1e201_row10_col7" class="data row10 col7">4</td>
+<td id="T_1e201_row10_col8" class="data row10 col8">56</td>
+<td id="T_1e201_row10_col9" class="data row10 col9">-40</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="plotting-the-kano-diagram" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-the-kano-diagram">Plotting the Kano Diagram</h3>
+<p>The last step is to plot the features on a Kano diagram. The quadrant in which the feature is located indicates a Kano category. The further the from the center, the higher the influence on satisfaction or dissatisfaction.</p>
+<div id="cell-fig-kano-diagram" class="cell" data-execution_count="11">
+<div class="cell-output cell-output-display">
+<div id="fig-kano-diagram" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kano-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://blog.frequentist.org/posts/20240805-kano-model/index_files/figure-html/fig-kano-diagram-output-1.png" class="quarto-figure quarto-figure-center figure-img" width="627" height="508">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kano-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Kano diagram
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="application-of-the-kano-model" class="level2">
+<h2 class="anchored" data-anchor-id="application-of-the-kano-model">Application of the Kano Model</h2>
+<p>The Kano model can be applied in product development to prioritize features and functionalities based on customer needs and expectations. By categorizing features into the five Kano categories, product managers can identify which features are essential, which are nice to have, and which can create a competitive advantage.</p>
+<p>The Kano model can also help product managers understand customer preferences and make informed decisions about resource allocation and product development. By focusing on Must-be Quality and One-dimensional Quality features, product managers can ensure that the product meets basic customer requirements and maximizes customer satisfaction.</p>
+<p>In conclusion, the Kano model is a valuable tool for prioritizing features and functionalities in product development. By understanding customer preferences and categorizing features into the five Kano categories, product managers can create products that meet customer needs and expectations, leading to higher customer satisfaction and competitive advantage.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Marketing</category>
+  <category>Product</category>
+  <category>Python</category>
+  <guid>https://blog.frequentist.org/posts/20240805-kano-model/</guid>
+  <pubDate>Mon, 05 Aug 2024 00:00:00 GMT</pubDate>
+  <media:content url="https://blog.frequentist.org/posts/20240805-kano-model/image.svg" medium="image" type="image/svg+xml"/>
 </item>
 </channel>
 </rss>
